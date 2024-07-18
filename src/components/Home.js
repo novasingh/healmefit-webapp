@@ -1,6 +1,7 @@
 import React from 'react';
 import {SearchOutlined} from '@ant-design/icons';
 import { Input, Button, Form, Dropdown, Space } from 'antd';
+import Sidebar from './Sidebar';
 import Header from './Header';
 
 const Home = () => {
