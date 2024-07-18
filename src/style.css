@@ -1,0 +1,39 @@
+html, body, #root {
+    height: 100%;
+    margin: 0;
+  }
+  
+  .app-container {
+    display: flex;
+    height: 100%;
+  }
+  
+  .sidebar {
+    width: 200px;
+    background-color: #0B5676;
+    padding: 15px;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  
+  .content {
+    flex-grow: 1;
+    padding: 4%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  
+  .sidebar ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .sidebar ul li {
+    margin: 10px 0;
+  }
+  
+  .sidebar ul li a {
+    text-decoration: none;
+    color: #fff;
+  }
+  
