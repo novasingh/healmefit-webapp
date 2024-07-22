@@ -32,7 +32,7 @@ const Driver = () => {
       }));
       console.log(drivers);
 
-      const response = await axios.post('http://localhost/v1/users/', { drivers });
+      const response = await axios.post('http://44.211.250.6:8000/v1/users', { drivers });
       console.log('Response:', response.data);
       setAddModal(false);
       form.resetFields();

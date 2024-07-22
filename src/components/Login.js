@@ -1,35 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
+import { message } from 'antd';
+import { AuthContext } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+// import './Login.css'; // Assu/ming you have styles for login page
+// let response = {status:200,role:'admin'}
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setErrorMessage(''); // Clear any previous error messages
 
     try {
-      const response = await axios.post('http://localhost:3000/v1/auth/login', {
+      const response = await axios.post('http://44.211.250.6:8000/v1/auth/login', {
         email,
         password,
-      });
-
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log(response,"dvkjsnvdlkn")
       if (response.status === 200) {
-        // Assuming you receive user data and tokens from the response
-        const { user, tokens } = response.data;
-
-        // Save user and tokens to local storage or context for authentication
-        // For example, you can create an AuthContext to store user information
-        // and redirect to Profile page after successful login
-
-        // Redirect to Profile page
-        window.location.href = '/home';
+        const { user, tokens } = response?.data;
+        if (user.role === 'manager') {
+          // Handle successful login and update authentication state
+          message.success("Successfully Logged In")
+          login(user.role);
+          navigate('/home');
+        } else if(user.role === 'driver'){
+            message.success("Successfully Logged In")
+          // Show error message if role is not admin
+          login(user.role)
+          navigate('/home')
+        }
       } else {
-        alert('Invalid credentials');
+        message.error('Not Exist')
       }
     } catch (error) {
       console.error('Error during login:', error);
-      alert('Error during login');
+      message.error('Error during login')
+    //   setErrorMessage('Error during login');
     }
   };
 
@@ -56,6 +74,7 @@ const Login = () => {
             />
             <label>Password</label>
           </div>
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
           <div className="input-box">
             <input type="submit" value="Log in" />
           </div>

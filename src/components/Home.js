@@ -4,7 +4,7 @@ import { Input, Button, Form, Dropdown, Space } from 'antd';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
-const Home = () => {
+const Home = (props) => {
   
   const [form] = Form.useForm();
   return(
@@ -47,6 +47,34 @@ const Home = () => {
       </Form.Item>
       </Form>
     </div>
+    {props.role !== 'manager' &&
+    <div >
+      <h4 style={{color:"#0B5676"}}>Company Info</h4>
+      <div style={{justifyContent:"space-between", display:"flex"}}>
+      {/* <Form
+      form={form}
+      initialValues={''}
+     layout="vertical"
+     style={{justifyContent:"space-between", display:"flex"}}
+      > */}
+      <Form.Item 
+      label={<div style={{color:"#BBBBBB"}}>Driver N*</div>}
+      >
+      <Input style={{width:"300px"}} placeholder="Enter Driver Number" />
+      </Form.Item>
+      <Form.Item 
+      label={<div style={{color:"#BBBBBB"}}>Truck N*</div>}
+      >
+      <Input style={{width:"300px"}} placeholder="Enter Truck Number" />
+      </Form.Item>
+      <Form.Item 
+      label={<div style={{color:"#BBBBBB"}}>License Plate</div>}
+      >
+      <Input style={{width:"300px"}} placeholder="Enter License Plate" />
+      </Form.Item>
+      </div>
+    </div>
+    }
   </>
   )
 };
