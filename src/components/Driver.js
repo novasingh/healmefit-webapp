@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import { DeleteOutlined } from '@ant-design/icons';
-import { Col, Button, Modal, Form, Input } from 'antd';
+import { Col, Button, Modal, Form, Input, message } from 'antd';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -9,11 +9,34 @@ const Driver = () => {
   const [form] = Form.useForm();
   const [AddModal, setAddModal] = useState(false);
   const [formLayout, setFormLayout] = useState([]);
+  const [formValues, setFormValues] = useState({});
+  const [isAddMoreDisabled, setIsAddMoreDisabled] = useState(true);
+  const [isAddDriverDisabled, setIsAddDriverDisabled] = useState(true);
+  const token = localStorage.getItem('accessToken'); // Retrieve the token from localStorage
+
+  useEffect(() => {
+    // Set default form layout with one driver row when modal opens
+    if (AddModal && formLayout.length === 0) {
+      setFormLayout([{ id: uuidv4(), email: '', password: '', name: '', role: '' }]);
+    }
+  }, [AddModal]);
 
   const addFormLayout = () => {
+    // Update formValues with current form data
+    formLayout.forEach((item) => {
+      const values = form.getFieldsValue();
+      setFormValues(prev => ({
+        ...prev,
+        [`email_${item.id}`]: values[`email_${item.id}`] || '',
+        [`password_${item.id}`]: values[`password_${item.id}`] || '',
+        [`name_${item.id}`]: values[`name_${item.id}`] || '',
+        [`role_${item.id}`]: values[`role_${item.id}`] || '',
+      }));
+    });
+
     setFormLayout([
       ...formLayout,
-      { id: uuidv4(), first_name: '', last_name: '', email: '' }
+      { id: uuidv4(), email: '', password: '', name: '', role: '' }
     ]);
   };
 
@@ -21,24 +44,70 @@ const Driver = () => {
     setFormLayout(formLayout.filter((item) => item.id !== id));
   };
 
+  const handleChange = () => {
+    const isAnyFieldEmpty = formLayout.some((item) => {
+      const email = form.getFieldValue(`email_${item.id}`);
+      const password = form.getFieldValue(`password_${item.id}`);
+      const name = form.getFieldValue(`name_${item.id}`);
+      const role = form.getFieldValue(`role_${item.id}`);
+      return !email || !password || !name || !role;
+    });
+
+    setIsAddMoreDisabled(isAnyFieldEmpty);
+    setIsAddDriverDisabled(formLayout.some((item) => {
+      const email = form.getFieldValue(`email_${item.id}`);
+      const password = form.getFieldValue(`password_${item.id}`);
+      const name = form.getFieldValue(`name_${item.id}`);
+      const role = form.getFieldValue(`role_${item.id}`);
+      return !email || !password || !name || !role;
+    }));
+  };
+
+  useEffect(() => {
+    formLayout.forEach((item) => {
+      form.setFieldsValue({
+        [`email_${item.id}`]: formValues[`email_${item.id}`] || '',
+        [`password_${item.id}`]: formValues[`password_${item.id}`] || '',
+        [`name_${item.id}`]: formValues[`name_${item.id}`] || '',
+        [`role_${item.id}`]: formValues[`role_${item.id}`] || '',
+      });
+    });
+  }, [formLayout, formValues, form]);
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      const drivers = formLayout.map((item) => ({
-        id:item.id,
-        first_name: values[`first_name_${item.id}`],
-        last_name: values[`last_name_${item.id}`],
-        email: values[`email_${item.id}`]
-      }));
-      console.log(drivers);
 
-      const response = await axios.post('http://localhost/v1/users/', { drivers });
-      console.log('Response:', response.data);
+      const addDriverPromises = formLayout.map((item) => {
+        const email = values[`email_${item.id}`];
+        const password = values[`password_${item.id}`];
+        const name = values[`name_${item.id}`];
+        const role = values[`role_${item.id}`];
+
+        return axios.post(
+          'http://localhost:3000/v1/users/',
+          { email, password, name, role },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+      });
+
+      await Promise.all(addDriverPromises);
+      message.success('Drivers added successfully!');
       setAddModal(false);
       form.resetFields();
       setFormLayout([]);
+      setFormValues({});
     } catch (error) {
       console.error('Error:', error);
+      if (error.response && error.response.data) {
+        message.error(`Error: ${error.response.data.message}`);
+      } else {
+        message.error('An error occurred while adding drivers. Please try again.');
+      }
     }
   };
 
@@ -69,30 +138,38 @@ const Driver = () => {
           <Form
             form={form}
             layout="vertical"
+            onValuesChange={handleChange}
           >
             <div style={{ height: formLayout.length > 3 ? "50vh" : '100%', overflowY: 'auto' }}>
               {formLayout.map((item) => (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end" }} key={item.id}>
-                  <Form.Item
-                    name={`first_name_${item.id}`}
-                    label={<div style={{ color: "#BBBBBB" }}>First Name</div>}
-                    rules={[{ required: true, message: 'Please enter first name' }]}
-                  >
-                    <Input style={{ width: "150px" }} placeholder="Enter First Name" />
-                  </Form.Item>
-                  <Form.Item
-                    name={`last_name_${item.id}`}
-                    label={<div style={{ color: "#BBBBBB" }}>Last Name</div>}
-                    rules={[{ required: true, message: 'Please enter last name' }]}
-                  >
-                    <Input style={{ width: "150px" }} placeholder="Enter Last Name" />
-                  </Form.Item>
                   <Form.Item
                     name={`email_${item.id}`}
                     label={<div style={{ color: "#BBBBBB" }}>Email</div>}
                     rules={[{ required: true, type: 'email', message: 'Please enter a valid email' }]}
                   >
                     <Input style={{ width: "150px" }} placeholder="Enter Email" />
+                  </Form.Item>
+                  <Form.Item
+                    name={`password_${item.id}`}
+                    label={<div style={{ color: "#BBBBBB" }}>Password</div>}
+                    rules={[{ required: true, message: 'Please enter a password' }]}
+                  >
+                    <Input.Password style={{ width: "150px" }} placeholder="Enter Password" />
+                  </Form.Item>
+                  <Form.Item
+                    name={`name_${item.id}`}
+                    label={<div style={{ color: "#BBBBBB" }}>Name</div>}
+                    rules={[{ required: true, message: 'Please enter name' }]}
+                  >
+                    <Input style={{ width: "150px" }} placeholder="Enter Name" />
+                  </Form.Item>
+                  <Form.Item
+                    name={`role_${item.id}`}
+                    label={<div style={{ color: "#BBBBBB" }}>Role</div>}
+                    rules={[{ required: true, message: 'Please enter role' }]}
+                  >
+                    <Input style={{ width: "150px" }} placeholder="Enter Role" />
                   </Form.Item>
                   <div style={{ width: "40px", height: "50px", cursor: "pointer" }} onClick={() => handleDeleteFormLayout(item.id)}>
                     <DeleteOutlined />
@@ -101,8 +178,20 @@ const Driver = () => {
               ))}
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <Button onClick={addFormLayout} style={{ marginBottom: "10px", width: "100%", height: "40px" }}>Add More</Button>
-              <Button onClick={handleSubmit} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>Add Driver</Button>
+              <Button
+                onClick={addFormLayout}
+                style={{ marginBottom: "10px", width: "100%", height: "40px" }}
+                disabled={isAddMoreDisabled}
+              >
+                Add More
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}
+                disabled={isAddDriverDisabled}
+              >
+                Add Driver
+              </Button>
             </div>
           </Form>
         </div>
