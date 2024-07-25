@@ -26,7 +26,7 @@ const Home = (props) => {
       <h4 style={{color:"#0B5676"}}>Personal Info</h4>
       <Form
       form={form}
-      initialValues={''}
+      // initialValues={}
      layout="vertical"
      style={{justifyContent:"space-between", display:"flex"}}
       >

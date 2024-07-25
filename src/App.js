@@ -1,4 +1,4 @@
-// src/App.js
+
 
 import React, { useContext } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -22,7 +22,7 @@ const App = () => {
 };
 
 const Content = () => {
-  const { isAuthenticated, role } = useContext(AuthContext);
+  const { isAuthenticated, role, accessToken } = useContext(AuthContext);
 
   return (
     <>
@@ -30,8 +30,8 @@ const Content = () => {
       <div className="content">
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/home" element={<Home role={role} />} />
-          <Route path="/driver" element={<Driver />} />
+          <Route path="/home" element={<Home role={role} accessToken={accessToken} />} />
+          <Route path="/driver" element={<Driver accessToken={accessToken}/>} />
         </Routes>
       </div>
     </>

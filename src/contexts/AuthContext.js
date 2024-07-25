@@ -5,6 +5,10 @@ import React, { createContext, useState, useEffect } from 'react';
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
+    const [accessToken, setAccessToken] = useState(()=>{
+        const storedAccessToken = sessionStorage.getItem('accessToken');
+    return storedAccessToken
+  });
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const storedIsAuthenticated = sessionStorage.getItem('isAuthenticated');
     return storedIsAuthenticated === 'true';
@@ -13,6 +17,9 @@ const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(() => {
     return sessionStorage.getItem('role') || '';
   });
+  useEffect(() => {
+    sessionStorage.setItem('accessToken', accessToken);
+  }, [accessToken]);
 
   useEffect(() => {
     sessionStorage.setItem('isAuthenticated', isAuthenticated);
@@ -22,18 +29,20 @@ const AuthProvider = ({ children }) => {
     sessionStorage.setItem('role', role);
   }, [role]);
 
-  const login = (loggedRole) => {
+  const login = (loggedRole, token) => {
+    setAccessToken(token)
     setIsAuthenticated(true);
     setRole(loggedRole);
   };
 
   const logout = () => {
+    setAccessToken()
     setIsAuthenticated(false);
     setRole('');
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, role, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, role, accessToken, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

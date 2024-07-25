@@ -18,7 +18,7 @@ const Login = () => {
     setErrorMessage(''); // Clear any previous error messages
 
     try {
-      const response = await axios.post('http://44.211.250.6:8000/v1/auth/login', {
+      const response = await axios.post('http://44.211.250.6/v1/auth/login', {
         email,
         password,
       }, {
@@ -33,12 +33,12 @@ const Login = () => {
         if (user.role === 'manager') {
           // Handle successful login and update authentication state
           message.success("Successfully Logged In")
-          login(user.role);
+          login(user.role,tokens.access.token);
           navigate('/home');
         } else if(user.role === 'driver'){
             message.success("Successfully Logged In")
           // Show error message if role is not admin
-          login(user.role)
+          login(user.role,tokens.access.token)
           navigate('/home')
         }
       } else {

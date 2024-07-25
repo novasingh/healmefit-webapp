@@ -264,3 +264,14 @@ html, body, #root {
     max-width: 80%; /* Limit the width of the text */
     margin: 0 auto; /* Center the text horizontally */
   }
+
+  .fixed-pagination .ant-pagination {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    /* background: white; */
+    padding: 10px 0;
+    text-align: center;
+    z-index: 1000; /* Ensure it's on top */
+  }
