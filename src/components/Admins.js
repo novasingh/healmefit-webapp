@@ -4,10 +4,10 @@ import { DeleteOutlined } from '@ant-design/icons';
 import { Col, Button, Modal, Form, Input, message, Table, Skeleton } from 'antd';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { get, remove } from "../utility/httpService";
+import { get } from "../utility/httpService";
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
 
-const Driver = (props) => {
+const Admins = (props) => {
   const [form] = Form.useForm();
   const [AddModal, setAddModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,20 +35,15 @@ const Driver = (props) => {
       dataIndex: 'email',
     },
     {
-      title: 'Driver N',
-      dataIndex: 'driverN',
-      render: (_, record) => (record?.driverN ? record?.driverN : '-')
-    },
-    {
-      title: 'Truck N',
-      dataIndex: 'truckN',
-      render: (_, record) => (record?.truckN ? record?.truckN : '-')
+      title: 'Phone No.',
+      dataIndex: 'phone',
+      render: (_, record) => (record?.phone ? record?.phone : '-'),
     },
     {
       title: 'Action',
       dataIndex: 'action',
       render: (_, record) => (
-       <ThreeDotsDropdown onDelete={() => null} onEdit={() => null} />
+        <ThreeDotsDropdown onDelete={() => null} onEdit={() => null} />
       ),
     },
   ];
@@ -165,7 +160,7 @@ const Driver = (props) => {
   };
   const fetchUsers = async (page = 1, limit = 10) => {
     try {
-      const response = await get('/users?role=driver', {
+      const response = await get('/users?role=admin', {
         page, limit 
       });
       const usersWithKeys = response.results.map(user => ({ ...user, key: user.id }));
@@ -198,7 +193,11 @@ const Driver = (props) => {
   const handleMultiRowDelete = async (selectedRowKeys) => {
     try {
       const deletePromises = selectedRowKeys.map((userId) =>
-        remove(`/users/${userId}`)
+        axios.delete(`http://44.211.250.6/v1/users/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
       );
       await Promise.all(deletePromises);
       message.success('Selected users deleted successfully');
@@ -211,13 +210,11 @@ const Driver = (props) => {
     }
   };
 
-  
-
   return (
     <div className={props.class} style={{ height: "100%" }}>
       <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600",  marginBottom: '10px' }}>Drivers</h3>
+        <h3 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600",  marginBottom: '10px' }}>Admins</h3>
         <div style={{ display: "flex", gap: "6px" }}>
           {selectedRowKeys?.length > 0 && 
           <Button onClick={() => handleMultiRowDelete(selectedRowKeys)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>Delete</Button>}
@@ -229,8 +226,8 @@ const Driver = (props) => {
       !(getAllUsers.length > 0) ? 
       <Col lg={24} style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80%" }}>
         <Col lg={10} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <div style={{ textAlign: "center", color: "#BBBBBB", fontWeight: "600" }}>Looks like you have no drivers yet.</div>
-          <div style={{ textAlign: "center", color: "#BBBBBB", fontWeight: "400" }}>Add a driver and we will send them an invite to join your team.</div>
+          <div style={{ textAlign: "center", color: "#BBBBBB", fontWeight: "600" }}>Looks like you have no admin yet.</div>
+          <div style={{ textAlign: "center", color: "#BBBBBB", fontWeight: "400" }}>Add a admin and we will send them an invite to join your team.</div>
           <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}> + Add</Button>
         </Col>
       </Col>
@@ -355,4 +352,4 @@ const Driver = (props) => {
   );
 };
 
-export default Driver;
+export default Admins;

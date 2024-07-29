@@ -7,7 +7,7 @@ import { AuthContext } from '../contexts/AuthContext';
 
 const Header = () => {
   const navigate = useNavigate();
-  const { logout } = useContext(AuthContext);
+  const { userData , logout } = useContext(AuthContext);
 
 
   const items = [
@@ -28,11 +28,11 @@ const Header = () => {
               fontSize: "14px",
             }}
           >
-            TA
+             {userData?.firstName[0]+" "+userData?.lastName[0]}
           </div>
           <div>
             <p style={{ margin: "auto", fontWeight: "600", fontSize: "14px" }}>
-              Tyler Adams
+              {userData?.firstName+" "+userData?.lastName}
             </p>
           </div>
         </div>
@@ -97,7 +97,7 @@ const Header = () => {
                 borderRadius: "50%",
               }}
             >
-              TA
+              {userData?.firstName[0]+" "+userData?.lastName[0]}
             </div>
           </Space>
         </a>

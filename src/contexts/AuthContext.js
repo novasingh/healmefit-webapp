@@ -1,48 +1,51 @@
-// src/contexts/AuthContext.js
-
-import React, { createContext, useState, useEffect } from 'react';
-
+import React, { createContext, useState, useEffect } from "react";
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-    const [accessToken, setAccessToken] = useState(()=>{
-        const storedAccessToken = sessionStorage.getItem('accessToken');
-    return storedAccessToken
+  const [accessToken, setAccessToken] = useState(() => {
+    const storedAccessToken = sessionStorage.getItem("accessToken");
+    return storedAccessToken;
   });
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const storedIsAuthenticated = sessionStorage.getItem('isAuthenticated');
-    return storedIsAuthenticated === 'true';
+    const storedIsAuthenticated = sessionStorage.getItem("isAuthenticated");
+    return storedIsAuthenticated === "true";
   });
 
   const [role, setRole] = useState(() => {
-    return sessionStorage.getItem('role') || '';
+    return sessionStorage.getItem("role") || "";
   });
-  useEffect(() => {
-    sessionStorage.setItem('accessToken', accessToken);
-  }, [accessToken]);
+  const [userData, setUserData] = useState(() => {
+    return JSON.parse(sessionStorage.getItem("user")) || "";
+  });
 
   useEffect(() => {
-    sessionStorage.setItem('isAuthenticated', isAuthenticated);
-  }, [isAuthenticated]);
+    if (accessToken || isAuthenticated || role || userData) {
+      sessionStorage.setItem("token", accessToken);
+      sessionStorage.setItem("isAuthenticated", isAuthenticated);
+      sessionStorage.setItem("role", role);
+      sessionStorage.setItem("user", JSON.stringify(userData));
+    }
+  }, [accessToken, isAuthenticated, role, userData]);
 
-  useEffect(() => {
-    sessionStorage.setItem('role', role);
-  }, [role]);
-
-  const login = (loggedRole, token) => {
-    setAccessToken(token)
+  const login = (user, token) => {
+    setAccessToken(token);
     setIsAuthenticated(true);
-    setRole(loggedRole);
+    setUserData(user);
+    setRole(user.role);
   };
 
   const logout = () => {
-    setAccessToken()
+    setAccessToken();
     setIsAuthenticated(false);
-    setRole('');
+    setRole("");
+    setUserData("")
+    sessionStorage.clear()
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, role, accessToken, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, role, accessToken, userData, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

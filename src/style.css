@@ -6,8 +6,12 @@ html, body, #root {
   .app-container {
     display: flex;
     height: 100%;
+    width: 100%;
   }
   
+  .padding-4rem{
+    padding: 4rem !important;
+  }
   .sidebar {
     width: 200px;
     background-color: #0B5676;
@@ -17,10 +21,9 @@ html, body, #root {
   }
   
   .content {
-    flex-grow: 1;
-    padding: 4%;
-    height: 100%;
-    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    width: 100%;
   }
   
   .sidebar ul {

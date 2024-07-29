@@ -31,9 +31,9 @@ const Login = () => {
       });
       if (response.status === 200) {
         const { user, tokens } = response.data;
-        if (user.role === 'manager' || user.role === 'driver') {
+        if (user.role === 'manager' || user.role === 'driver' || user.role === 'admin') {
           message.success("Successfully Logged In");
-          login(user.role, tokens.access.token);
+          login(user, tokens.access.token);
           navigate('/home');
         } else {
           message.error('Not Exist');
