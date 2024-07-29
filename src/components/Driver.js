@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import { DeleteOutlined } from '@ant-design/icons';
 import { Col, Button, Modal, Form, Input, message, Table, Skeleton } from 'antd';
-import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { get, remove } from "../utility/httpService";
+import { get, post, remove } from "../utility/httpService";
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
 
 const Driver = (props) => {
@@ -134,17 +133,9 @@ const Driver = (props) => {
         const truckN = values[`truckN${item.id}`];
         const driverN = values[`driverN${item.id}`];
         const name = values[`name_${item.id}`];
-        const role = values[`role_${item.id}`];
+        const role = 'driver';
 
-        return axios.post(
-          'http://44.211.250.6/v1/users/',
-          { email, truckN, driverN, name, role },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        );
+        return post('/users', { email, truckN, driverN, name, role });
       });
 
       await Promise.all(addDriverPromises);
@@ -279,36 +270,28 @@ const Driver = (props) => {
                     label={<div style={{ color: "#BBBBBB" }}>Email</div>}
                     rules={[{ required: true, type: 'email', message: 'Please enter a valid email' }]}
                   >
-                    <Input style={{ width: "150px" }} placeholder="Enter Email" />
+                    <Input style={{ width: "200px" }} placeholder="Enter Email" />
                   </Form.Item>
                   <Form.Item
                     name={`driverN${item.id}`}
                     label={<div style={{ color: "#BBBBBB" }}>Driver No.</div>}
                     rules={[{ required: true, message: 'Please enter a Driver Number' }]}
                   >
-                   <Input style={{ width: "150px" }} placeholder="Enter Driver Number" />
+                   <Input style={{ width: "200px" }} placeholder="Enter Driver Number" />
                   </Form.Item>
                   <Form.Item
                     name={`truckN${item.id}`}
                     label={<div style={{ color: "#BBBBBB" }}>Truck No.</div>}
                     rules={[{ required: true, message: 'Please enter a Truck Number' }]}
                   >
-                   <Input style={{ width: "150px" }} placeholder="Enter Truck Number" />
+                   <Input style={{ width: "200px" }} placeholder="Enter Truck Number" />
                   </Form.Item>
                   <Form.Item
                     name={`name_${item.id}`}
                     label={<div style={{ color: "#BBBBBB" }}>Name</div>}
                     rules={[{ required: true, message: 'Please enter name' }]}
                   >
-                    <Input style={{ width: "150px" }} placeholder="Enter Name" />
-                  </Form.Item>
-                  <Form.Item
-                    name={`role_${item.id}`}
-                    label={<div style={{ color: "#BBBBBB" }}>Role</div>}
-                    rules={[{ required: true, message: 'Please enter role' }]}
-                    initialValue='driver'
-                  >
-                    <Input style={{ width: "150px" }} placeholder="Enter Role" />
+                    <Input style={{ width: "200px" }} placeholder="Enter Name" />
                   </Form.Item>
                   <div style={{ width: "40px", height: "50px", cursor: "pointer" }} onClick={() => handleDeleteFormLayout(item.id)}>
                     <DeleteOutlined />
@@ -316,7 +299,7 @@ const Driver = (props) => {
                 </div>
               ))}
             </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", alignItems:'center',  flexDirection: "column" }}>
               <Button
                 onClick={addFormLayout}
                 style={{ marginBottom: "10px", width: "100%", height: "40px" }}
