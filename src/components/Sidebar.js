@@ -27,7 +27,17 @@ const Sidebar = (props) => {
          <li style={{padding:'0 30% 20% 30%'}}><Link to="/health">Health</Link></li>
          <li style={{padding:'0 30% 20% 30%'}}><Link to="/documents">Documents</Link></li>
          </> 
-         : null }
+         : role === 'admin' && (
+          <>
+          <li style={{padding:'10% 30% 20% 30%'}}><Link to="/home">Home</Link></li>
+          <li style={{padding:'0 30% 20% 30%'}}><Link to="/driver">Driver</Link></li>
+          <li style={{padding:'0 30% 20% 30%'}}><Link to="/managers">Managers</Link></li>
+          <li style={{padding:'0 30% 20% 30%'}}><Link to="/admins">Admins</Link></li>
+          <li style={{padding:'0 30% 20% 30%'}}><Link to="/Companies">Companies</Link></li>
+          
+          </>
+          
+         )}
         
         {/* <li><Link to="/documents">Documents</Link></li> */}
       </ul>
