@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import { DeleteOutlined } from '@ant-design/icons';
 import { Col, Button, Modal, Form, Input, message, Table, Skeleton } from 'antd';
-import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { get } from "../utility/httpService";
+import { get, post, remove } from "../utility/httpService";
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
 
 const Companies = (props) => {
@@ -129,19 +128,11 @@ const Companies = (props) => {
         const name = values[`name_${item.id}`];
         const role = values[`role_${item.id}`];
 
-        return axios.post(
-          'http://44.211.250.6/v1/users/',
-          { email, truckN, driverN, name, role },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        );
+        return post('/users', { email, truckN, driverN, name, role });
       });
 
       await Promise.all(addDriverPromises);
-      message.success('Drivers added successfully!');
+      message.success('Companies added successfully!');
       fetchUsers(currentPage, pageSize);
       setAddModal(false);
       form.resetFields();
@@ -190,11 +181,7 @@ const Companies = (props) => {
   const handleMultiRowDelete = async (selectedRowKeys) => {
     try {
       const deletePromises = selectedRowKeys.map((userId) =>
-        axios.delete(`http://44.211.250.6/v1/users/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        remove(`/users/${userId}`)
       );
       await Promise.all(deletePromises);
       message.success('Selected users deleted successfully');
@@ -275,7 +262,7 @@ const Companies = (props) => {
                   >
                     <Input style={{ width: "150px" }} placeholder="Enter Email" />
                   </Form.Item>
-                  <Form.Item
+                  {/* <Form.Item
                     name={`driverN${item.id}`}
                     label={<div style={{ color: "#BBBBBB" }}>Driver No.</div>}
                     rules={[{ required: true, message: 'Please enter a Driver Number' }]}
@@ -288,7 +275,7 @@ const Companies = (props) => {
                     rules={[{ required: true, message: 'Please enter a Truck Number' }]}
                   >
                    <Input style={{ width: "150px" }} placeholder="Enter Truck Number" />
-                  </Form.Item>
+                  </Form.Item> */}
                   <Form.Item
                     name={`name_${item.id}`}
                     label={<div style={{ color: "#BBBBBB" }}>Name</div>}
