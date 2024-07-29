@@ -159,7 +159,7 @@ const [totalResults, setTotalResults] = useState(0);
   };
   const fetchUsers = async (page = 1, limit = 10) => {
     try {
-      const response = await axios.get('http://44.211.250.6/v1/users/', {
+      const response = await axios.get('http://44.211.250.6/v1/users?role=driver', {
         params: { page, limit },
         headers: {
           Authorization: `Bearer ${token}`

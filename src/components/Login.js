@@ -3,8 +3,11 @@ import axios from 'axios';
 import { message } from 'antd';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-// import './Login.css'; // Assu/ming you have styles for login page
-// let response = {status:200,role:'admin'}
+import './Login.css'; // Assuming you have styles for login page
+import facebookicon from '../assets/facebook.png';
+import emailicon from '../assets/email.png';
+import healmefitlogo from '../assets/HMFjpg.jpg';
+import checkmarkicon from '../assets/Frame 97.png'; // Assuming you have the checkmark icon
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -25,45 +28,50 @@ const Login = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-      }
-    );
-    console.log(response,"dvkjsnvdlkn")
+      });
       if (response.status === 200) {
-        const { user, tokens } = response?.data;
-        if (user.role === 'manager') {
-          // Handle successful login and update authentication state
-          message.success("Successfully Logged In")
-          login(user.role,tokens.access.token);
+        const { user, tokens } = response.data;
+        if (user.role === 'manager' || user.role === 'driver') {
+          message.success("Successfully Logged In");
+          login(user.role, tokens.access.token);
           navigate('/home');
-        } else if(user.role === 'driver'){
-            message.success("Successfully Logged In")
-          // Show error message if role is not admin
-          login(user.role,tokens.access.token)
-          navigate('/home')
+        } else {
+          message.error('Not Exist');
         }
       } else {
-        message.error('Not Exist')
+        message.error('Not Exist');
       }
     } catch (error) {
       console.error('Error during login:', error);
-      message.error('Error during login')
-    //   setErrorMessage('Error during login');
+      message.error('Error during login');
     }
   };
 
   return (
     <div className="login-container">
+      <div className="login-info">
+        <div className="circle">
+          <div> <a href="#"><img src={checkmarkicon} alt="Facebook" /></a></div>
+        </div>
+        <h3>We aim to improve the safety and compliance issues in trucking companies and the well-being of truckers.</h3>
+      </div>
       <div className="login-box">
+        <div className="login-logo">
+          <img src={healmefitlogo} alt="Heal Me Fit Logo" />
+        </div>
         <h2>Log in</h2>
+        <p>Welcome back!</p><br></br>
         <form onSubmit={handleSubmit}>
+          <button className="google-login">Log in with Google</button>
+          <div className="divider">or</div>
           <div className="input-box">
             <input
-              type="text"
+              type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
             />
-            <label>Email</label>
           </div>
           <div className="input-box">
             <input
@@ -71,14 +79,25 @@ const Login = () => {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
             />
-            <label>Password</label>
           </div>
           {errorMessage && <p className="error-message">{errorMessage}</p>}
           <div className="input-box">
             <input type="submit" value="Log in" />
           </div>
         </form>
+        <div className="login-footer">
+          <a href="/forgot-password">Forgot password?</a>
+        </div>
+        <footer>
+          <p>&copy; 2024 Heal Me Fit</p>
+          <p>123 Street, San Jose, CA 12345 USA</p><br></br>
+          <div className="social-links">
+            <a href="#"><img src={facebookicon} alt="Facebook" /></a>
+            <a href="#"><img src={emailicon} alt="Email" /></a>
+          </div>
+        </footer>
       </div>
     </div>
   );
