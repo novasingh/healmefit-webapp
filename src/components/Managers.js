@@ -67,7 +67,7 @@ const Managers = (props) => {
   useEffect(() => {
     // Set default form layout with one driver row when modal opens
     if (AddModal && formLayout.length === 0) {
-      setFormLayout([{ id: uuidv4(), email: '', truckN: '', driverN: '', name: '', role: 'driver' }]);
+      setFormLayout([{ id: uuidv4(), email: '', phone: '', name: '', role: 'driver' }]);
     }
   }, [AddModal]);
 
@@ -78,8 +78,7 @@ const Managers = (props) => {
       setFormValues(prev => ({
         ...prev,
         [`email_${item.id}`]: values[`email_${item.id}`] || '',
-        [`truckN${item.id}`]: values[`truckN${item.id}`] || '',
-        [`driverN${item.id}`]: values[`driverN${item.id}`] || '',
+        [`phone_${item.id}`]: values[`phone_${item.id}`] || '',
         [`name_${item.id}`]: values[`name_${item.id}`] || '',
         [`role_${item.id}`]: values[`role_${item.id}`] || 'driver',
       }));
@@ -87,7 +86,7 @@ const Managers = (props) => {
 
     setFormLayout([
       ...formLayout,
-      { id: uuidv4(), email: '', truckN: '', driverN: '', name: '', role: 'driver' }
+      { id: uuidv4(), email: '', phone: '', name: '', role: 'driver' }
     ]);
   };
 
@@ -99,20 +98,18 @@ const Managers = (props) => {
     const isAnyFieldEmpty = formLayout.some((item) => {
       const email = form.getFieldValue(`email_${item.id}`);
       const name = form.getFieldValue(`name_${item.id}`);
-      const truckN = form.getFieldValue(`truckN${item.id}`);
-      const driverN = form.getFieldValue(`driverN${item.id}`);
+      const phone = form.getFieldValue(`phone_${item.id}`);
       const role = form.getFieldValue(`role_${item.id}`);
-      return !email || !name || !truckN || !driverN || !role;
+      return !email || !name || !phone || !role;
     });
 
     setIsAddMoreDisabled(isAnyFieldEmpty);
     setIsAddDriverDisabled(formLayout.some((item) => {
       const email = form.getFieldValue(`email_${item.id}`);
       const name = form.getFieldValue(`name_${item.id}`);
-      const truckN = form.getFieldValue(`truckN${item.id}`);
-      const driverN = form.getFieldValue(`driverN${item.id}`);
+      const phone = form.getFieldValue(`phone_${item.id}`);
       const role = form.getFieldValue(`role_${item.id}`);
-      return !email || !name || !truckN || !driverN || !role;
+      return !email || !name || !phone ||  !role;
     }));
   };
 
@@ -120,9 +117,7 @@ const Managers = (props) => {
     formLayout.forEach((item) => {
       form.setFieldsValue({
         [`email_${item.id}`]: formValues[`email_${item.id}`] || '',
-        [`truckN${item.id}`]: formValues[`truckN${item.id}`] || '',
-        [`driverN${item.id}`]: formValues[`driverN${item.id}`] || '',
-        [`name_${item.id}`]: formValues[`name_${item.id}`] || '',
+        [`phone_${item.id}`]: formValues[`phone_${item.id}`] || '',
         [`role_${item.id}`]: formValues[`role_${item.id}`] || 'driver',
       });
     });
@@ -134,12 +129,11 @@ const Managers = (props) => {
 
       const addDriverPromises = formLayout.map((item) => {
         const email = values[`email_${item.id}`];
-        const truckN = values[`truckN${item.id}`];
-        const driverN = values[`driverN${item.id}`];
+        const phone = values[`phone${item.id}`];
         const name = values[`name_${item.id}`];
-        const role = values[`role_${item.id}`];
+        const role =  'manager';
 
-        return post('/users', { email, truckN, driverN, name, role });
+        return post('/users', { email, phone, name, role });
       });
 
       await Promise.all(addDriverPromises);
@@ -268,40 +262,25 @@ const Managers = (props) => {
               {formLayout.map((item) => (
                 <div key={item.id} style={{ display: "flex", gap: "10px", alignItems: "end" }}>
                   <Form.Item
-                    name={`email_${item.id}`}
-                    label={<div style={{ color: "#BBBBBB" }}>Email</div>}
-                    rules={[{ required: true, type: 'email', message: 'Please enter a valid email' }]}
-                  >
-                    <Input style={{ width: "150px" }} placeholder="Enter Email" />
-                  </Form.Item>
-                  {/* <Form.Item
-                    name={`driverN${item.id}`}
-                    label={<div style={{ color: "#BBBBBB" }}>Driver No.</div>}
-                    rules={[{ required: true, message: 'Please enter a Driver Number' }]}
-                  >
-                   <Input style={{ width: "150px" }} placeholder="Enter Driver Number" />
-                  </Form.Item>
-                  <Form.Item
-                    name={`truckN${item.id}`}
-                    label={<div style={{ color: "#BBBBBB" }}>Truck No.</div>}
-                    rules={[{ required: true, message: 'Please enter a Truck Number' }]}
-                  >
-                   <Input style={{ width: "150px" }} placeholder="Enter Truck Number" />
-                  </Form.Item> */}
-                  <Form.Item
                     name={`name_${item.id}`}
                     label={<div style={{ color: "#BBBBBB" }}>Name</div>}
                     rules={[{ required: true, message: 'Please enter name' }]}
                   >
-                    <Input style={{ width: "150px" }} placeholder="Enter Name" />
+                    <Input style={{ width: "250px" }} placeholder="Enter Name" />
                   </Form.Item>
                   <Form.Item
-                    name={`role_${item.id}`}
-                    label={<div style={{ color: "#BBBBBB" }}>Role</div>}
-                    rules={[{ required: true, message: 'Please enter role' }]}
-                    initialValue='driver'
+                    name={`email_${item.id}`}
+                    label={<div style={{ color: "#BBBBBB" }}>Email</div>}
+                    rules={[{ required: true, type: 'email', message: 'Please enter a valid email' }]}
                   >
-                    <Input style={{ width: "150px" }} placeholder="Enter Role" />
+                    <Input style={{ width: "250px" }} placeholder="Enter Email" />
+                  </Form.Item>
+                  <Form.Item
+                    name={`phone_${item.id}`}
+                    label={<div style={{ color: "#BBBBBB" }}>Phone No</div>}
+                    rules={[{ required: true, message: 'Please enter phone no.' }]}
+                  >
+                    <Input style={{ width: "250px" }} placeholder="Enter Phone Number" />
                   </Form.Item>
                   <div style={{ width: "40px", height: "50px", cursor: "pointer" }} onClick={() => handleDeleteFormLayout(item.id)}>
                     <DeleteOutlined />
