@@ -37,6 +37,7 @@ const AuthProvider = ({ children }) => {
   const logout = () => {
     setAccessToken();
     setIsAuthenticated(false);
+    localStorage.clear()
     setRole("");
     setUserData("")
     sessionStorage.clear()

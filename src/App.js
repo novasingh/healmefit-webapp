@@ -11,6 +11,8 @@ import './style.css';
 import Managers from './components/Managers';
 import Admins from './components/Admins';
 import Companies from './components/Companies';
+import Health from './components/Health';
+import Callback from './components/Callback';
 
 const App = () => {
   return (
@@ -32,8 +34,10 @@ const Content = () => {
       <div className="content">
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/callback" element={<Callback  />} />
           <Route path="/home" element={<Home class="padding-4rem" role={role} accessToken={accessToken} />} />
           <Route path="/driver" element={<Driver class="padding-4rem" accessToken={accessToken}/>} />
+          <Route path="/health" element={<Health class="padding-4rem" role={role} accessToken={accessToken}/>} />
           <Route path="/managers" element={<Managers class="padding-4rem"/>} />
           <Route path="/admins" element={<Admins class="padding-4rem"/>} />
           <Route path="/companies" element={<Companies class="padding-4rem"/>} />
