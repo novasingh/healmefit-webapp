@@ -3,11 +3,11 @@ import { Button, Col, Modal, Row } from 'antd';
 import Header from './Header';
 import axios from 'axios';
 import Chart from 'react-apexcharts';
-import { get } from "../utility/httpService";
+import { get, post, remove } from "../utility/httpService";
 import { AuthContext } from '../contexts/AuthContext';
 
 const Health = (props) => {
-  const { userData } = useContext(AuthContext);
+  
   const clientId = '23PGQL';
   const redirectUri = 'http://localhost:3000/callback';
   const scope = 'activity nutrition profile settings sleep heartrate';
@@ -20,6 +20,8 @@ const Health = (props) => {
   const [stepData, setStepData] = useState();
   const [profileData, setProfileData] = useState();
   const [sleepData, setSleepData] = useState();
+  const { userData} = useContext(AuthContext);
+  const [haveTokens, setHaveTokens] = useState(false)
 
   const handleFitbitAuth = () => {
     window.location.href = fitbitAuthUrl;
@@ -134,8 +136,27 @@ const Health = (props) => {
     }
   };
 
+  const getUserFitbitTokens = async() => {
+    await get(`/fitbit/${userData.id}`).then((response) => {
+       if(response.data){
+        localStorage.setItem('fitbitAccessToken', response.data.accessToken);
+        localStorage.setItem('fitbitRefreshToken', response.data.refreshToken);
+        setHaveTokens(true)
+        fetchStepData();
+        fetchDeviceData();
+        fetchSleepData();
+        fetchHeartDetail();
+        fetchProfileData();
+       }
+    }, error => {
+      if(error.code === 404){
+        setHaveTokens(false)
+      }
+    })
+  }
+
   useEffect(() => {
-    getUserFitbitToken();
+    getUserFitbitTokens();
   }, []);
 
   const chartOptions = {
@@ -163,7 +184,7 @@ const Health = (props) => {
         <h3 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600", marginBottom: '10px', marginTop: "3%" }}>Health</h3>
         <Button style={{width: "10%", height: "40px", color: "#1FA6E0", border:"1.5px solid #1FA6E0",fontWeight:"600" }}>Sync</Button>
       </Col>
-      {profileData ? 
+      {!haveTokens ? 
       <Col lg={24} style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80%" }}>
         <Col lg={10} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <div style={{ textAlign: "center", color: "#BBBBBB", fontWeight: "600" }}>Looks like we have not added a device yet.</div>
