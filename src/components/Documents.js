@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DocumentCard from './DocumentCard';
 import './Documents.css';
+import axios from 'axios';
 
 function Documents() {
   const [documents, setDocuments] = useState([]);
@@ -17,7 +18,7 @@ function Documents() {
 
   const fetchDocuments = async () => {
     try {
-      const response = await fetch(`/document/{userID}/documents`); // Replace {userID} with the actual user ID
+      const response = await axios(`/document/{userID}/documents`); // Replace {userID} with the actual user ID
       const data = await response.json();
       setDocuments(data);
     } catch (error) {
@@ -30,7 +31,7 @@ function Documents() {
     formData.append('file', file);
 
     try {
-      const response = await fetch(`/document/{userID}/documents`, { // Replace {userID} with the actual user ID
+      const response = await axios(`/document/{userID}/documents`, { // Replace {userID} with the actual user ID
         method: 'POST',
         body: formData
       });
@@ -51,7 +52,7 @@ function Documents() {
 
   const deleteDocument = async (documentId) => {
     try {
-      const response = await fetch(`/document/{userID}/documents/${documentId}`, { // Replace {userID} with the actual user ID
+      const response = await axios(`/document/{userID}/documents/${documentId}`, { // Replace {userID} with the actual user ID
         method: 'DELETE'
       });
 

@@ -6,7 +6,7 @@ import { AuthContext } from '../contexts/AuthContext';
 
 const Callback = () => {
   const navigate = useNavigate();
-  const { role } = useContext(AuthContext);
+  const { userData } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchTokens = async (code) => {
@@ -25,16 +25,18 @@ const Callback = () => {
         })
         console.log('response', response)
 
-        const { access_token, refresh_token, expiry, type } = response.data;
+  
+        const { access_token, refresh_token, expires_in, token_type} = response.data;
         localStorage.setItem('fitbitAccessToken', access_token);
         localStorage.setItem('fitbitRefreshToken', refresh_token);
-        // post(`/fitbit/${role.id}`,{
-        //     "accessToken": access_token,
-        //     "refreshToken": refresh_token,
-        //     "user": role.id,
-        //     "type": type,
-        //     "expires": expiry
-        // })
+        post(`/fitbit/${userData.id}`,{
+            "accessToken": access_token,
+            "refreshToken": refresh_token,
+            "user": userData.id,
+            "type": token_type,
+            "expires": expires_in,
+            "code" : code
+        })
         // Call the function to store the tokens in MongoDB
         await storeTokens(access_token, refresh_token);
 
