@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Button, Col, Modal, Row } from 'antd';
 import Header from './Header';
 import axios from 'axios';
 import Chart from 'react-apexcharts';
+import { get } from "../utility/httpService";
+import { AuthContext } from '../contexts/AuthContext';
 
 const Health = (props) => {
+  const { userData } = useContext(AuthContext);
   const clientId = '23PGQL';
   const redirectUri = 'http://localhost:3000/callback';
   const scope = 'activity nutrition profile settings sleep heartrate';
@@ -22,15 +25,38 @@ const Health = (props) => {
     window.location.href = fitbitAuthUrl;
   };
 
+  const getUserFitbitToken = async () => {
+    try {
+      const response = await get(`/fitbit/${userData.id}`);
+      console.log(response);
+      if (response.token) {
+        localStorage.setItem('fitbitAccessToken', response.token);
+        fetchProfileData();
+        fetchDeviceData();
+        fetchHeartDetail();
+        fetchSleepData();
+        fetchStepData();
+      } else {
+        console.error('No token found in the response');
+      }
+    } catch (error) {
+      console.error('Failed to get Fitbit token:', error);
+    }
+  };
+
   const fetchProfileData = async () => {
     try {
-      const response = await axios.post('https://api.fitbit.com/1/user/-/profile.json', null, {
+      const token = localStorage.getItem('fitbitAccessToken');
+      if (!token) {
+        throw new Error('Authentication token is missing.');
+      }
+      const response = await axios.get('https://api.fitbit.com/1/user/-/profile.json', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('fitbitAccessToken')}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         }
       });
-      setProfileData(response);
+      setProfileData(response.data);
     } catch (error) {
       console.error('Error fetching profile data:', error);
     }
@@ -38,13 +64,17 @@ const Health = (props) => {
 
   const fetchDeviceData = async () => {
     try {
-      const response = await axios.post('https://api.fitbit.com/1/user/-/devices.json', null, {
+      const token = localStorage.getItem('fitbitAccessToken');
+      if (!token) {
+        throw new Error('Authentication token is missing.');
+      }
+      const response = await axios.get('https://api.fitbit.com/1/user/-/devices.json', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('fitbitAccessToken')}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         }
       });
-      setDeviceData(response);
+      setDeviceData(response.data);
     } catch (error) {
       console.error('Error fetching device data:', error);
     }
@@ -52,13 +82,17 @@ const Health = (props) => {
 
   const fetchHeartDetail = async () => {
     try {
-      const response = await axios.post('https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json', null, {
+      const token = localStorage.getItem('fitbitAccessToken');
+      if (!token) {
+        throw new Error('Authentication token is missing.');
+      }
+      const response = await axios.get('https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('fitbitAccessToken')}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         }
       });
-      setHeartData(response);
+      setHeartData(response.data);
     } catch (error) {
       console.error('Error fetching heart data:', error);
     }
@@ -66,13 +100,17 @@ const Health = (props) => {
 
   const fetchSleepData = async () => {
     try {
-      const response = await axios.post('https://api.fitbit.com/1.2/user/-/sleep/date/2020-01-01.json', null, {
+      const token = localStorage.getItem('fitbitAccessToken');
+      if (!token) {
+        throw new Error('Authentication token is missing.');
+      }
+      const response = await axios.get('https://api.fitbit.com/1.2/user/-/sleep/date/2020-01-01.json', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('fitbitAccessToken')}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         }
       });
-      setSleepData(response);
+      setSleepData(response.data);
     } catch (error) {
       console.error('Error fetching sleep data:', error);
     }
@@ -80,24 +118,24 @@ const Health = (props) => {
 
   const fetchStepData = async () => {
     try {
-      const response = await axios.post('https://api.fitbit.com/1/user/-/activities/goals/daily.json', null, {
+      const token = localStorage.getItem('fitbitAccessToken');
+      if (!token) {
+        throw new Error('Authentication token is missing.');
+      }
+      const response = await axios.get('https://api.fitbit.com/1/user/-/activities/goals/daily.json', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('fitbitAccessToken')}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         }
       });
-      setStepData(response);
+      setStepData(response.data);
     } catch (error) {
       console.error('Error fetching step data:', error);
     }
   };
 
   useEffect(() => {
-    fetchStepData();
-    fetchDeviceData();
-    fetchSleepData();
-    fetchHeartDetail();
-    fetchProfileData();
+    getUserFitbitToken();
   }, []);
 
   const chartOptions = {
@@ -139,15 +177,15 @@ const Health = (props) => {
           <div style={{borderRadius:"8px", border:"0.4px solid #d9d9d9", padding: '5%', display:"flex" ,gap:"20%", justifyContent:"center"}}> 
             <div style={{display:"flex", flexDirection:"column", alignItems:"center", gap:"5px"}}>
               <div style={{color:"#BBBBBB", fontSize:"16px"}}>Age</div>
-              <div style={{fontSize:"16px", fontWeight:700}}>{profileData?.data?.user?.age}</div>
+              <div style={{fontSize:"16px", fontWeight:700}}>{profileData?.user?.age}</div>
             </div>
             <div style={{display:"flex", flexDirection:"column", alignItems:"center" , gap:"5px"}}>
               <div  style={{color:"#BBBBBB", fontSize:"16px"}}>Height</div>
-              <div style={{fontSize:"16px", fontWeight:700}}>{String(profileData?.data?.user?.height).split('.')[0]}</div>
+              <div style={{fontSize:"16px", fontWeight:700}}>{String(profileData?.user?.height).split('.')[0]}</div>
             </div>
             <div style={{display:"flex", flexDirection:"column", alignItems:"center", gap:"5px"}}>
               <div  style={{color:"#BBBBBB", fontSize:"16px"}}>Weight</div>
-              <div style={{fontSize:"16px", fontWeight:700}}>{profileData?.data?.user?.weight}</div>
+              <div style={{fontSize:"16px", fontWeight:700}}>{profileData?.user?.weight}</div>
             </div>
           </div>
           <div style={{display:"flex", paddingTop:"3%", paddingBottom:"2%", gap:"3%"}}>
@@ -191,21 +229,28 @@ const Health = (props) => {
             </div>
           </div>
         </Col>
-        <Col lg={12}>
-          <div style={{borderRadius:"8px", border:"0.4px solid #d9d9d9", padding: '5%'}}> 
-            <Chart options={chartOptions.options} series={chartOptions.series} type="radialBar" height={350} />
-          </div>
+        <Col lg={12} style={{display:"flex", justifyContent:"center"}}>
+          <Chart
+            options={chartOptions.options}
+            series={chartOptions.series}
+            type="radialBar"
+            height={350}
+          />
         </Col>
       </Row>
-      </>
-      }
-      <Modal title="Basic Modal" open={AddModal} onOk={() => setAddModal(false)} onCancel={() => setAddModal(false)}>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
+      </>}
+      <Modal open={AddModal} onOk={() => setAddModal(false)} onCancel={() => setAddModal(false)}>
+        <Row>
+          <div>
+            <h2 style={{textAlign:"center", color:"#0B5676"}}>Add a new device</h2>
+            <div style={{display:"flex", justifyContent:"center"}}>
+              <Button style={{width: "50%", height: "40px", color: "#1FA6E0", border:"1.5px solid #1FA6E0",fontWeight:"600" }} onClick={handleFitbitAuth}>Fitbit</Button>
+            </div>
+          </div>
+        </Row>
       </Modal>
     </div>
   );
-};
+}
 
 export default Health;
