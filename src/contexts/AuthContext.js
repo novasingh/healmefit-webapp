@@ -20,10 +20,12 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (accessToken || isAuthenticated || role || userData) {
-      sessionStorage.setItem("token", accessToken);
-      sessionStorage.setItem("isAuthenticated", isAuthenticated);
-      sessionStorage.setItem("role", role);
-      sessionStorage.setItem("user", JSON.stringify(userData));
+      if(accessToken !== null && isAuthenticated !== null && role !== null && userData !== null ){
+        sessionStorage.setItem("token", accessToken);
+        sessionStorage.setItem("isAuthenticated", isAuthenticated);
+        sessionStorage.setItem("role", role);
+        sessionStorage.setItem("user", JSON.stringify(userData));
+      }
     }
   }, [accessToken, isAuthenticated, role, userData]);
 
