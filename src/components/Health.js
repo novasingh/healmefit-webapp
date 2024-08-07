@@ -5,7 +5,7 @@ import axios from 'axios';
 import Chart from 'react-apexcharts';
 import { get, post, remove } from "../utility/httpService";
 import { AuthContext } from '../contexts/AuthContext';
-import { isTokenExpired } from '../utility/utils';
+import { calculateHealthScore, isTokenExpired } from '../utility/utils';
 import { useNavigate } from 'react-router-dom';
 
 const Health = (props) => {
@@ -158,7 +158,6 @@ const Health = (props) => {
   useEffect(() => {
     getUserFitbitTokens();
   }, []);
-  <div id="chart" style="width: 100%; max-width: 600px; height: 500px;"></div>
 
   const chartOptions = {
     series: [70, 55, 65, 80], // Add values for Sleep, BMI, and Steps
@@ -191,16 +190,17 @@ const Health = (props) => {
             },
             total: {
               show: true,
-              label: 'Total',
+              label: 'Health Score',
               color: 'black',
               formatter: function (w) {
-                return '100%';
+    
+                return Math.round(calculateHealthScore(profileData?.user?.age ,21, 78, 4000, 7)*100);
               }
             }
           }
         },
       },
-      labels: ['Health Score', 'Sleep', 'BMI', 'Steps'], // Add labels for the new circles
+      labels: ['Heart Rate', 'Sleep', 'BMI', 'Steps'], // Add labels for the new circles
     },
   };
   
@@ -283,13 +283,14 @@ const Health = (props) => {
           </div>
         </Col>
         <Col lg={12} style={{display:"flex", justifyContent:"center"}}>
-          <Chart
+        { profileData?.user &&  <Chart
             options={chartOptions.options}
             series={chartOptions.series}
             type="radialBar"
             height={350}
-          />
+          />}
         </Col>
+
       </Row>
       </>}
       <Modal open={AddModal} onOk={() => setAddModal(false)} onCancel={() => setAddModal(false)}>
