@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Button, Col, Modal, Row } from 'antd';
+import { Button, Col, Modal, Row, Spin } from 'antd';
 import Header from './Header';
 import axios from 'axios';
 import Chart from 'react-apexcharts';
 import { get, post, remove } from "../utility/httpService";
 import { AuthContext } from '../contexts/AuthContext';
+import { isTokenExpired } from '../utility/utils';
+import { useNavigate } from 'react-router-dom';
 
 const Health = (props) => {
   
@@ -14,6 +16,7 @@ const Health = (props) => {
 
   const fitbitAuthUrl = `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&expires_in=604800`;
 
+  const navigate = useNavigate()
   const [AddModal, setAddModal] = useState(false);
   const [heartData, setHeartData] = useState();
   const [deviceData, setDeviceData] = useState();
@@ -22,29 +25,13 @@ const Health = (props) => {
   const [sleepData, setSleepData] = useState();
   const { userData} = useContext(AuthContext);
   const [haveTokens, setHaveTokens] = useState(false)
+ const [loading, setLoading] = useState(false)
+
 
   const handleFitbitAuth = () => {
     window.location.href = fitbitAuthUrl;
   };
 
-  const getUserFitbitToken = async () => {
-    try {
-      const response = await get(`/fitbit/${userData.id}`);
-      console.log(response);
-      if (response.token) {
-        localStorage.setItem('fitbitAccessToken', response.token);
-        fetchProfileData();
-        fetchDeviceData();
-        fetchHeartDetail();
-        fetchSleepData();
-        fetchStepData();
-      } else {
-        console.error('No token found in the response');
-      }
-    } catch (error) {
-      console.error('Failed to get Fitbit token:', error);
-    }
-  };
 
   const fetchProfileData = async () => {
     try {
@@ -143,20 +130,27 @@ const Health = (props) => {
   };
 
   const getUserFitbitTokens = async() => {
+    setLoading(true)
     await get(`/fitbit/${userData.id}`).then((response) => {
        if(response.data){
-        localStorage.setItem('fitbitAccessToken', response.data.accessToken);
-        localStorage.setItem('fitbitRefreshToken', response.data.refreshToken);
-        setHaveTokens(true)
-        fetchStepData();
-        fetchDeviceData();
-        fetchSleepData();
-        fetchHeartDetail();
-        fetchProfileData();
+        if(isTokenExpired(response.data.accessToken)){
+          navigate(`/callback?code=${response.data.code}`)
+        }else{
+          localStorage.setItem('fitbitAccessToken', response.data.accessToken);
+          localStorage.setItem('fitbitRefreshToken', response.data.refreshToken);
+          setHaveTokens(true)
+          fetchStepData();
+          fetchDeviceData();
+          fetchSleepData();
+          fetchHeartDetail();
+          fetchProfileData();
+        }
        }
+       setLoading(false)
     }, error => {
       if(error.code === 404){
         setHaveTokens(false)
+        setLoading(false)
       }
     })
   }
@@ -211,7 +205,11 @@ const Health = (props) => {
   };
   
 
-  return (
+  return loading ? (
+    <Col style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%'}}>
+       <Spin />
+    </Col>
+  ): (
     <div className={props.class} style={{ height: "100%" }}>
       <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
