@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DocumentCard from './DocumentCard';
 import './Documents.css';
-import axios from 'axios';
 
 function Documents() {
   const [documents, setDocuments] = useState([]);
@@ -17,57 +16,36 @@ function Documents() {
   }, [documents]);
 
   const fetchDocuments = async () => {
-    try {
-      const response = await axios(`/document/{userID}/documents`); // Replace {userID} with the actual user ID
-      const data = await response.json();
-      setDocuments(data);
-    } catch (error) {
-      console.error('Error fetching documents:', error);
-    }
+    // Implement API call here
+    // For now, we'll use mock data
+    setDocuments([
+      { id: 1, name: 'ID', status: 'not_uploaded' },
+      { id: 2, name: 'Driver License', status: 'not_uploaded' },
+      { id: 3, name: 'Resume', status: 'not_uploaded' },
+      { id: 4, name: 'Vaccination proof', status: 'not_uploaded' },
+      { id: 5, name: 'HR Form', status: 'not_uploaded' },
+    ]);
   };
 
   const uploadDocument = async (file, documentId) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await axios(`/document/{userID}/documents`, { // Replace {userID} with the actual user ID
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        setDocuments(prevDocuments =>
-          prevDocuments.map(doc =>
-            doc.id === documentId ? { ...doc, status: 'uploaded', file } : doc
-          )
-        );
-      } else {
-        console.error('Error uploading document:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error uploading document:', error);
-    }
+    // Implement document upload API call here
+    console.log('Uploading document:', file);
+    // Simulate an upload success
+    setDocuments(prevDocuments =>
+      prevDocuments.map(doc =>
+        doc.id === documentId ? { ...doc, status: 'uploaded', file } : doc
+      )
+    );
   };
 
-  const deleteDocument = async (documentId) => {
-    try {
-      const response = await axios(`/document/{userID}/documents/${documentId}`, { // Replace {userID} with the actual user ID
-        method: 'DELETE'
-      });
-
-      if (response.ok) {
-        setDocuments(prevDocuments =>
-          prevDocuments.map(doc =>
-            doc.id === documentId ? { ...doc, status: 'not_uploaded', file: null } : doc
-          )
-        );
-      } else {
-        console.error('Error deleting document:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error deleting document:', error);
-    }
+  const deleteDocument = (documentId) => {
+    // Implement document delete API call here
+    console.log('Deleting document:', documentId);
+    setDocuments(prevDocuments =>
+      prevDocuments.map(doc =>
+        doc.id === documentId ? { ...doc, status: 'not_uploaded', file: null } : doc
+      )
+    );
   };
 
   const progressPercentage = (uploadedCount / documents.length) * 100;
@@ -80,7 +58,7 @@ function Documents() {
           <button className="upload-button">Upload</button>
         </header>
         <div className="documents-section">
-        <h2>Required</h2>
+          <h2 className="document-heading">Required</h2>
         </div>
         <div className="progress-bar">
           <div className="progress-bar-fill" style={{ width: `${progressPercentage}%` }}>

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { post } from '../utility/httpService';
 import { AuthContext } from '../contexts/AuthContext';
+import { Col, Spin } from 'antd';
 
 const Callback = () => {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ const Callback = () => {
             "code" : code
         })
         // Call the function to store the tokens in MongoDB
-        await storeTokens(access_token, refresh_token);
+        // await storeTokens(access_token, refresh_token);
 
         navigate('/health');
       } catch (error) {
@@ -46,26 +47,26 @@ const Callback = () => {
       }
     };
 
-    const storeTokens = async (accessToken, refreshToken) => {
-      try {
-        const response = await fetch('http://localhost:5000/token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ accessToken, refreshToken }),
-        });
+    // const storeTokens = async (accessToken, refreshToken) => {
+    //   try {
+    //     const response = await fetch('http://localhost:5000/token', {
+    //       method: 'POST',
+    //       headers: {
+    //         'Content-Type': 'application/json',
+    //       },
+    //       body: JSON.stringify({ accessToken, refreshToken }),
+    //     });
 
-        if (!response.ok) {
-          throw new Error('Failed to store tokens');
-        }
+    //     if (!response.ok) {
+    //       throw new Error('Failed to store tokens');
+    //     }
 
-        const result = await response.json();
-        console.log(result.message);
-      } catch (error) {
-        console.error('Error storing tokens:', error);
-      }
-    };
+    //     const result = await response.json();
+    //     console.log(result.message);
+    //   } catch (error) {
+    //     console.error('Error storing tokens:', error);
+    //   }
+    // };
 
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
@@ -74,7 +75,11 @@ const Callback = () => {
     }
   }, [navigate]);
 
-  return <div>Loading...</div>;
+  return (
+    <Col style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' ,width: '100%'}}>
+    <Spin />
+ </Col>
+  );
 };
 
 export default Callback;

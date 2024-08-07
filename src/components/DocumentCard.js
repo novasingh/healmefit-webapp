@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import axios from 'axios';
 
 function DocumentCard({ document, onUpload, onDelete }) {
   const fileInputRef = useRef(null);
@@ -19,10 +20,15 @@ function DocumentCard({ document, onUpload, onDelete }) {
     }
   };
 
-  const handleDelete = () => {
-    onDelete(document.id);
-    setMessage('Document deleted successfully!');
-    setTimeout(() => setMessage(''), 3000); // Clear the message after 3 seconds
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`/document/{userID}/documents/${document.id}`); // Replace {userID} with the actual user ID
+      onDelete(document.id);
+      setMessage('Document deleted successfully!');
+      setTimeout(() => setMessage(''), 3000); // Clear the message after 3 seconds
+    } catch (error) {
+      console.error('Error deleting document:', error);
+    }
   };
 
   return (

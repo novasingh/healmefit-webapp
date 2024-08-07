@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Button, Col, Modal, Row } from 'antd';
+import { Button, Col, Modal, Row, Spin } from 'antd';
 import Header from './Header';
 import axios from 'axios';
 import Chart from 'react-apexcharts';
 import { get } from "../utility/httpService";
 import { AuthContext } from '../contexts/AuthContext';
+import { calculateHealthScore, isTokenExpired } from '../utility/utils';
+import { useNavigate } from 'react-router-dom';
 
 const Health = (props) => {
 
@@ -14,6 +16,7 @@ const Health = (props) => {
 
   const fitbitAuthUrl = `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&expires_in=604800`;
 
+  const navigate = useNavigate()
   const [AddModal, setAddModal] = useState(false);
   const [heartData, setHeartData] = useState();
   const [deviceData, setDeviceData] = useState();
@@ -22,6 +25,8 @@ const Health = (props) => {
   const [sleepData, setSleepData] = useState();
   const { userData } = useContext(AuthContext);
   const [haveTokens, setHaveTokens] = useState(false);
+ const [loading, setLoading] = useState(false)
+
 
   const handleFitbitAuth = () => {
     window.location.href = fitbitAuthUrl;
@@ -100,7 +105,13 @@ const Health = (props) => {
           'Content-Type': 'application/json',
         }
       });
-      setHeartData(response.data);
+  
+      if (response.data['activities-heart'] && response.data['activities-heart'][0]) {
+        const heartData = response.data['activities-heart'][0].value;
+        setHeartData(heartData);
+      } else {
+        console.error('No heart data available for today');
+      }
     } catch (error) {
       console.error('Error fetching heart data:', error);
     }
@@ -140,6 +151,32 @@ const Health = (props) => {
     }
   };
 
+  const getUserFitbitTokens = async() => {
+    setLoading(true)
+    await get(`/fitbit/${userData.id}`).then((response) => {
+       if(response.data){
+        if(isTokenExpired(response.data.accessToken)){
+          navigate(`/callback?code=${response.data.code}`)
+        }else{
+          localStorage.setItem('fitbitAccessToken', response.data.accessToken);
+          localStorage.setItem('fitbitRefreshToken', response.data.refreshToken);
+          setHaveTokens(true)
+          fetchStepData();
+          fetchDeviceData();
+          fetchSleepData();
+          fetchHeartDetail();
+          fetchProfileData();
+        }
+       }
+       setLoading(false)
+    }, error => {
+      if(error.code === 404){
+        setHaveTokens(false)
+        setLoading(false)
+      }
+    })
+  }
+
   useEffect(() => {
     getUserFitbitTokens();
   }, []);
@@ -158,18 +195,51 @@ const Health = (props) => {
       chart: {
         height: 500,
         type: 'radialBar',
+        width: '100%', // Ensure the chart uses full width of its container
       },
       plotOptions: {
         radialBar: {
           hollow: {
-            size: '40%',
+            size: '60%', // Adjust size for medium circles
           },
+          dataLabels: {
+            name: {
+              show: true,
+              fontSize: '14px',
+              color: undefined,
+              offsetY: -10,
+            },
+            value: {
+              show: true,
+              fontSize: '12px',
+              color: 'black',
+              offsetY: 10,
+              formatter: function (val) {
+                return val + '%';
+              }
+            },
+            total: {
+              show: true,
+              label: 'Health Score',
+              color: 'black',
+              formatter: function (w) {
+    
+                return Math.round(calculateHealthScore(profileData?.user?.age ,21, 78, 4000, 7)*100);
+              }
+            }
+          }
         },
       },
-      labels: [`Heart Rate ${heartRate} bpm`, `Sleep ${sleepHours}h ${sleepMinutes}m`, 'series 3', 'series 4', 'series 5'],
+      labels: ['Heart Rate', 'Sleep', 'BMI', 'Steps'], // Add labels for the new circles
     },
   };
-  return (
+  
+
+  return loading ? (
+    <Col style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%'}}>
+       <Spin />
+    </Col>
+  ): (
     <div className={props.class} style={{ height: "100%" }}>
       <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -242,6 +312,8 @@ const Health = (props) => {
             </div>
           </div>
         </Col>
+        <Col lg={12} style={{display:"flex", justifyContent:"center"}}>
+        { profileData?.user &&  <Chart
         <Col lg={12} style={{}}>
           <Chart
             options={chartOptions.options}
@@ -250,6 +322,7 @@ const Health = (props) => {
             height={400}
           />
         </Col>
+
       </Row>
       </>}
       <Modal open={AddModal} onOk={() => setAddModal(false)} onCancel={() => setAddModal(false)}>
