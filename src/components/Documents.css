@@ -3,6 +3,11 @@
     height: 100vh;
 }
 
+.document-heading {
+    text-align: center;
+    font-weight: bold; /* Optional, for emphasis */
+    margin-bottom: 10px; /* Optional, for spacing */
+  }
 /*.sidebar {
     width: 200px;
     background-color: #0d2e4e;

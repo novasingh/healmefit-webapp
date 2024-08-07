@@ -94,7 +94,13 @@ const Health = (props) => {
           'Content-Type': 'application/json',
         }
       });
-      setHeartData(response.data);
+  
+      if (response.data['activities-heart'] && response.data['activities-heart'][0]) {
+        const heartData = response.data['activities-heart'][0].value;
+        setHeartData(heartData);
+      } else {
+        console.error('No heart data available for today');
+      }
     } catch (error) {
       console.error('Error fetching heart data:', error);
     }
@@ -158,24 +164,52 @@ const Health = (props) => {
   useEffect(() => {
     getUserFitbitTokens();
   }, []);
+  <div id="chart" style="width: 100%; max-width: 600px; height: 500px;"></div>
 
   const chartOptions = {
-    series: [70],
+    series: [70, 55, 65, 80], // Add values for Sleep, BMI, and Steps
     options: {
       chart: {
-        height: 350,
+        height: 500, // Increased height
         type: 'radialBar',
+        width: '100%', // Ensure the chart uses full width of its container
       },
       plotOptions: {
         radialBar: {
           hollow: {
-            size: '70%',
+            size: '60%', // Adjust size for medium circles
           },
+          dataLabels: {
+            name: {
+              show: true,
+              fontSize: '14px',
+              color: undefined,
+              offsetY: -10,
+            },
+            value: {
+              show: true,
+              fontSize: '12px',
+              color: 'black',
+              offsetY: 10,
+              formatter: function (val) {
+                return val + '%';
+              }
+            },
+            total: {
+              show: true,
+              label: 'Total',
+              color: 'black',
+              formatter: function (w) {
+                return '100%';
+              }
+            }
+          }
         },
       },
-      labels: ['Health Score'],
+      labels: ['Health Score', 'Sleep', 'BMI', 'Steps'], // Add labels for the new circles
     },
   };
+  
 
   return (
     <div className={props.class} style={{ height: "100%" }}>
