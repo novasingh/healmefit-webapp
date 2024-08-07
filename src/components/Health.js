@@ -163,25 +163,29 @@ const Health = (props) => {
     series: [70, 55, 65, 80], // Add values for Sleep, BMI, and Steps
     options: {
       chart: {
-        height: 500, // Increased height
+        height: 800, // Increased height for bigger chart
         type: 'radialBar',
-        width: '100%', // Ensure the chart uses full width of its container
+        width: '100%', // Ensure the chart uses the full width of its container
       },
       plotOptions: {
         radialBar: {
           hollow: {
             size: '60%', // Adjust size for medium circles
           },
+          track: {
+            show: true,
+            strokeWidth: '20%', // Adjust the thickness of the track
+          },
           dataLabels: {
             name: {
               show: true,
-              fontSize: '14px',
+              fontSize: '20px', // Increase font size for name
               color: undefined,
               offsetY: -10,
             },
             value: {
               show: true,
-              fontSize: '12px',
+              fontSize: '18px', // Increase font size for value
               color: 'black',
               offsetY: 10,
               formatter: function (val) {
@@ -192,17 +196,22 @@ const Health = (props) => {
               show: true,
               label: 'Health Score',
               color: 'black',
+              fontSize: '18px', // Increase font size for total label
               formatter: function (w) {
-    
                 return Math.round(calculateHealthScore(profileData?.user?.age ,21, 78, 4000, 7)*100);
               }
             }
+          },
+          stroke: {
+            lineCap: 'round', // Make the ends of the strokes round
+            width: 50, // Increase the stroke width
           }
         },
       },
       labels: ['Heart Rate', 'Sleep', 'BMI', 'Steps'], // Add labels for the new circles
     },
   };
+  
   
 
   return loading ? (
