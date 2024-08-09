@@ -4,7 +4,6 @@ import Header from './Header';
 import { get, post } from "../utility/httpService";
 import { AuthContext } from '../contexts/AuthContext';
 import { calculateHealthScore, isTokenExpired } from '../utility/utils';
-import { useNavigate } from 'react-router-dom';
 import Chart from 'react-apexcharts';
 import { fetchDeviceData, fetchHeartDetail, fetchProfileData, fetchSleepData, fetchStepData } from '../utility/fitbitServices';
 
@@ -269,11 +268,11 @@ const Health = (props) => {
         </Col>
       </Row>
       </>}
-      <Modal open={AddModal} onOk={() => setAddModal(false)} onCancel={() => setAddModal(false)}>
+      <Modal centered={true} open={AddModal} footer={null} onCancel={() => setAddModal(false)}>
         <Row>
-          <div>
+          <div style={{width: '100%'}}>
             <h2 style={{textAlign:"center", color:"#0B5676"}}>Add a new device</h2>
-            <div style={{display:"flex", justifyContent:"center"}}>
+            <div style={{display:"flex", justifyContent:"center", margin: '30px 0px'}}>
               <Button style={{width: "50%", height: "40px", color: "#1FA6E0", border:"1.5px solid #1FA6E0",fontWeight:"600" }} onClick={handleFitbitAuth}>Fitbit</Button>
             </div>
           </div>
