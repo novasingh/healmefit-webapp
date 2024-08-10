@@ -26,7 +26,14 @@ const update = async (url, data) => {
     return error.response.data
   }
 };
-
+const updatePatch = async (url, data) => {
+  try {
+    const response = await axiosInstance.patch(url, data);
+    return response
+  } catch (error) {
+    return error.response.data
+  }
+};
 const remove = async url => {
   try {
     const response = await axiosInstance.delete(url);
@@ -36,4 +43,4 @@ const remove = async url => {
   }
 };
 
-export { get, post, update, remove };
+export { get, post, update, remove, updatePatch };

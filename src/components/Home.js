@@ -1,11 +1,66 @@
-import React, { useContext } from "react";
-import { Input, Button, Form } from "antd";
+import React, { useContext, useEffect, useState } from "react";
+import { Input, Button, Form, notification } from "antd";
 import Header from "./Header";
 import { AuthContext } from "../contexts/AuthContext";
+import axios from "axios";
+import { get, update, updatePatch } from "../utility/httpService";
+
 
 const Home = (props) => {
   const [form] = Form.useForm();
-  const { userData } = useContext(AuthContext);
+  const { userData} = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+  const [profileData, setProfileData] = useState(userData);
+
+  useEffect(() => {
+    // Fetch updated user data from the API
+    const fetchUserData = async () => {
+      setLoading(true);
+      try {
+        const response = await get(`/users/${userData.id}`);
+        setProfileData(response.data); // Update the userData in context
+      } catch (error) {
+        console.error("Failed to fetch user data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userData?.id) {
+      fetchUserData();
+    }
+  }, [userData.id]);
+
+  const handleSaveChanges = async () => {
+    try {
+      setLoading(true);
+      const values = await form.validateFields();
+
+      const data = {
+        firstName: values.firstName,
+        email: values.email,
+        phone: values.phone ? values.phone : 'N/A', 
+        truckN: values.truckN ? values.truckN : 'N/A', 
+        driverN: values.driverN ? values.driverN : 'N/A', 
+        licensePlate: values.licensePlate ? values.licensePlate : 'N/A'
+      }
+      // Sending the PATCH request to update user data
+      const response = await updatePatch(`/users/${userData.id}`, data );
+
+        console.log(response
+
+        )
+      // Fetch the updated user data after the PATCH request
+      // const response = await axios.get(`/users/${userData.id}`);
+      setProfileData(response.data);
+      notification.success({ message: "Profile updated successfully!" });
+    } catch (error) {
+      console.error("Failed to update profile", error.response?.data || error.message);
+      notification.error({ message: `Failed to update profile: ${error.response?.data?.message || error.message}` });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={props.class}>
@@ -19,8 +74,8 @@ const Home = (props) => {
         }}
       >
         <p style={{ color: "#88C43E", margin: "auto" }}>
-          Welcome {userData?.firstName}! Don’t forget to enter all missing information on your
-          profile.
+          Welcome {userData?.firstName}! Don’t forget to enter all missing
+          information on your profile.
         </p>
       </div>
       <div
@@ -48,11 +103,11 @@ const Home = (props) => {
               fontSize: "32px",
             }}
           >
-            TA
+            {profileData?.firstName?.charAt(0)}{profileData?.lastName?.charAt(0)}
           </div>
           <div>
             <p style={{ margin: "auto", fontWeight: "600", fontSize: "24px" }}>
-            {userData?.firstName+" "+userData?.lastName}
+              {profileData.firstName} {profileData?.lastName}
             </p>
             <span
               style={{ fontSize: "10px", color: "#1FA6E0", fontWeight: "600" }}
@@ -62,63 +117,92 @@ const Home = (props) => {
           </div>
         </div>
         <div>
-          <Button type="primary">Save Changes</Button>
+          <Button
+            type="primary"
+            loading={loading}
+            onClick={handleSaveChanges}
+          >
+            Save Changes
+          </Button>
         </div>
       </div>
-      <div style={{marginTop: "20px"}}>
+      <div style={{ marginTop: "20px" }}>
         <h4 style={{ color: "#0B5676" }}>Personal Info</h4>
         <Form
           form={form}
-          // initialValues={}
+          initialValues={{
+            firstName: profileData?.firstName,
+            email: profileData?.email,
+            phone: profileData?.phone || "N/A",
+            truckN: profileData.truckN || "",
+            driverN: profileData?.driverN || "",
+            licensePlate: profileData?.licensePlate || "",
+          }}
           layout="vertical"
-          style={{ justifyContent: "space-between", display: "flex", gap: '20px' }}
+          style={{
+            justifyContent: "space-between",
+            display: "flex",
+            gap: "20px",
+          }}
         >
-          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Full Name</div>}>
-            <Input style={{ width: "300px" }} value={userData?.firstName} placeholder="Enter Name" />
+          <Form.Item
+            label={<div style={{ color: "#BBBBBB" }}>Full Name</div>}
+            name="firstName"
+            rules={[{ required: true, message: "Please enter your name" }]}
+          >
+            <Input
+              style={{ width: "300px" }}
+              placeholder="Enter Name"
+            />
           </Form.Item>
-          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Email</div>}>
-            <Input style={{ width: "300px" }} value={userData?.email} placeholder="Enter Email" />
+          <Form.Item
+            label={<div style={{ color: "#BBBBBB" }}>Email</div>}
+            name="email"
+            rules={[{ required: true, type: "email", message: "Please enter a valid email" }]}
+          >
+            <Input
+              style={{ width: "300px" }}
+              placeholder="Enter Email"
+            />
           </Form.Item>
-          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Phone</div>}>
-            <Input style={{ width: "300px" }} value={userData?.phone || 'N/A'} placeholder="Enter PhoneNumber" />
+          <Form.Item
+            label={<div style={{ color: "#BBBBBB" }}>Phone</div>}
+            name="phone"
+          >
+            <Input
+              style={{ width: "300px" }}
+              placeholder="Enter Phone Number"
+            />
+          </Form.Item><br/>
+          <Form.Item
+            label={<div style={{ color: "#BBBBBB" }}>Truck Number</div>}
+            name="truckN"
+          >
+            <Input
+              style={{ width: "300px" }}
+              placeholder="Enter Truck Number"
+            />
+          </Form.Item>
+          <Form.Item
+            label={<div style={{ color: "#BBBBBB" }}>Driver Number</div>}
+            name="driverN"
+          >
+            <Input
+              style={{ width: "300px" }}
+              placeholder="Enter Driver Number"
+            />
+          </Form.Item>
+          <Form.Item
+            label={<div style={{ color: "#BBBBBB" }}>License Plate</div>}
+            name="licensePlate"
+          >
+            <Input
+              style={{ width: "300px" }}
+              placeholder="Enter License Plate"
+            />
           </Form.Item>
         </Form>
       </div>
-      {props.role !== "manager" && props.role !== "admin" && (
-        <div>
-          <h4 style={{ color: "#0B5676" }}>Company Info</h4>
-          <div style={{ justifyContent: "space-between", display: "flex" }}>
-            {/* <Form
-      form={form}
-      initialValues={''}
-     layout="vertical"
-     style={{justifyContent:"space-between", display:"flex"}}
-      > */}
-            <Form.Item
-              label={<div style={{ color: "#BBBBBB" }}>Driver N*</div>}
-            >
-              <Input
-                style={{ width: "300px" }}
-                placeholder="Enter Driver Number"
-              />
-            </Form.Item>
-            <Form.Item label={<div style={{ color: "#BBBBBB" }}>Truck N*</div>}>
-              <Input
-                style={{ width: "300px" }}
-                placeholder="Enter Truck Number"
-              />
-            </Form.Item>
-            <Form.Item
-              label={<div style={{ color: "#BBBBBB" }}>License Plate</div>}
-            >
-              <Input
-                style={{ width: "300px" }}
-                placeholder="Enter License Plate"
-              />
-            </Form.Item>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
