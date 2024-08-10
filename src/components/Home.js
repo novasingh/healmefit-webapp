@@ -18,7 +18,8 @@ const Home = (props) => {
       setLoading(true);
       try {
         const response = await get(`/users/${userData.id}`);
-        setProfileData(response.data); // Update the userData in context
+        setProfileData(response.data); 
+        sessionStorage.setItem('user', JSON.stringify(response.data))// Update the userData in context
       } catch (error) {
         console.error("Failed to fetch user data", error);
       } finally {
@@ -37,7 +38,8 @@ const Home = (props) => {
       const values = await form.validateFields();
 
       const data = {
-        firstName: values.firstName,
+        firstName: values.firstName.split(' ').length > 0 ? values.firstName.split(' ')[0] : 'N/A',
+        lastName: values.firstName.split(' ').length > 0 ? values.firstName.split(' ')[1] : 'N/A',
         email: values.email,
         phone: values.phone ? values.phone : 'N/A', 
         truckN: values.truckN ? values.truckN : 'N/A', 
@@ -53,6 +55,8 @@ const Home = (props) => {
       // Fetch the updated user data after the PATCH request
       // const response = await axios.get(`/users/${userData.id}`);
       setProfileData(response.data);
+      sessionStorage.setItem('user', JSON.stringify(response.data)
+      )
       notification.success({ message: "Profile updated successfully!" });
     } catch (error) {
       console.error("Failed to update profile", error.response?.data || error.message);
@@ -109,11 +113,11 @@ const Home = (props) => {
             <p style={{ margin: "auto", fontWeight: "600", fontSize: "24px" }}>
               {profileData.firstName} {profileData?.lastName}
             </p>
-            <span
+            {/* <span
               style={{ fontSize: "10px", color: "#1FA6E0", fontWeight: "600" }}
             >
               Edit Photo
-            </span>
+            </span> */}
           </div>
         </div>
         <div>
