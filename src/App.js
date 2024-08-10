@@ -39,6 +39,7 @@ const Content = () => {
           <Route path="/home" element={<Home class="padding-4rem" role={role} accessToken={accessToken} />} />
           <Route path="/driver" element={<Driver class="padding-4rem" accessToken={accessToken}/>} />
           <Route path="/health" element={<Health class="padding-4rem" role={role} accessToken={accessToken}/>} />
+          <Route path="/driver/health" element={<Health class="padding-4rem" role={role} accessToken={accessToken}/>} />
           <Route path="/documents" element={<Documents class="padding-4rem" role={role} accessToken={accessToken}/>} />
           <Route path="/managers" element={<Managers class="padding-4rem"/>} />
           <Route path="/admins" element={<Admins class="padding-4rem"/>} />

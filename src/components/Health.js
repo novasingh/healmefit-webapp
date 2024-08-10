@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Button, Col, Modal, Row, Spin } from 'antd';
 import Header from './Header';
+import back from '../assets/backicon.png'
+import { useNavigate } from 'react-router-dom';
 import { get, post } from "../utility/httpService";
 import { AuthContext } from '../contexts/AuthContext';
 import { calculateHealthScore, isTokenExpired } from '../utility/utils';
@@ -12,6 +14,7 @@ const CLIENT_ID = '23PGQL';
 const CLIENT_SECRET = '4ea0a9b6e679a00b512ee8478e94385d';
 
 const Health = (props) => {
+  const navigate = useNavigate()
   const clientId = CLIENT_ID;
   const redirectUri = 'http://localhost:3000/callback';
   const scope = 'activity nutrition profile settings sleep heartrate';
@@ -29,6 +32,9 @@ const Health = (props) => {
 
   const handleFitbitAuth = () => {
     window.location.href = fitbitAuthUrl;
+  };
+  const handleBackClick = () => {
+    navigate('/driver');
   };
 
   const refreshAccessToken = async () => {
@@ -193,8 +199,8 @@ const Health = (props) => {
     <div className={props.class} style={{ height: "100%" }}>
       <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600", marginBottom: '10px', marginTop: "3%" }}>Health</h3>
-        <Button onClick={fetchAllData} style={{width: "10%", height: "40px", color: "#1FA6E0", border:"1.5px solid #1FA6E0",fontWeight:"600" }}>Sync</Button>
+        <h3 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600", marginBottom: '10px', marginTop: "3%" }}>{userData?.role == 'manager' ? <div style={{ display:"flex", alignItems:"center", gap:"5px"}}><img src={back} style={{color: "#1FA6E0",cursor:"pointer"}} onClick={()=>handleBackClick() } height={30} width={30}/> Health</div> : 'Health'}</h3>
+        <Button style={{width: "10%", height: "40px", color: "#1FA6E0", border:"1.5px solid #1FA6E0",fontWeight:"600" }}>Sync</Button>
       </Col>
       {!haveTokens ? 
       <Col lg={24} style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80%" }}>
@@ -225,7 +231,7 @@ const Health = (props) => {
             <div style={{width:"50%"}}>
               <div style={{borderRadius:"8px", border:"0.4px solid #d9d9d9", padding: '5%'}}> 
                 <div style={{display:"flex", flexDirection:"column",gap:"5px"}}>
-                  <div style={{fontSize:"16px",fontWeight:"400", paddingBottom:"10%"}}>Heart Rate</div>
+                  <div style={{fontSize:"16px",fontWeight:"400", paddingBottom:"10%"}}>Resting Heart Rate</div>
                   <div style={{fontSize:"20px", fontWeight:700}}>61 bpm</div>
                   <div  style={{color:"#BBBBBB", fontSize:"10px"}}>Daily Average</div>
                 </div>
@@ -246,7 +252,7 @@ const Health = (props) => {
               <div style={{borderRadius:"8px", border:"0.4px solid #d9d9d9", padding: '5%'}}> 
                 <div style={{display:"flex", flexDirection:"column",gap:"5px"}}>
                   <div style={{fontSize:"16px",fontWeight:"400", paddingBottom:"10%"}}>Steps</div>
-                  <div style={{fontSize:"20px", fontWeight:700}}>{stepData?.goals?.steps}</div>
+                  <div style={{fontSize:"20px", fontWeight:700}}>4020</div>
                   <div  style={{color:"#BBBBBB", fontSize:"10px"}}>Daily Average</div>
                 </div>
               </div>
@@ -255,7 +261,7 @@ const Health = (props) => {
               <div style={{borderRadius:"8px", border:"0.4px solid #d9d9d9", padding: '5%'}}> 
                 <div style={{display:"flex", flexDirection:"column",gap:"5px"}}>
                   <div style={{fontSize:"16px",fontWeight:"400", paddingBottom:"10%"}}>Calories Burned</div>
-                  <div style={{fontSize:"20px", fontWeight:700}}>{stepData?.goals?.caloriesOut}</div>
+                  <div style={{fontSize:"20px", fontWeight:700}}>2200</div>
                   <div  style={{color:"#BBBBBB", fontSize:"10px"}}>Daily Average</div>
                 </div>
               </div>
