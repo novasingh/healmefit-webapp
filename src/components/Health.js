@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Button, Col, Modal, Row, Spin } from 'antd';
 import Header from './Header';
+import back from '../assets/backicon.png'
+import { useNavigate } from 'react-router-dom';
 import { get, post } from "../utility/httpService";
 import { AuthContext } from '../contexts/AuthContext';
 import { calculateHealthScore, isTokenExpired } from '../utility/utils';
@@ -12,6 +14,7 @@ const CLIENT_ID = '23PGQL';
 const CLIENT_SECRET = '4ea0a9b6e679a00b512ee8478e94385d';
 
 const Health = (props) => {
+  const navigate = useNavigate()
   const clientId = CLIENT_ID;
   const redirectUri = 'http://localhost:3000/callback';
   const scope = 'activity nutrition profile settings sleep heartrate';
@@ -29,6 +32,9 @@ const Health = (props) => {
 
   const handleFitbitAuth = () => {
     window.location.href = fitbitAuthUrl;
+  };
+  const handleBackClick = () => {
+    navigate('/driver');
   };
 
   const refreshAccessToken = async () => {
