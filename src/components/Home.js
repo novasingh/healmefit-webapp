@@ -1,14 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Input, Button, Form, notification } from "antd";
+import { Input, Button, Form, notification, Tooltip } from "antd";
 import Header from "./Header";
 import { AuthContext } from "../contexts/AuthContext";
-import axios from "axios";
-import { get, update, updatePatch } from "../utility/httpService";
-
+import { get, updatePatch } from "../utility/httpService";
 
 const Home = (props) => {
   const [form] = Form.useForm();
-  const { userData} = useContext(AuthContext);
+  const { userData } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(userData);
 
@@ -19,7 +17,8 @@ const Home = (props) => {
       try {
         const response = await get(`/users/${userData.id}`);
         setProfileData(response.data); 
-        sessionStorage.setItem('user', JSON.stringify(response.data))// Update the userData in context
+        sessionStorage.setItem('user', JSON.stringify(response.data)); // Update the userData in context
+        form.setFieldsValue(response.data); // Set form fields with the fetched data
       } catch (error) {
         console.error("Failed to fetch user data", error);
       } finally {
@@ -30,7 +29,7 @@ const Home = (props) => {
     if (userData?.id) {
       fetchUserData();
     }
-  }, [userData.id]);
+  }, [userData.id, form]);
 
   const handleSaveChanges = async () => {
     try {
@@ -40,23 +39,18 @@ const Home = (props) => {
       const data = {
         firstName: values.firstName.split(' ').length > 0 ? values.firstName.split(' ')[0] : 'N/A',
         lastName: values.firstName.split(' ').length > 0 ? values.firstName.split(' ')[1] : 'N/A',
-        email: values.email,
-        phone: values.phone ? values.phone : 'N/A', 
-        truckN: values.truckN ? values.truckN : 'N/A', 
-        driverN: values.driverN ? values.driverN : 'N/A', 
+        phone: values.phone ? values.phone : 'N/A',
+        truckN: values.truckN ? values.truckN : 'N/A',
+        driverN: values.driverN ? values.driverN : 'N/A',
         licensePlate: values.licensePlate ? values.licensePlate : 'N/A'
-      }
+      };
+
       // Sending the PATCH request to update user data
-      const response = await updatePatch(`/users/${userData.id}`, data );
+      const response = await updatePatch(`/users/${userData.id}`, data);
 
-        console.log(response
-
-        )
       // Fetch the updated user data after the PATCH request
-      // const response = await axios.get(`/users/${userData.id}`);
       setProfileData(response.data);
-      sessionStorage.setItem('user', JSON.stringify(response.data)
-      )
+      sessionStorage.setItem('user', JSON.stringify(response.data));
       notification.success({ message: "Profile updated successfully!" });
     } catch (error) {
       console.error("Failed to update profile", error.response?.data || error.message);
@@ -113,11 +107,6 @@ const Home = (props) => {
             <p style={{ margin: "auto", fontWeight: "600", fontSize: "24px" }}>
               {profileData.firstName} {profileData?.lastName}
             </p>
-            {/* <span
-              style={{ fontSize: "10px", color: "#1FA6E0", fontWeight: "600" }}
-            >
-              Edit Photo
-            </span> */}
           </div>
         </div>
         <div>
@@ -132,79 +121,41 @@ const Home = (props) => {
       </div>
       <div style={{ marginTop: "20px" }}>
         <h4 style={{ color: "#0B5676" }}>Personal Info</h4>
-        <Form
-          form={form}
-          initialValues={{
-            firstName: profileData?.firstName,
-            email: profileData?.email,
-            phone: profileData?.phone || "N/A",
-            truckN: profileData.truckN || "",
-            driverN: profileData?.driverN || "",
-            licensePlate: profileData?.licensePlate || "",
-          }}
-          layout="vertical"
-          style={{
-            justifyContent: "space-between",
-            display: "flex",
-            gap: "20px",
-          }}
-        >
-          <Form.Item
-            label={<div style={{ color: "#BBBBBB" }}>Full Name</div>}
-            name="firstName"
-            rules={[{ required: true, message: "Please enter your name" }]}
-          >
-            <Input
-              style={{ width: "300px" }}
-              placeholder="Enter Name"
-            />
+        <Form form={form} initialValues={profileData} layout="vertical" style={{ justifyContent: "space-between", display: "flex", gap: "20px" }}>
+          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Full Name</div>} name="firstName" rules={[{ required: true, message: "Please enter your name" }]}>
+            <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Name" />
           </Form.Item>
-          <Form.Item
-            label={<div style={{ color: "#BBBBBB" }}>Email</div>}
-            name="email"
-            rules={[{ required: true, type: "email", message: "Please enter a valid email" }]}
-          >
-            <Input
-              style={{ width: "300px" }}
-              placeholder="Enter Email"
-            />
+          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Email</div>} name="email">
+            <Tooltip title="Email can't be edited">
+              <Input
+                style={{
+                  width: "300px",
+                  color: "#333", // Darker text color
+                  backgroundColor: "#f5f5f5", // Light gray background to indicate non-editable
+                  cursor: "not-allowed",
+                }}
+                value={profileData.email} // Display the logged-in user's email
+                disabled
+              />
+            </Tooltip>
           </Form.Item>
-          <Form.Item
-            label={<div style={{ color: "#BBBBBB" }}>Phone</div>}
-            name="phone"
-          >
-            <Input
-              style={{ width: "300px" }}
-              placeholder="Enter Phone Number"
-            />
-          </Form.Item><br/>
-          <Form.Item
-            label={<div style={{ color: "#BBBBBB" }}>Truck Number</div>}
-            name="truckN"
-          >
-            <Input
-              style={{ width: "300px" }}
-              placeholder="Enter Truck Number"
-            />
+          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Phone</div>} name="phone">
+            <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Phone Number" />
           </Form.Item>
-          <Form.Item
-            label={<div style={{ color: "#BBBBBB" }}>Driver Number</div>}
-            name="driverN"
-          >
-            <Input
-              style={{ width: "300px" }}
-              placeholder="Enter Driver Number"
-            />
-          </Form.Item>
-          <Form.Item
-            label={<div style={{ color: "#BBBBBB" }}>License Plate</div>}
-            name="licensePlate"
-          >
-            <Input
-              style={{ width: "300px" }}
-              placeholder="Enter License Plate"
-            />
-          </Form.Item>
+
+          {userData.role === "driver" && (
+            <>
+              <Form.Item label={<div style={{ color: "#BBBBBB" }}>Truck Number</div>} name="truckN">
+                <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Truck Number" />
+              </Form.Item>
+              <Form.Item label={<div style={{ color: "#BBBBBB" }}>Driver Number</div>} name="driverN">
+                <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Driver Number" />
+              </Form.Item>
+              <Form.Item label={<div style={{ color: "#BBBBBB" }}>License Plate</div>} name="licensePlate">
+                <Input style={{ width: "300px", color: "#000" }} placeholder="Enter License Plate" />
+              </Form.Item>
+            </>
+          )}
         </Form>
       </div>
     </div>
