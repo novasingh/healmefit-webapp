@@ -119,3 +119,17 @@ html, body, #root {
     }
   }
   
+
+  .fixed-pagination .ant-pagination {
+    position: sticky;
+    bottom: 0;
+    background-color: white; /* or your background color */
+    z-index: 1;
+  }
+  
+  .fixed-pagination .ant-table-body {
+    max-height: calc(100vh - 250px); /* Adjust based on your layout */
+    overflow-y: auto;
+  }
+  
+  

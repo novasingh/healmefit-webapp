@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
+import '../style.css'
 import { DeleteOutlined } from '@ant-design/icons';
 import { Col, Button, Modal, Form, Input, message, Table, Skeleton } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import { get, post, remove } from "../utility/httpService";
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
+import { useNavigate } from 'react-router-dom';
+
 
 const Driver = (props) => {
+  const navigate = useNavigate()
   const [form] = Form.useForm();
   const [AddModal, setAddModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,7 +31,11 @@ const Driver = (props) => {
     {
       title: 'Name',
       dataIndex: 'name',
-      render: (text, record) => <a>{`${record.firstName} ${record.lastName}`}</a>,
+      render: (text, record) => (
+        <a onClick={() => navigate(`/driver/health`)}>
+          {`${record.firstName} ${record.lastName}`}
+        </a>
+      ),
     },
     {
       title: 'Email',
@@ -159,9 +167,10 @@ const Driver = (props) => {
       const response = await get('/users?role=driver', {
         page, limit 
       });
-      const usersWithKeys = response.results.map(user => ({ ...user, key: user.id }));
-      setGetAllUsers(usersWithKeys);
-      setTotalResults(response.totalResults);
+      console.log(response); // Log the response to check if data is correct
+      const usersWithKeys = response?.data?.results?.map(user => ({ ...user, key: user?.id }));
+      usersWithKeys && setGetAllUsers(usersWithKeys);
+      setTotalResults(response?.totalResults);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -169,6 +178,7 @@ const Driver = (props) => {
       message.error('An error occurred while fetching users. Please try again.');
     }
   };
+  
   
   useEffect(() => {
     setLoading(true);
@@ -207,12 +217,12 @@ const Driver = (props) => {
   return (
     <div className={props.class} style={{ height: "100%" }}>
       <Header />
-      <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <Col lg={24} style={{paddingTop:"2%" ,display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h3 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600",  marginBottom: '10px' }}>Drivers</h3>
         <div style={{ display: "flex", gap: "6px" }}>
           {selectedRowKeys?.length > 0 && 
           <Button onClick={() => handleMultiRowDelete(selectedRowKeys)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>Delete</Button>}
-          {!(getAllUsers.length === 0) && <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>+ Add</Button>}
+          {getAllUsers && !(getAllUsers?.length == 0) && <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>+ Add</Button>}
         </div>
       </Col>
       {
@@ -237,10 +247,11 @@ const Driver = (props) => {
         total: totalResults,
         onChange: (page, pageSize) => handleTableChange({ current: page, pageSize }),
       }}
-      style={{ height: "60vh", overflowY: "auto" }}
+      scroll={{ y: "calc(100vh - 250px)" }}  // Adjust height based on your needs
       onChange={handleTableChange}
       className="fixed-pagination"
     />
+    
     
     // </div>
     

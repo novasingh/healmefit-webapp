@@ -1,12 +1,13 @@
 .documents-dashboard {
     display: flex;
-    height: 100vh;
+    /* height: 100vh; */
 }
 
 .document-heading {
     text-align: center;
-    font-weight: bold; /* Optional, for emphasis */
+    font-weight: 500; /* Optional, for emphasis */
     margin-bottom: 10px; /* Optional, for spacing */
+    color:#BBBBBB
   }
 /*.sidebar {
     width: 200px;
@@ -36,8 +37,8 @@
 */
 .dashboard-main {
     flex-grow: 1;
-    padding: 20px;
-    background-color: #f5f5f5;
+    /* padding: 20px; */
+    /* background-color: #f5f5f5; */
 }
 
 .dashboard-header {
@@ -45,6 +46,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+   
 }
 
 .upload-button {
@@ -66,6 +68,7 @@
 .upload-count {
     color: #888;
 }
+
 
 .sort-button {
     background: none;
@@ -89,15 +92,15 @@
 }
 
 .document-card.not_uploaded {
-    border: 2px dashed #ccc;
+    border: 1px dashed #1da1f2;
 }
 
 .upload-icon {
     position: absolute;
     top: 10px;
     right: 10px;
-    background-color: #1da1f2;
-    color: white;
+    background-color: #fff ;
+    color: #1da1f2;
     border: none;
     width: 24px;
     height: 24px;
@@ -134,7 +137,7 @@
 
 .progress-bar {
   height: 10px;
-  width: 100%;
+  width: 50%;
   background-color: #e0e0e0;
   border-radius: 10px;
   overflow: hidden;

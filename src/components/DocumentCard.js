@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import axios from 'axios';
 
-function DocumentCard({ document, onUpload, onDelete }) {
+function DocumentCard({ document, onUpload, onDelete, userID }) {
   const fileInputRef = useRef(null);
   const [message, setMessage] = useState('');
 
@@ -22,7 +22,7 @@ function DocumentCard({ document, onUpload, onDelete }) {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`/document/{userID}/documents/${document.id}`); // Replace {userID} with the actual user ID
+      await axios.delete(`/document/${userID}/documents/${document.id}`);
       onDelete(document.id);
       setMessage('Document deleted successfully!');
       setTimeout(() => setMessage(''), 3000); // Clear the message after 3 seconds
@@ -32,10 +32,12 @@ function DocumentCard({ document, onUpload, onDelete }) {
   };
 
   return (
-    <div className={`document-card ${document.status}`}>
-      <h3>{document.name}</h3>
-      <p>{document.status === 'uploaded' ? 'Uploaded' : 'Not uploaded'}</p>
-      {message && <p className="message">{message}</p>}
+    <div style={{color:"#1FA6E0", height:"28vh"}} className={`document-card ${document.status}`}>
+      <p style={{fontSize:"12px",color:document.status !== 'uploaded' ? "#1FA6E0" : '#88C43E',paddingBottom:"8px"}}>
+        {document.status === 'uploaded' ? 'Uploaded' : 'Not uploaded'}
+      </p>
+      <h4 style={{textAlign:"left"}}>{document.name}</h4>
+      
       {document.status === 'uploaded' ? (
         <>
           <button className="button-preview" onClick={handlePreview}>Preview</button>
@@ -52,6 +54,7 @@ function DocumentCard({ document, onUpload, onDelete }) {
           <button className="upload-icon" onClick={() => fileInputRef.current.click()}>+</button>
         </>
       )}
+      <></>
     </div>
   );
 }
