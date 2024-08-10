@@ -154,7 +154,7 @@ const Admins = (props) => {
       const response = await get('/users?role=admin', {
         page, limit 
       });
-      const usersWithKeys = response.results.map(user => ({ ...user, key: user.id }));
+      const usersWithKeys = response?.data?.results?.map(user => ({ ...user, key: user.id }));
       setGetAllUsers(usersWithKeys);
       setTotalResults(response.totalResults);
       setLoading(false);
