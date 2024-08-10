@@ -233,7 +233,7 @@ const Managers = (props) => {
         total: totalResults,
         onChange: (page, pageSize) => handleTableChange({ current: page, pageSize }),
       }}
-      style={{ height: "60vh", overflowY: "auto" }}
+      scroll={{ y: "calc(100vh - 250px)" }}
       onChange={handleTableChange}
       className="fixed-pagination"
     />
