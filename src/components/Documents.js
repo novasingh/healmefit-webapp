@@ -66,7 +66,7 @@ function Documents(props) {
         </header>
         <div className="documents-section">
           <div style={{display:"flex", alignItems:"center", gap:"8px"}} className="document-heading">Required <div className="progress-bar">
-          <div className="progress-bar-fill" style={{ width: `${progressPercentage}%` }}>
+          <div className="progress-bar-fill" style={{ width: ${progressPercentage}% }}>
           </div></div><div style={{display:"flex", color:"#BBBBB"}}>2/5 Uploaded</div>
           
         </div>

@@ -15,7 +15,7 @@ const AuthProvider = ({ children }) => {
     return sessionStorage.getItem("role") || "";
   });
   const [userData, setUserData] = useState(() => {
-    return JSON.parse(sessionStorage.getItem("user")) || "";
+    return JSON.parse(sessionStorage.getItem("user")) || {};
   });
 
   useEffect(() => {

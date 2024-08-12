@@ -3,6 +3,9 @@ import { Input, Button, Form, notification, Tooltip } from "antd";
 import Header from "./Header";
 import { AuthContext } from "../contexts/AuthContext";
 import { get, updatePatch } from "../utility/httpService";
+import moment from "moment"; // Import moment for date formatting
+import 'react-phone-input-2/lib/style.css'; // Import the style for the phone input
+import PhoneInput from 'react-phone-input-2';
 
 const Home = (props) => {
   const [form] = Form.useForm();
@@ -11,14 +14,18 @@ const Home = (props) => {
   const [profileData, setProfileData] = useState(userData);
 
   useEffect(() => {
-    // Fetch updated user data from the API
     const fetchUserData = async () => {
       setLoading(true);
       try {
         const response = await get(`/users/${userData.id}`);
-        setProfileData(response.data); 
-        sessionStorage.setItem('user', JSON.stringify(response.data)); // Update the userData in context
-        form.setFieldsValue(response.data); // Set form fields with the fetched data
+        const userDob = response.data.dob ? moment(response.data.dob) : moment();
+        response.data.dob = userDob;
+        setProfileData(response.data);
+        sessionStorage.setItem('user', JSON.stringify(response.data));
+        form.setFieldsValue({
+          ...response.data,
+          dob: userDob.format("YYYY-MM-DD"), // Set the DOB field with moment date
+        });
       } catch (error) {
         console.error("Failed to fetch user data", error);
       } finally {
@@ -35,22 +42,24 @@ const Home = (props) => {
     try {
       setLoading(true);
       const values = await form.validateFields();
-
+      const formattedDob = moment(values.dob).format("YYYY-MM-DD");
       const data = {
-        firstName: values.firstName.split(' ').length > 0 ? values.firstName.split(' ')[0] : 'N/A',
-        lastName: values.firstName.split(' ').length > 0 ? values.firstName.split(' ')[1] : 'N/A',
-        phone: values.phone ? values.phone : 'N/A',
+        firstName: values.firstName,
+        lastName: values.lastName,
+        dob: formattedDob ? formattedDob : null,
+        address: values.address ? values.address : 'N/A',
         truckN: values.truckN ? values.truckN : 'N/A',
         driverN: values.driverN ? values.driverN : 'N/A',
-        licensePlate: values.licensePlate ? values.licensePlate : 'N/A'
+        licensePlate: values.licensePlate ? values.licensePlate : 'N/A',
+        insuranceN: values.insuranceN ? values.insuranceN : 'N/A',
+        phone: values.phone
       };
 
-      // Sending the PATCH request to update user data
       const response = await updatePatch(`/users/${userData.id}`, data);
 
-      // Fetch the updated user data after the PATCH request
       setProfileData(response.data);
       sessionStorage.setItem('user', JSON.stringify(response.data));
+      form.resetFields();
       notification.success({ message: "Profile updated successfully!" });
     } catch (error) {
       console.error("Failed to update profile", error.response?.data || error.message);
@@ -105,7 +114,7 @@ const Home = (props) => {
           </div>
           <div>
             <p style={{ margin: "auto", fontWeight: "600", fontSize: "24px" }}>
-              {profileData.firstName} {profileData?.lastName}
+              {profileData?.firstName} {profileData?.lastName}
             </p>
           </div>
         </div>
@@ -122,28 +131,44 @@ const Home = (props) => {
       <div style={{ marginTop: "20px" }}>
         <h4 style={{ color: "#0B5676" }}>Personal Info</h4>
         <Form form={form} initialValues={profileData} layout="vertical" style={{ justifyContent: "space-between", display: "flex", gap: "20px" }}>
-          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Full Name</div>} name="firstName" rules={[{ required: true, message: "Please enter your name" }]}>
-            <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Name" />
+          <Form.Item label={<div style={{ color: "#BBBBBB" }}>First Name</div>} name="firstName" rules={[{ required: true, message: "Please enter your first name" }]}>
+            <Input style={{ width: "300px", color: "#000" }} placeholder="Enter First Name" />
+          </Form.Item>
+          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Last Name</div>} name="lastName" rules={[{ required: true, message: "Please enter your last name" }]}>
+            <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Last Name" />
           </Form.Item>
           <Form.Item label={<div style={{ color: "#BBBBBB" }}>Email</div>} name="email">
             <Tooltip title="Email can't be edited">
               <Input
                 style={{
                   width: "300px",
-                  color: "#333", // Darker text color
-                  backgroundColor: "#f5f5f5", // Light gray background to indicate non-editable
+                  color: "#333",
+                  backgroundColor: "#f5f5f5",
                   cursor: "not-allowed",
                 }}
-                value={profileData.email} // Display the logged-in user's email
+                value={profileData?.email} 
                 disabled
               />
             </Tooltip>
           </Form.Item>
           <Form.Item label={<div style={{ color: "#BBBBBB" }}>Phone</div>} name="phone">
-            <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Phone Number" />
+            <PhoneInput
+              country={'in'} // Set default country to India
+              enableSearch={true} // Enable search option in the dropdown
+              containerStyle={{ width: "300px" }}
+              inputStyle={{ width: "100%", color: "#000" }}
+              placeholder="Enter Phone Number"
+            />
+          </Form.Item>
+          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Address</div>} name="address">
+            <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Address" />
           </Form.Item>
 
-          {userData.role === "driver" && (
+          {/* Conditional fields for drivers */}
+          <div style={{ marginTop: "20px" }}>
+          <h4 style={{ color: "#0B5676" }}>Company Info</h4>
+          </div>
+          {profileData?.role === "driver" && (
             <>
               <Form.Item label={<div style={{ color: "#BBBBBB" }}>Truck Number</div>} name="truckN">
                 <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Truck Number" />
@@ -153,6 +178,9 @@ const Home = (props) => {
               </Form.Item>
               <Form.Item label={<div style={{ color: "#BBBBBB" }}>License Plate</div>} name="licensePlate">
                 <Input style={{ width: "300px", color: "#000" }} placeholder="Enter License Plate" />
+              </Form.Item>
+              <Form.Item label={<div style={{ color: "#BBBBBB" }}>Insurance Number</div>} name="insuranceN">
+                <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Insurance Number" />
               </Form.Item>
             </>
           )}

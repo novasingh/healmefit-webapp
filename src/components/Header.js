@@ -42,8 +42,16 @@ const Header = () => {
       type: 'divider',
     },
     {
-      label: 'Profile',
-      key: '0',
+      label: (
+        <div
+          onClick={() => {
+            navigate('/home'); // Add this navigation to the profile page
+          }}
+        >
+          Profile
+        </div>
+         ),
+         key: '0',
     },
     {
       label: (
