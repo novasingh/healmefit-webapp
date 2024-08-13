@@ -91,7 +91,7 @@ form {
 .google-login {
   width: 100%;
   padding: 0.5rem;
-  background-color: #000000;
+  background-color: #656565;
   color: white;
   border: 1px;
   border-radius: 4px;
@@ -150,10 +150,15 @@ footer {
 }
 
 h3 {
-/* margin-top: 130px; */
+  margin-top: 8rem;
 text-align: center;
 }
 
 .login-logo {
   size: 50px;
+}
+
+h4 {
+  color: #5d5d5d;
+  margin-bottom: 2rem;
 }
