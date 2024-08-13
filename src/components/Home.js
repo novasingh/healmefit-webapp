@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Input, Button, Form, notification, Tooltip } from "antd";
+import { Input, Button, Form, notification, Tooltip, Collapse } from "antd";
 import Header from "./Header";
 import { AuthContext } from "../contexts/AuthContext";
 import { get, updatePatch } from "../utility/httpService";
-import moment from "moment"; // Import moment for date formatting
-import 'react-phone-input-2/lib/style.css'; // Import the style for the phone input
+import moment from "moment";
+import 'react-phone-input-2/lib/style.css';
 import PhoneInput from 'react-phone-input-2';
 
 const Home = (props) => {
@@ -12,6 +12,8 @@ const Home = (props) => {
   const { userData } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(userData);
+
+  const { Panel } = Collapse;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -24,7 +26,7 @@ const Home = (props) => {
         sessionStorage.setItem('user', JSON.stringify(response.data));
         form.setFieldsValue({
           ...response.data,
-          dob: userDob.format("YYYY-MM-DD"), // Set the DOB field with moment date
+          dob: userDob.format("YYYY-MM-DD"),
         });
       } catch (error) {
         console.error("Failed to fetch user data", error);
@@ -69,22 +71,40 @@ const Home = (props) => {
     }
   };
 
-  return (
-    <div className={props.class}>
-      <Header />
-      <div
-        style={{
-          marginTop: "30px",
-          background: "#C8F6653D",
-          width: "100%",
-          padding: "1%",
-        }}
-      >
-        <p style={{ color: "#88C43E", margin: "auto" }}>
+  const WelcomeMessage = ({ userData }) => {
+    const [isVisible, setIsVisible] = useState(true);
+
+    useEffect(() => {
+      const messageStatus = localStorage.getItem('welcomeMessageStatus');
+      if (messageStatus === 'dismissed') {
+        setIsVisible(false);
+      }
+    }, []);
+
+    const handleClose = () => {
+      setIsVisible(false);
+      localStorage.setItem('welcomeMessageStatus', 'dismissed');
+    };
+
+    if (!isVisible) return null;
+
+    return (
+      <div style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#E7F8D6', padding: '10px', borderRadius: '5px' }}>
+        <p style={{ color: "#88C43E", margin: "auto", textAlign: "left", flex: 1 }}>
           Welcome {userData?.firstName}! Don’t forget to enter all missing
           information on your profile.
         </p>
+        <button onClick={handleClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '26px', color: 'white', marginLeft: '10px' }}>
+          &times;
+        </button>
       </div>
+    );
+  };
+
+  return (
+    <div className={props.class}>
+      <Header />
+      <WelcomeMessage userData={userData} /> {/* Display the WelcomeMessage */}
       <div
         style={{
           marginTop: "30px",
@@ -129,62 +149,76 @@ const Home = (props) => {
         </div>
       </div>
       <div style={{ marginTop: "20px" }}>
-        <h4 style={{ color: "#0B5676" }}>Personal Info</h4>
-        <Form form={form} initialValues={profileData} layout="vertical" style={{ justifyContent: "space-between", display: "flex", gap: "20px" }}>
-          <Form.Item label={<div style={{ color: "#BBBBBB" }}>First Name</div>} name="firstName" rules={[{ required: true, message: "Please enter your first name" }]}>
-            <Input style={{ width: "300px", color: "#000" }} placeholder="Enter First Name" />
-          </Form.Item>
-          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Last Name</div>} name="lastName" rules={[{ required: true, message: "Please enter your last name" }]}>
-            <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Last Name" />
-          </Form.Item>
-          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Email</div>} name="email">
-            <Tooltip title="Email can't be edited">
-              <Input
-                style={{
-                  width: "300px",
-                  color: "#333",
-                  backgroundColor: "#f5f5f5",
-                  cursor: "not-allowed",
-                }}
-                value={profileData?.email} 
-                disabled
-              />
-            </Tooltip>
-          </Form.Item>
-          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Phone</div>} name="phone">
-            <PhoneInput
-              country={'in'} // Set default country to India
-              enableSearch={true} // Enable search option in the dropdown
-              containerStyle={{ width: "300px" }}
-              inputStyle={{ width: "100%", color: "#000" }}
-              placeholder="Enter Phone Number"
-            />
-          </Form.Item>
-          <Form.Item label={<div style={{ color: "#BBBBBB" }}>Address</div>} name="address">
-            <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Address" />
-          </Form.Item>
+        <div>
+          <Collapse defaultActiveKey={['1', '2']} expandIconPosition="end">
+            <Panel header={<h4 style={{ color: "#0B5676" }}>Personal Info</h4>} key="1">
+              <Form
+                form={form}
+                initialValues={profileData}
+                layout="vertical"
+                style={{ justifyContent: "space-between", display: "flex", flexWrap: "wrap", gap: "20px" }}
+              >
+                <Form.Item label={<div style={{ color: "#BBBBBB" }}>First Name</div>} name="firstName" rules={[{ required: true, message: "Please enter your first name" }]}>
+                  <Input style={{ width: "300px", color: "#000" }} placeholder="Enter First Name" />
+                </Form.Item>
+                <Form.Item label={<div style={{ color: "#BBBBBB" }}>Last Name</div>} name="lastName" rules={[{ required: true, message: "Please enter your last name" }]}>
+                  <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Last Name" />
+                </Form.Item>
+                <Form.Item label={<div style={{ color: "#BBBBBB" }}>Email</div>} name="email">
+                  <Tooltip title="Email can't be edited">
+                    <Input
+                      style={{
+                        width: "300px",
+                        color: "#333",
+                        backgroundColor: "#f5f5f5",
+                        cursor: "not-allowed",
+                      }}
+                      value={profileData?.email}
+                      disabled
+                    />
+                  </Tooltip>
+                </Form.Item>
+                <Form.Item label={<div style={{ color: "#BBBBBB" }}>Phone</div>} name="phone">
+                  <PhoneInput
+                    country={'in'} // Set default country to India
+                    enableSearch={true} // Enable search option in the dropdown
+                    containerStyle={{ width: "300px" }}
+                    inputStyle={{ width: "100%", color: "#000" }}
+                    placeholder="Enter Phone Number"
+                  />
+                </Form.Item>
+                <Form.Item label={<div style={{ color: "#BBBBBB" }}>Address</div>} name="address">
+                  <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Address" />
+                </Form.Item>
+              </Form>
+            </Panel>
 
-          {/* Conditional fields for drivers */}
-          <div style={{ marginTop: "20px" }}>
-          <h4 style={{ color: "#0B5676" }}>Company Info</h4>
-          </div>
-          {profileData?.role === "driver" && (
-            <>
-              <Form.Item label={<div style={{ color: "#BBBBBB" }}>Truck Number</div>} name="truckN">
-                <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Truck Number" />
-              </Form.Item>
-              <Form.Item label={<div style={{ color: "#BBBBBB" }}>Driver Number</div>} name="driverN">
-                <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Driver Number" />
-              </Form.Item>
-              <Form.Item label={<div style={{ color: "#BBBBBB" }}>License Plate</div>} name="licensePlate">
-                <Input style={{ width: "300px", color: "#000" }} placeholder="Enter License Plate" />
-              </Form.Item>
-              <Form.Item label={<div style={{ color: "#BBBBBB" }}>Insurance Number</div>} name="insuranceN">
-                <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Insurance Number" />
-              </Form.Item>
-            </>
-          )}
-        </Form>
+              {profileData?.role === "driver" && (
+                <Panel header={<h4 style={{ color: "#0B5676" }}>Company Info</h4>} key="2">
+                <Form
+                  form={form}
+                  initialValues={profileData}
+                  layout="vertical"
+                  style={{ justifyContent: "space-between", display: "flex", flexWrap: "wrap", gap: "20px" }}
+                >
+                  <Form.Item label={<div style={{ color: "#BBBBBB" }}>Truck Number</div>} name="truckN">
+                    <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Truck Number" />
+                  </Form.Item>
+                  <Form.Item label={<div style={{ color: "#BBBBBB" }}>Driver Number</div>} name="driverN">
+                    <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Driver Number" />
+                  </Form.Item>
+                  <Form.Item label={<div style={{ color: "#BBBBBB" }}>License Plate</div>} name="licensePlate">
+                    <Input style={{ width: "300px", color: "#000" }} placeholder="Enter License Plate" />
+                  </Form.Item>
+                  <Form.Item label={<div style={{ color: "#BBBBBB" }}>Insurance Number</div>} name="insuranceN">
+                    <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Insurance Number" />
+                  </Form.Item>
+                </Form>
+                </Panel>
+              )}
+            
+          </Collapse>
+        </div>
       </div>
     </div>
   );

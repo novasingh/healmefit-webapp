@@ -222,7 +222,7 @@ const Driver = (props) => {
         <div style={{ display: "flex", gap: "6px" }}>
           {selectedRowKeys?.length > 0 && 
           <Button onClick={() => handleMultiRowDelete(selectedRowKeys)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>Delete</Button>}
-          {getAllUsers && !(getAllUsers?.length == 0) && <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>+ Add</Button>}
+          {getAllUsers && !(getAllUsers?.length == 0) && <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>+ Add Drivers</Button>}
         </div>
       </Col>
       {
@@ -232,7 +232,7 @@ const Driver = (props) => {
         <Col lg={10} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <div style={{ textAlign: "center", color: "#BBBBBB", fontWeight: "600" }}>Looks like you have no drivers yet.</div>
           <div style={{ textAlign: "center", color: "#BBBBBB", fontWeight: "400" }}>Add a driver and we will send them an invite to join your team.</div>
-          <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}> + Add</Button>
+          <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}> + Add Drivers</Button>
         </Col>
       </Col>
       :

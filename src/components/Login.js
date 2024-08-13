@@ -84,7 +84,7 @@ const Login = () => {
           </div>
           {errorMessage && <p className="error-message">{errorMessage}</p>}
           <div className="input-box">
-            <input type="submit" value="Log in" />
+            <input type="submit" value="Log now" />
           </div>
         </form>
         <div className="login-footer">
