@@ -1,13 +1,14 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { message } from 'antd';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import './Login.css'; // Assuming you have styles for login page
+import './Login.css';
 import facebookicon from '../assets/facebook.png';
 import emailicon from '../assets/email.png';
 import healmefitlogo from '../assets/HMFjpg.jpg';
-import checkmarkicon from '../assets/Frame 97.png'; // Assuming you have the checkmark icon
+import checkmarkicon from '../assets/Frame 97.png';
+import { post } from '../utility/httpService';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -16,12 +17,41 @@ const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => initializeGoogleSignIn(); // Initialize Google Sign-In after the script is loaded
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const initializeGoogleSignIn = () => {
+    if (window.google && window.google.accounts) {
+      window.google.accounts.id.initialize({
+        client_id: '502464504225-suhn1s1437jq3neg8g57pat8po7pce3c.apps.googleusercontent.com', // Ensure this is correct
+        callback: handleGoogleResponse,
+      });
+      window.google.accounts.id.renderButton(
+        document.getElementById('googleSignInDiv'),
+        { theme: 'outline', size: 'large', width: '100%' }
+      );
+      console.log('Google Sign-In button initialized');
+    } else {
+      console.log('Google object not available yet');
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setErrorMessage(''); // Clear any previous error messages
+    setErrorMessage('');
 
     try {
-      const response = await axios.post('http://44.211.250.6/v1/auth/login', {
+      const response = await post('http://44.211.250.6/v1/auth/login', {
         email,
         password,
       }, {
@@ -29,17 +59,18 @@ const Login = () => {
           'Content-Type': 'application/json',
         },
       });
+
       if (response.status === 200) {
         const { user, tokens } = response.data;
-        if (user.role === 'manager' || user.role === 'driver' || user.role === 'admin') {
+        if (['manager', 'driver', 'admin'].includes(user.role)) {
           message.success("Successfully Logged In");
           login(user, tokens.access.token);
           navigate('/home');
         } else {
-          message.error('Not Exist');
+          message.error('User role not authorized');
         }
       } else {
-        message.error('Not Exist');
+        message.error('Invalid login credentials');
       }
     } catch (error) {
       console.error('Error during login:', error);
@@ -47,11 +78,36 @@ const Login = () => {
     }
   };
 
+  const handleGoogleResponse = async (response) => {
+    try {
+      console.log('Google response received:', response);
+      const backendResponse = await post('http://44.211.250.6/v1/auth/google-login', {
+        credential: response.credential,
+      });
+
+      if (backendResponse.status === 200) {
+        const { user, tokens } = backendResponse.data;
+        if (['manager', 'driver', 'admin'].includes(user.role)) {
+          message.success("Successfully Logged In with Google");
+          login(user, tokens.access.token);
+          navigate('/home');
+        } else {
+          message.error('User role not authorized');
+        }
+      } else {
+        message.error('Google login failed');
+      }
+    } catch (error) {
+      console.error('Error during Google login:', error);
+      message.error('Error during Google login');
+    }
+  };
+
   return (
     <div className="login-container">
       <div className="login-info">
         <div className="circle">
-          <div> <a href="#"><img src={checkmarkicon} alt="Facebook" /></a></div>
+          <div><a href="#"><img src={checkmarkicon} alt="Checkmark" /></a></div>
         </div>
         <h3>We aim to improve the safety and compliance issues in trucking companies and the well-being of truckers.</h3>
       </div>
@@ -59,10 +115,10 @@ const Login = () => {
         <div className="login-logo">
           <img src={healmefitlogo} alt="Heal Me Fit Logo" />
         </div>
-        <h2>Log in</h2>
-        <p>Welcome back!</p><br></br>
+        <h2>Welcome To Heal Me Fit!</h2>
+        <p></p><br />
         <form onSubmit={handleSubmit}>
-          <button className="google-login">Log in with Google</button>
+          <div id="googleSignInDiv"></div>
           <div className="divider">or</div>
           <div className="input-box">
             <input
@@ -84,18 +140,18 @@ const Login = () => {
           </div>
           {errorMessage && <p className="error-message">{errorMessage}</p>}
           <div className="input-box">
-            <input type="submit" value="Log now" />
+            <input type="submit" value="Log In" />
           </div>
         </form>
         <div className="login-footer">
-          <a href="/forgot-password">Forgot password?</a>
+          <a href="/resetlogin">Reset Password?</a>
         </div>
         <footer>
           <p>&copy; 2024 Heal Me Fit</p>
-          <p>123 Street, San Jose, CA 12345 USA</p><br></br>
+          <p>123 Street, San Jose, CA 12345 USA</p><br />
           <div className="social-links">
-            <a href="#"><img src={facebookicon} alt="Facebook" /></a>
-            <a href="#"><img src={emailicon} alt="Email" /></a>
+          <a href="https://www.facebook.com/HealMeFit"><img src={facebookicon} alt="Facebook" /></a>
+          <a href="mailto:support@healmefit.com"><img src={emailicon} alt="Email" /></a>
           </div>
         </footer>
       </div>

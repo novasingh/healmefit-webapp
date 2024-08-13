@@ -104,9 +104,9 @@ const Login = () => {
             <input type="submit" value="Reset Password" />
           </div>
         </form>
-        {/* <div className="login-footer">
-          <a href="/forgot-password">Forgot password?</a>
-        </div> */}
+        <div className="login-footer">
+          <a href="/">Log In Now!</a>
+        </div>
         <footer>
           <p>&copy; 2024 Heal Me Fit</p>
           <p>123 Street, San Jose, CA 12345 USA</p><br></br>
