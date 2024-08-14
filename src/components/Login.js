@@ -1,8 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
-import axios from 'axios';
 import { message } from 'antd';
 import { AuthContext } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 import facebookicon from '../assets/facebook.png';
 import emailicon from '../assets/email.png';
@@ -49,9 +48,8 @@ const Login = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setErrorMessage('');
-
     try {
-      const response = await post('http://44.211.250.6/v1/auth/login', {
+      const response = await post('/auth/login', {
         email,
         password,
       }, {
@@ -73,7 +71,6 @@ const Login = () => {
         message.error('Invalid login credentials');
       }
     } catch (error) {
-      console.error('Error during login:', error);
       message.error('Error during login');
     }
   };
@@ -112,6 +109,7 @@ const Login = () => {
         <h3>We aim to improve the safety and compliance issues in trucking companies and the well-being of truckers.</h3>
       </div>
       <div className="login-box">
+        <div style={{textAlign: 'center', width: '320px'}}> 
         <div className="login-logo">
           <img src={healmefitlogo} alt="Heal Me Fit Logo" />
         </div>
@@ -144,7 +142,7 @@ const Login = () => {
           </div>
         </form>
         <div className="login-footer">
-          <a href="/resetlogin">Reset Password?</a>
+          <Link to="/forgot-password">Forgot Password?</Link>
         </div>
         <footer>
           <p>&copy; 2024 Heal Me Fit</p>
@@ -154,6 +152,7 @@ const Login = () => {
           <a href="mailto:support@healmefit.com"><img src={emailicon} alt="Email" /></a>
           </div>
         </footer>
+        </div>
       </div>
     </div>
   );
