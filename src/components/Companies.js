@@ -201,12 +201,10 @@ const Companies = (props) => {
   return (
     <div className={props.class} style={{ height: "100%" }}>
       <Header />
-      <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600", marginBottom: '10px' }}>Companies</h3>
+      <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: '2%' }}>
+        <h2 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600", marginBottom: '10px' }}>Companies</h2>
         <div style={{ display: "flex", gap: "6px" }}>
-          {selectedRowKeys.length > 0 &&
-          <Button onClick={handleMultiRowDelete} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>Delete</Button>}
-          {totalResults.length > 0 && <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>+ Add</Button>}
+          {totalResults.length > 0 && <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>+ Add Company</Button>}
         </div>
       </Col>
       {
@@ -216,7 +214,7 @@ const Companies = (props) => {
         <Col lg={10} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <div style={{ textAlign: "center", color: "#BBBBBB", fontWeight: "600" }}>Looks like you have no company yet.</div>
           <div style={{ textAlign: "center", color: "#BBBBBB", fontWeight: "400" }}>Add a company and we will send them an invite to join your team.</div>
-          <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}> + Add</Button>
+          <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}> + Add Company</Button>
         </Col>
       </Col>
       :
@@ -228,7 +226,6 @@ const Companies = (props) => {
             current: currentPage,
             pageSize: pageSize,
             total: totalResults.length,
-            onChange: (page, pageSize) => handleTableChange({ current: page, pageSize }),
         }}
       />
       :

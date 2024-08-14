@@ -1,3 +1,4 @@
+import { message } from 'antd';
 import axiosInstance from './axiosInterceptor';
 
 const get = async (url, params = {}) => {
@@ -5,7 +6,8 @@ const get = async (url, params = {}) => {
     const response = await axiosInstance.get(url, { params });
     return response
   } catch (error) {
-    return error.response.data
+    message.error(error?.response?.data?.message)
+    return error
   }
 };
 
@@ -14,7 +16,8 @@ const post = async (url, data) => {
     const response = await axiosInstance.post(url, data);
     return response
   } catch (error) {
-    return error.response.data
+    message.error(error?.response?.data?.message)
+    return error
   }
 };
 
@@ -23,7 +26,8 @@ const update = async (url, data) => {
     const response = await axiosInstance.put(url, data);
     return response
   } catch (error) {
-    return error.response.data
+    message.error(error?.response?.data?.message)
+    return error
   }
 };
 const updatePatch = async (url, data) => {
@@ -31,7 +35,8 @@ const updatePatch = async (url, data) => {
     const response = await axiosInstance.patch(url, data);
     return response
   } catch (error) {
-    return error.response.data
+    message.error(error?.response?.data?.message)
+    return error
   }
 };
 const remove = async url => {
@@ -39,7 +44,8 @@ const remove = async url => {
     const response = await axiosInstance.delete(url);
     return response
   } catch (error) {
-    return error.response.data
+    message.error(error?.response?.data?.message)
+    return error
   }
 };
 

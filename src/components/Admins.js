@@ -18,10 +18,8 @@ const Admins = (props) => {
   const [getAllUsers, setGetAllUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [viewModal, setViewModal] = useState(false);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [isAddMoreDisabled, setIsAddMoreDisabled] = useState(true);
-  const [isAddDriverDisabled, setIsAddDriverDisabled] = useState(true);
-  const token = sessionStorage.getItem('accessToken'); // Retrieve the token from sessionStorage
+  const [isAddDriverDisabled, setIsAddDriverDisabled] = useState(true)
 
   const columns = [
     {
@@ -42,113 +40,11 @@ const Admins = (props) => {
       title: 'Action',
       dataIndex: 'action',
       render: (_, record) => (
-        <ThreeDotsDropdown onDelete={() => null} onEdit={() => null} />
+        <ThreeDotsDropdown onDelete={() => handleDeleteUser(record?.id)} onEdit={() => null} emailId={record?.email} />
       ),
     },
   ];
 
-  // rowSelection object indicates the need for row selection
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (selectedRowKeys) => {
-      setSelectedRowKeys(selectedRowKeys);
-    },
-  };
-
-  useEffect(() => {
-    // Set default form layout with one driver row when modal opens
-    if (AddModal && formLayout.length === 0) {
-      setFormLayout([{ id: uuidv4(), email: '', truckN: '', driverN: '', name: '', role: 'driver' }]);
-    }
-  }, [AddModal]);
-
-  const addFormLayout = () => {
-    // Update formValues with current form data
-    formLayout.forEach((item) => {
-      const values = form.getFieldsValue();
-      setFormValues(prev => ({
-        ...prev,
-        [`email_${item.id}`]: values[`email_${item.id}`] || '',
-        [`truckN${item.id}`]: values[`truckN${item.id}`] || '',
-        [`driverN${item.id}`]: values[`driverN${item.id}`] || '',
-        [`name_${item.id}`]: values[`name_${item.id}`] || '',
-        [`role_${item.id}`]: values[`role_${item.id}`] || 'driver',
-      }));
-    });
-
-    setFormLayout([
-      ...formLayout,
-      { id: uuidv4(), email: '', truckN: '', driverN: '', name: '', role: 'driver' }
-    ]);
-  };
-
-  const handleDeleteFormLayout = (id) => {
-    setFormLayout(formLayout.filter((item) => item.id !== id));
-  };
-
-  const handleChange = () => {
-    const isAnyFieldEmpty = formLayout.some((item) => {
-      const email = form.getFieldValue(`email_${item.id}`);
-      const name = form.getFieldValue(`name_${item.id}`);
-      const truckN = form.getFieldValue(`truckN${item.id}`);
-      const driverN = form.getFieldValue(`driverN${item.id}`);
-      const role = form.getFieldValue(`role_${item.id}`);
-      return !email || !name || !truckN || !driverN || !role;
-    });
-
-    setIsAddMoreDisabled(isAnyFieldEmpty);
-    setIsAddDriverDisabled(formLayout.some((item) => {
-      const email = form.getFieldValue(`email_${item.id}`);
-      const name = form.getFieldValue(`name_${item.id}`);
-      const truckN = form.getFieldValue(`truckN${item.id}`);
-      const driverN = form.getFieldValue(`driverN${item.id}`);
-      const role = form.getFieldValue(`role_${item.id}`);
-      return !email || !name || !truckN || !driverN || !role;
-    }));
-  };
-
-  useEffect(() => {
-    formLayout.forEach((item) => {
-      form.setFieldsValue({
-        [`email_${item.id}`]: formValues[`email_${item.id}`] || '',
-        [`truckN${item.id}`]: formValues[`truckN${item.id}`] || '',
-        [`driverN${item.id}`]: formValues[`driverN${item.id}`] || '',
-        [`name_${item.id}`]: formValues[`name_${item.id}`] || '',
-        [`role_${item.id}`]: formValues[`role_${item.id}`] || 'driver',
-      });
-    });
-  }, [formLayout, formValues, form]);
-
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-
-      const addDriverPromises = formLayout.map((item) => {
-        const email = values[`email_${item.id}`];
-        const truckN = values[`truckN${item.id}`];
-        const driverN = values[`driverN${item.id}`];
-        const name = values[`name_${item.id}`];
-        const role = values[`role_${item.id}`];
-
-        return post('/users', { email, truckN, driverN, name, role });
-      });
-
-      await Promise.all(addDriverPromises);
-      message.success('Admins added successfully!');
-      fetchUsers(currentPage, pageSize);
-      setAddModal(false);
-      form.resetFields();
-      setFormLayout([]);
-      setFormValues({});
-    } catch (error) {
-      console.error('Error:', error);
-      if (error.response && error.response.data) {
-        message.error(`Error: ${error.response.data.message}`);
-      } else {
-        message.error('An error occurred while adding admin. Please try again.');
-      }
-    }
-  };
   const fetchUsers = async (page = 1, limit = 10) => {
     try {
       const response = await get('/users?role=admin', {
@@ -164,6 +60,117 @@ const Admins = (props) => {
       message.error('An error occurred while fetching users. Please try again.');
     }
   };
+
+  const handleDeleteUser = async(id) => {
+    await remove(`/users/${id}`).then((response) => {
+      if(response){
+        message.success('Admin Deleted Successfully.')
+        fetchUsers()
+      }
+    }, error => {
+      console.log(error)
+    })
+  }
+
+
+  useEffect(() => {
+    // Set default form layout with one driver row when modal opens
+    if (AddModal && formLayout.length === 0) {
+      setFormLayout([{ id: uuidv4(), email: '',phone : '', name: '', role: 'driver' }]);
+    }
+  }, [AddModal, formLayout?.length]);
+
+  const addFormLayout = () => {
+    // Update formValues with current form data
+    formLayout.forEach((item) => {
+      const values = form.getFieldsValue();
+      setFormValues(prev => ({
+        ...prev,
+        [`email_${item.id}`]: values[`email_${item.id}`] || '',
+        [`phone_${item.id}`]: values[`phone_${item.id}`] || '',
+        [`name_${item.id}`]: values[`name_${item.id}`] || '',
+        [`role_${item.id}`]: values[`role_${item.id}`] || 'admin',
+      }));
+    });
+
+    setFormLayout([
+      ...formLayout,
+      { id: uuidv4(), email: '', truckN: '', driverN: '', name: '', role: 'admin' }
+    ]);
+  };
+
+  const handleDeleteFormLayout = (id) => {
+    setFormLayout(formLayout.filter((item) => item.id !== id));
+  };
+
+  const handleChange = () => {
+    const isAnyFieldEmpty = formLayout.some((item) => {
+      const email = form.getFieldValue(`email_${item.id}`);
+      const name = form.getFieldValue(`name_${item.id}`);
+      const phone = form.getFieldValue(`phone_${item.id}`);
+      const role = form.getFieldValue(`role_${item.id}`);
+      return !email || !name || !phone || !role;
+    });
+
+    setIsAddMoreDisabled(isAnyFieldEmpty);
+    setIsAddDriverDisabled(formLayout.some((item) => {
+      const email = form.getFieldValue(`email_${item.id}`);
+      const name = form.getFieldValue(`name_${item.id}`);
+      const phone = form.getFieldValue(`phone_${item.id}`);
+      const role = form.getFieldValue(`role_${item.id}`);
+      return !email || !name || !phone || !role;
+    }));
+  };
+
+  useEffect(() => {
+    formLayout.forEach((item) => {
+      form.setFieldsValue({
+        [`email_${item.id}`]: formValues[`email_${item.id}`] || '',
+        [`phone_${item.id}`]: formValues[`phone_${item.id}`] || '',
+        [`name_${item.id}`]: formValues[`name_${item.id}`] || '',
+        [`role_${item.id}`]: formValues[`role_${item.id}`] || 'admin',
+      });
+    });
+  }, [formLayout, formValues, form]);
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+
+      const addDriverPromises = formLayout.map((item) => {
+        const email = values[`email_${item.id}`];
+        const phone = values[`phone_${item.id}`];
+        const name = values[`name_${item.id}`];
+        const role = 'admin';
+
+        return post('/users', { email, phone, name, role });
+      });
+
+      const responses = await Promise.all(addDriverPromises);
+
+      const allSuccessful = responses.every(response => response.status === 201);
+      if(allSuccessful){
+        message.success('Admins added successfully!');
+        fetchUsers(currentPage, pageSize);
+        setAddModal(false);
+        form.resetFields();
+        setFormLayout([]);
+        setFormValues({});
+      }else {
+        message.error('One or more requests failed.');
+      }
+
+      message.success('Admins added successfully!');
+      
+    } catch (error) {
+      console.error('Error:', error);
+      if (error.response && error.response.data) {
+        message.error(`Error: ${error.response.data.message}`);
+      } else {
+        message.error('An error occurred while adding admin. Please try again.');
+      }
+    }
+  };
   
   useEffect(() => {
     setLoading(true);
@@ -175,37 +182,13 @@ const Admins = (props) => {
     setPageSize(pagination.pageSize);
   };
   
-
-  const handleViewMore = (record) => {
-    setSelectedUser(record);
-    setViewModal(true);
-  };
-
-  const handleMultiRowDelete = async (selectedRowKeys) => {
-    try {
-      const deletePromises = selectedRowKeys.map((userId) =>
-        remove(`/users/${userId}`)
-      );
-      await Promise.all(deletePromises);
-      message.success('Selected users deleted successfully');
-      // Remove the deleted users from the state
-      setGetAllUsers(getAllUsers.filter((user) => !selectedRowKeys.includes(user.key)));
-      setSelectedRowKeys([]);
-    } catch (error) {
-      console.error('Error deleting users:', error);
-      message.error('An error occurred while deleting users. Please try again.');
-    }
-  };
-
   return (
     <div className={props.class} style={{ height: "100%" }}>
       <Header />
-      <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600",  marginBottom: '10px' }}>Admins</h3>
+      <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: '2%' }}>
+        <h2 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600",  marginBottom: '10px' }}>Admins</h2>
         <div style={{ display: "flex", gap: "6px" }}>
-          {selectedRowKeys?.length > 0 && 
-          <Button onClick={() => handleMultiRowDelete(selectedRowKeys)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>Delete</Button>}
-          {!(getAllUsers.length === 0) && <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>+ Add</Button>}
+          {!(getAllUsers.length === 0) && <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>+ Add Admins</Button>}
         </div>
       </Col>
       {
@@ -221,21 +204,17 @@ const Admins = (props) => {
       :
       // <div className='TableStyle'>
       <Table
-      rowSelection={rowSelection}
       columns={columns}
       dataSource={getAllUsers}
       pagination={{
         current: currentPage,
         pageSize: pageSize,
-        total: totalResults,
-        onChange: (page, pageSize) => handleTableChange({ current: page, pageSize }),
+        total: totalResults
       }}
-      scroll={{ y: "calc(100vh - 250px)" }}
       onChange={handleTableChange}
       className="fixed-pagination"
     />
     
-    // </div>
     
  : <Skeleton active/>
       }
@@ -262,39 +241,27 @@ const Admins = (props) => {
                     name={`email_${item.id}`}
                     label={<div style={{ color: "#BBBBBB" }}>Email</div>}
                     rules={[{ required: true, type: 'email', message: 'Please enter a valid email' }]}
+                    style={{ flex: 1 }}
                   >
-                    <Input style={{ width: "150px" }} placeholder="Enter Email" />
+                    <Input  placeholder="Enter Email" />
                   </Form.Item>
-                  {/* <Form.Item
-                    name={`driverN${item.id}`}
-                    label={<div style={{ color: "#BBBBBB" }}>Driver No.</div>}
-                    rules={[{ required: true, message: 'Please enter a Driver Number' }]}
-                  >
-                   <Input style={{ width: "150px" }} placeholder="Enter Driver Number" />
-                  </Form.Item>
-                  <Form.Item
-                    name={`truckN${item.id}`}
-                    label={<div style={{ color: "#BBBBBB" }}>Truck No.</div>}
-                    rules={[{ required: true, message: 'Please enter a Truck Number' }]}
-                  >
-                   <Input style={{ width: "150px" }} placeholder="Enter Truck Number" />
-                  </Form.Item> */}
                   <Form.Item
                     name={`name_${item.id}`}
                     label={<div style={{ color: "#BBBBBB" }}>Name</div>}
                     rules={[{ required: true, message: 'Please enter name' }]}
+                    style={{ flex: 1 }}
                   >
-                    <Input style={{ width: "150px" }} placeholder="Enter Name" />
+                    <Input  placeholder="Enter Name" />
                   </Form.Item>
                   <Form.Item
-                    name={`role_${item.id}`}
-                    label={<div style={{ color: "#BBBBBB" }}>Role</div>}
-                    rules={[{ required: true, message: 'Please enter role' }]}
-                    initialValue='driver'
+                    name={`phone_${item.id}`}
+                    label={<div style={{ color: "#BBBBBB" }}>Phone</div>}
+                    rules={[{ required: true, message: 'Please enter phone number' }]}
+                    style={{ flex: 1 }}
                   >
-                    <Input style={{ width: "150px" }} placeholder="Enter Role" />
+                    <Input  placeholder="Enter phone number" />
                   </Form.Item>
-                  <div style={{ width: "40px", height: "50px", cursor: "pointer" }} onClick={() => handleDeleteFormLayout(item.id)}>
+                  <div style={{ fontSize: '24px', cursor: "pointer", marginBottom: '25px' }} onClick={() => handleDeleteFormLayout(item.id)}>
                     <DeleteOutlined />
                   </div>
                 </div>
@@ -330,8 +297,6 @@ const Admins = (props) => {
             <p><strong>Name:</strong> {selectedUser.firstName} {selectedUser.lastName}</p>
             <p><strong>Email:</strong> {selectedUser.email}</p>
             <p><strong>Role:</strong> {selectedUser.role}</p>
-            {selectedUser.driverN && <p><strong>Driver No.:</strong> {selectedUser.driverN}</p>}
-            {selectedUser.truckN && <p><strong>Truck No.:</strong> {selectedUser.truckN}</p>}
           </div>
         )}
       </Modal>

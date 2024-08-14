@@ -14,7 +14,8 @@ import Companies from './components/Companies';
 import Health from './components/Health';
 import Callback from './components/Callback';
 import Documents from './components/Documents';
-import ResetLogin from './components/ResetLogin'; 
+import ResetPassword from './components/ResetPassword'; 
+import ForgotPassword from './components/ForgotPassword';
 
 const App = () => {
   return (
@@ -36,7 +37,8 @@ const Content = () => {
       <div className="content">
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/resetLogin" element={<ResetLogin />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/callback" element={<Callback  />} />
           <Route path="/home" element={<Home class="padding-4rem" role={role} accessToken={accessToken} />} />
           <Route path="/driver" element={<Driver class="padding-4rem" accessToken={accessToken}/>} />
