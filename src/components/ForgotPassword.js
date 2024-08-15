@@ -1,50 +1,32 @@
-import React, { useState, useContext } from 'react';
-import axios from 'axios';
+/* eslint-disable jsx-a11y/anchor-is-valid */
+import React, { useState } from 'react';
 import { message } from 'antd';
-import { AuthContext } from '../contexts/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './Login.css'; // Assuming you have styles for login page
 import facebookicon from '../assets/facebook.png';
 import emailicon from '../assets/email.png';
 import healmefitlogo from '../assets/HMFjpg.jpg';
 import checkmarkicon from '../assets/ResetLogin.png'; // Assuming you have the checkmark icon
+import { post } from '../utility/httpService';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const { login } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const [success , setSuccess] = useState(false)
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setErrorMessage(''); // Clear any previous error messages
-
-    try {
-      const response = await axios.post('http://44.211.250.6/v1/auth/login', {
-        email,
-        password,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.status === 200) {
-        const { user, tokens } = response.data;
-        if (user.role === 'manager' || user.role === 'driver' || user.role === 'admin') {
-          message.success("Successfully Logged In");
-          login(user, tokens.access.token);
-          navigate('/home');
-        } else {
-          message.error('Not Exist');
-        }
-      } else {
-        message.error('Not Exist');
+    setErrorMessage('');
+   
+   await post(`/auth/forgot-password`, {
+      email
+    }).then((res) => {
+      if(res.status === 204){
+        setSuccess(true)
+        message.success('Email Sent Successfully.')
       }
-    } catch (error) {
-      console.error('Error during login:', error);
-      message.error('Error during login');
-    }
+    })
+   
   };
 
   return (
@@ -61,23 +43,29 @@ const ForgotPassword = () => {
         <div className="login-logo">
           <img src={healmefitlogo} alt="Heal Me Fit Logo" />
         </div>
+       {success ? <>
+       <h2 style={{color: 'green', marginBottom: 10}}>Email Sent Successfully.</h2>
+       <h4>Please check your email to reset the new password.</h4>
+       </> : 
+       <>
         <h4>Forgot Password</h4>
         <form onSubmit={handleSubmit}>
           <div className="input-box">
           <input
               type="email"
               required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Email Address"
             />
 
           </div>
           {errorMessage && <p className="error-message">{errorMessage}</p>}
           <div className="input-box">
-            <input type="submit" value="Continue" />
+            <input type="submit" value="Continue"  />
           </div>
         </form>
+       </>}
         <div className="login-footer">
           <Link to="/">Login in </Link>
         </div>
