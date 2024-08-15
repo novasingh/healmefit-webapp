@@ -2,7 +2,7 @@ import axios from 'axios';
 
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8000/v1', 
+  baseURL: 'https://api.healmefit.io/v1', 
 });
 
 axiosInstance.interceptors.request.use(
