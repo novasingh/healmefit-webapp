@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './Header';
 import '../style.css';
-import { DeleteOutlined } from '@ant-design/icons';
-import { Col, Button, Modal, Form, Input, message, Table, Skeleton } from 'antd';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { Col, Button, Modal, Form, Input, message, Table, Skeleton, Select } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import { get, post, remove } from "../utility/httpService";
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
 import { useNavigate } from 'react-router-dom';
+
+const { Option } = Select;
 
 const Driver = (props) => {
   const navigate = useNavigate();
@@ -15,11 +17,15 @@ const Driver = (props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalResults, setTotalResults] = useState(0);
-  const [formLayout, setFormLayout] = useState([{ id: uuidv4(), email: '', truckN: '', driverN: '', name: '', role: 'driver' }]);
+  const [formLayout, setFormLayout] = useState([{ id: uuidv4(), email: '', truckN: '', driverN: '', name: '', company: '', role: 'driver' }]);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [viewModalVisible, setViewModalVisible] = useState(false);
+
+  // New state for companies and selected company
+  const [companies, setCompanies] = useState([]);
+  const [selectedCompany, setSelectedCompany] = useState(null);
 
   const columns = [
     {
@@ -35,6 +41,14 @@ const Driver = (props) => {
     { title: 'Driver N', dataIndex: 'driverN', render: (_, record) => record.driverN || '-' },
     { title: 'Truck N', dataIndex: 'truckN', render: (_, record) => record.truckN || '-' },
     {
+      title: 'Company',
+      dataIndex: 'company',
+      render: (_, record) => {
+        const company = companies.find(company => company.id === record.companyId);
+        return company ? company.name : 'N/A';
+      },
+    },
+    {
       title: 'Action',
       dataIndex: 'action',
       render: (_, record) => (
@@ -43,18 +57,36 @@ const Driver = (props) => {
     },
   ];
 
+  // Fetch list of companies
+  const fetchCompanies = async () => {
+    try {
+      const response = await get('/companies');
+      setCompanies(response?.data || []);
+    } catch (error) {
+      message.error('An error occurred while fetching companies.');
+    }
+  };
+
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await get('/users?role=driver', { page: currentPage, limit: pageSize });
-      setUsers(response?.data?.results?.map(user => ({ ...user, key: user.id })) || []);
+      const response = await get('/users?role=driver', {
+        page: currentPage,
+        limit: pageSize,
+        company: selectedCompany,  // Include the selected company
+      });
+      setUsers(response?.data?.results?.map(user => ({
+        ...user,
+        key: user.id,
+        companyId: user.companyId  // Assuming users have a companyId field
+      })) || []);
       setTotalResults(response?.totalResults || 0);
     } catch (error) {
       message.error('An error occurred while fetching users. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, selectedCompany]);
 
   const handleDeleteUser = async(id) => {
     await remove(`/users/${id}`).then((response) => {
@@ -67,12 +99,15 @@ const Driver = (props) => {
     })
   }
 
-
   useEffect(() => {
     if(currentPage && pageSize){
       fetchUsers();
     }
   }, [currentPage, fetchUsers, pageSize]);
+
+  useEffect(() => {
+    fetchCompanies();  // Fetch companies on component mount
+  }, []);
 
   const handleTableChange = (pagination) => {
     setCurrentPage(pagination.current);
@@ -80,7 +115,7 @@ const Driver = (props) => {
   };
 
   const addFormLayout = () => {
-    setFormLayout([...formLayout, { id: uuidv4(), email: '', truckN: '', driverN: '', name: '', role: 'driver' }]);
+    setFormLayout([...formLayout, { id: uuidv4(), email: '', truckN: '', driverN: '', name: '', company: '', role: 'driver' }]);
   };
 
   const handleDeleteFormLayout = (id) => {
@@ -89,7 +124,7 @@ const Driver = (props) => {
 
   const handleFormChange = () => {
     const allFieldsFilled = formLayout.every(item => {
-      const values = form.getFieldsValue([`email_${item.id}`, `name_${item.id}`, `truckN${item.id}`, `driverN${item.id}`]);
+      const values = form.getFieldsValue([`email_${item.id}`, `name_${item.id}`, `truckN${item.id}`, `driverN${item.id}`, `company_${item.id}`]);
       return Object.values(values).every(value => !!value);
     });
     formLayout.length > 0 && form.setFieldsValue({ isAddMoreDisabled: !allFieldsFilled, isAddDriverDisabled: !allFieldsFilled });
@@ -104,6 +139,7 @@ const Driver = (props) => {
           truckN: values[`truckN${item.id}`],
           driverN: values[`driverN${item.id}`],
           name: values[`name_${item.id}`],
+          companyId: values[`company_${item.id}`],  // Use companyId to link the company
           role: 'driver',
         }))
       );
@@ -112,7 +148,7 @@ const Driver = (props) => {
         message.success('Drivers added successfully!');
         setAddModalVisible(false);
         form.resetFields();
-        setFormLayout([{ id: uuidv4(), email: '', truckN: '', driverN: '', name: '', role: 'driver' }]);
+        setFormLayout([{ id: uuidv4(), email: '', truckN: '', driverN: '', name: '', company: '', role: 'driver' }]);
         fetchUsers()
       }else {
         message.error('One or more requests failed.');
@@ -131,6 +167,23 @@ const Driver = (props) => {
         {users.length > 0 && (
           <Button onClick={() => setAddModalVisible(true)} style={{ background: "#1FA6E0", height: "40px", color: "#fff" }}>+ Add Drivers</Button>
         )}
+      </Col>
+      <Col style={{ padding: "10px 0" }}>
+        <Select
+          placeholder="Select Company"
+          style={{ width: 250 }}
+          onChange={(value) => {
+            setSelectedCompany(value === "none" ? null : value);
+            setCurrentPage(1); // Reset to first page
+          }}
+        >
+          <Select.Option value="none">None</Select.Option>
+          {companies.map(company => (
+            <Select.Option key={company.id} value={company.id}>
+              {company.name}
+            </Select.Option>
+          ))}
+        </Select>
       </Col>
       {loading ? (
         <Skeleton active />
@@ -153,77 +206,76 @@ const Driver = (props) => {
       )}
       <Modal
         title="Add Drivers"
-        open={addModalVisible}
-        width={900}
+        visible={addModalVisible}
         onCancel={() => setAddModalVisible(false)}
-        destroyOnClose
-        centered
-        footer={null}
+        onOk={handleSubmit}
+        okButtonProps={{ disabled: form.getFieldValue('isAddDriverDisabled') }}
+        cancelButtonProps={{ disabled: form.getFieldValue('isAddDriverDisabled') }}
       >
-        <Form form={form} layout="vertical" onValuesChange={handleFormChange} onFinish={handleSubmit}>
+        <Form
+          form={form}
+          onFieldsChange={handleFormChange}
+        >
           {formLayout.map(item => (
-            <div key={item.id} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-               <Form.Item
-                name={`name_${item.id}`}
-                label="Name"
-                rules={[{ required: true, message: 'Please enter name' }]}
-              >
-                <Input placeholder="Enter Name" />
-              </Form.Item>
-              <Form.Item
-                name={`email_${item.id}`}
-                label="Email"
-                rules={[{ required: true, type: 'email', message: 'Please enter a valid email' }]}
-              >
-                <Input placeholder="Enter Email" />
-              </Form.Item>
-              <Form.Item
-                name={`driverN${item.id}`}
-                label="Driver No."
-                rules={[{ required: true, message: 'Please enter a Driver Number' }]}
-              >
-                <Input placeholder="Enter Driver Number" />
-              </Form.Item>
-              <Form.Item
-                name={`truckN${item.id}`}
-                label="Truck No."
-                rules={[{ required: true, message: 'Please enter a Truck Number' }]}
-              >
-                <Input placeholder="Enter Truck Number" />
-              </Form.Item>
-              <DeleteOutlined onClick={() => handleDeleteFormLayout(item.id)} style={{ fontSize: '24px', cursor: 'pointer' }} />
-            </div>
+            <Form.Item key={item.id}>
+              <div style={{ marginBottom: "20px", padding: "15px", border: "1px solid #E6E6E6", borderRadius: "8px" }}>
+                <Form.Item
+                  name={`email_${item.id}`}
+                  label="Email"
+                  rules={[{ required: true, message: 'Please input email!' }]}
+                >
+                  <Input placeholder="Email" />
+                </Form.Item>
+                <Form.Item
+                  name={`name_${item.id}`}
+                  label="Name"
+                  rules={[{ required: true, message: 'Please input name!' }]}
+                >
+                  <Input placeholder="Name" />
+                </Form.Item>
+                <Form.Item
+                  name={`truckN${item.id}`}
+                  label="Truck N"
+                  rules={[{ required: true, message: 'Please input truck number!' }]}
+                >
+                  <Input placeholder="Truck Number" />
+                </Form.Item>
+                <Form.Item
+                  name={`driverN${item.id}`}
+                  label="Driver N"
+                  rules={[{ required: true, message: 'Please input driver number!' }]}
+                >
+                  <Input placeholder="Driver Number" />
+                </Form.Item>
+                <Form.Item
+                  name={`company_${item.id}`}
+                  label="Company"
+                  rules={[{ required: true, message: 'Please select company!' }]}
+                >
+                  <Select placeholder="Select Company">
+                    {companies.map(company => (
+                      <Option key={company.id} value={company.id}>
+                        {company.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Button type="link" danger onClick={() => handleDeleteFormLayout(item.id)}>
+                  <DeleteOutlined /> Delete
+                </Button>
+              </div>
+            </Form.Item>
           ))}
-          
-          <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-          <Button onClick={addFormLayout} style={{ marginBottom: "10px", width: "265px" }}>
+          <Button
+            type="dashed"
+            onClick={addFormLayout}
+            style={{ width: '100%' }}
+            icon={<PlusOutlined />}
+            disabled={form.getFieldValue('isAddMoreDisabled')}
+          >
             Add More
           </Button>
-          <Button
-            htmlType="submit"
-            style={{ background: "#1FA6E0", width: "265px", color: "#fff" }}
-          >
-            Add Driver
-          </Button>
-
-          </div>
         </Form>
-      </Modal>
-      <Modal
-        title="User Details"
-        open={viewModalVisible}
-        onCancel={() => setViewModalVisible(false)}
-        footer={null}
-      >
-        {selectedUser && (
-          <div>
-            <p><strong>Name:</strong> {selectedUser.firstName} {selectedUser.lastName}</p>
-            <p><strong>Email:</strong> {selectedUser.email}</p>
-            <p><strong>Role:</strong> {selectedUser.role}</p>
-            {selectedUser.driverN && <p><strong>Driver No.:</strong> {selectedUser.driverN}</p>}
-            {selectedUser.truckN && <p><strong>Truck No.:</strong> {selectedUser.truckN}</p>}
-          </div>
-        )}
       </Modal>
     </div>
   );

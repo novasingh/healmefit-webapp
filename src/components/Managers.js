@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import { DeleteOutlined } from '@ant-design/icons';
-import { Col, Button, Modal, Form, Input, message, Table, Skeleton } from 'antd';
+import { Col, Button, Modal, Form, Input, message, Table, Skeleton, Select } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import { get, post, remove } from "../utility/httpService";
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
@@ -22,7 +22,20 @@ const Managers = (props) => {
   const [isAddManagerDisabled, setIsAddManagerDisabled] = useState(true);
   
   const token = sessionStorage.getItem('token');
+  const [companies, setCompanies] = useState([]); // Changed Companies to companies
 
+  const fetchCompanies = async () => {
+    try {
+      const response = await get('/companies'); // Adjust the endpoint as needed
+      setCompanies(response.data);
+    } catch (error) {
+      message.error('An error occurred while fetching companies. Please try again.');
+    }
+  };
+  
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
   const columns = [
     {
       title: 'Name',
@@ -78,7 +91,7 @@ const Managers = (props) => {
 
   const addFormLayout = () => {
     updateFormValues();
-    setFormLayout([...formLayout, { id: uuidv4(), email: '', phone: '', name: '', role: 'manager' }]);
+    setFormLayout([...formLayout, { id: uuidv4(), email: '', phone: '', name: '', companyId: '', role: 'manager' }]);
   };
 
   const updateFormValues = () => {
@@ -119,6 +132,7 @@ const Managers = (props) => {
           email: values[`email_${id}`],
           phone: values[`phone_${id}`],
           name: values[`name_${id}`],
+          companyId: values[`company_${id}`],
           role: 'manager',
         });
       });
@@ -155,6 +169,7 @@ const Managers = (props) => {
     setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
   };
+  
 
   return (
     <div className={props.class} style={{ height: "100%" }}>
@@ -191,6 +206,7 @@ const Managers = (props) => {
         handleDeleteFormLayout={handleDeleteFormLayout}
         addFormLayout={addFormLayout}
         onCancel={() => setAddModalVisible(false)}
+        companies={companies} // Pass companies to AddManagerModal
       />
       {selectedUser && (
         <ManagerDetailsModal
@@ -213,7 +229,7 @@ const EmptyState = ({ onClick }) => (
   </Col>
 );
 
-const AddManagerModal = ({ visible, form, formLayout, isAddMoreDisabled, isAddManagerDisabled, handleChange, handleSubmit, handleDeleteFormLayout, addFormLayout, onCancel }) => (
+const AddManagerModal = ({ visible, form, formLayout, isAddMoreDisabled, isAddManagerDisabled, handleChange, handleSubmit, handleDeleteFormLayout, addFormLayout, onCancel, companies }) => (
   <Modal
     title='Add Manager'
     open={visible}
@@ -237,8 +253,17 @@ const AddManagerModal = ({ visible, form, formLayout, isAddMoreDisabled, isAddMa
               <Form.Item name={`phone_${item.id}`} rules={[{ required: true, message: 'Please input the phone number!' }]} style={{ flex: 1 }}>
                 <Input placeholder='Phone' />
               </Form.Item>
-              <div style={{fontSize: '24px', cursor: 'pointer', marginBottom: '20px'}}>
-              <DeleteOutlined onClick={() => handleDeleteFormLayout(item.id)} />
+              <Form.Item name={`company_${item.id}`} rules={[{ required: true, message: 'Please select a company!' }]} style={{ flex: 1 }}>
+                <Select placeholder='Select Company'>
+                  {companies.map(company => (
+                    <Select.Option key={company.id} value={company.id}>
+                      {company.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <div style={{ fontSize: '24px', cursor: 'pointer', marginBottom: '20px' }}>
+                <DeleteOutlined onClick={() => handleDeleteFormLayout(item.id)} />
               </div>
             </div>
           ))}
@@ -249,6 +274,7 @@ const AddManagerModal = ({ visible, form, formLayout, isAddMoreDisabled, isAddMa
     </div>
   </Modal>
 );
+
 
 const ManagerDetailsModal = ({ visible, user, onCancel }) => (
   <Modal
