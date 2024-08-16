@@ -54,7 +54,7 @@ const Managers = (props) => {
     {
       title: 'Company',
       dataIndex: 'company',
-      render: (_, record) => record?.company?.name || '-',
+      render: (_, record) => record?.company?.name ?  record?.company?.name : '-',
     },
     {
       title: 'Action',
@@ -185,7 +185,14 @@ const Managers = (props) => {
           <Table
             columns={columns}
             dataSource={managers}
-            pagination={{ current: currentPage, pageSize, total: totalResults }}
+            pagination={{
+              current: currentPage,
+              pageSize: pageSize,
+              onChange: (page, pageSize) => {
+                setCurrentPage(page);
+                setPageSize(pageSize)
+              },
+            }}
             onChange={handleTableChange}
             className="fixed-pagination"
           />

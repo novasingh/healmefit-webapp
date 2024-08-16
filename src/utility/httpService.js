@@ -11,9 +11,9 @@ const get = async (url, params = {}) => {
   }
 };
 
-const post = async (url, data) => {
+const post = async (url, data, config = {}) => {
   try {
-    const response = await axiosInstance.post(url, data);
+    const response = await axiosInstance.post(url, data, config);
     return response
   } catch (error) {
     message.error(error?.response?.data?.message)

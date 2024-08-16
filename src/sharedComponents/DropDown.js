@@ -6,10 +6,8 @@ import { post } from '../utility/httpService';
 const ThreeDotsDropdown = ({ onEdit, onDelete, emailId, driverName, role }) => {
   const [isInviteModalVisible, setIsInviteModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
-  const [currentRole, setCurrentRole] = useState(null);
 
   const handleSendInvite = () => {
     setIsInviteModalVisible(true);
@@ -47,57 +45,10 @@ const ThreeDotsDropdown = ({ onEdit, onDelete, emailId, driverName, role }) => {
     setIsDeleteModalVisible(false);
   };
 
-  const handleEdit = () => {
-    setCurrentRole(role);
-    setIsEditModalVisible(true);
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditModalVisible(false);
-  };
-
-  const renderEditFields = () => {
-    switch (currentRole) {
-      case 'Driver':
-        return (
-          <>
-            <Input placeholder="Driver Name" defaultValue={driverName} />
-            <Input placeholder="License Number" />
-            {/* Add more driver-specific fields here */}
-          </>
-        );
-      case 'Manager':
-        return (
-          <>
-            <Input placeholder="Manager Name" />
-            <Input placeholder="Department" />
-            {/* Add more manager-specific fields here */}
-          </>
-        );
-      case 'Admin':
-        return (
-          <>
-            <Input placeholder="Admin Name" />
-            <Input placeholder="Permissions" />
-            {/* Add more admin-specific fields here */}
-          </>
-        );
-      case 'Company':
-        return (
-          <>
-            <Input placeholder="Company Name" />
-            <Input placeholder="Company Address" />
-            {/* Add more company-specific fields here */}
-          </>
-        );
-      default:
-        return null;
-    }
-  };
 
   const menu = (
     <Menu>
-      <Menu.Item key="edit" onClick={handleEdit}>
+      <Menu.Item key="edit" onClick={() => onEdit()}>
         Edit
       </Menu.Item>
       <Menu.Item key="delete" onClick={showDeleteConfirm}>
@@ -152,24 +103,6 @@ const ThreeDotsDropdown = ({ onEdit, onDelete, emailId, driverName, role }) => {
             marginTop: '10px',
           }}
         />
-      </Modal>
-
-      {/* Edit Modal */}
-      <Modal
-        title={`Edit ${currentRole}`}
-        visible={isEditModalVisible}
-        onCancel={handleCancelEdit}
-        centered
-        footer={[
-          <Button key="cancel" onClick={handleCancelEdit}>
-            Cancel
-          </Button>,
-          <Button key="save" type="primary" onClick={() => message.success('Saved successfully!')}>
-            Save
-          </Button>,
-        ]}
-      >
-        {renderEditFields()}
       </Modal>
 
       {/* Delete Confirmation Modal */}

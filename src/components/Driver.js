@@ -44,8 +44,7 @@ const Driver = (props) => {
       title: 'Company',
       dataIndex: 'company',
       render: (_, record) => {
-        const company = companies.find(company => company.id === record.companyId);
-        return company ? company.name : 'N/A';
+        return record?.company?.name ? record?.company?.name : '-';
       },
     },
     {
@@ -139,7 +138,7 @@ const Driver = (props) => {
           truckN: values[`truckN${item.id}`],
           driverN: values[`driverN${item.id}`],
           name: values[`name_${item.id}`],
-          companyId: values[`company_${item.id}`],  // Use companyId to link the company
+          company: values[`company_${item.id}`],  // Use companyId to link the company
           role: 'driver',
         }))
       );
@@ -164,11 +163,8 @@ const Driver = (props) => {
       <Header />
       <Col style={{ paddingTop: "2%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600", marginBottom: '10px' }}>Drivers</h2>
-        {users.length > 0 && (
-          <Button onClick={() => setAddModalVisible(true)} style={{ background: "#1FA6E0", height: "40px", color: "#fff" }}>+ Add Drivers</Button>
-        )}
-      </Col>
-      <Col style={{ padding: "10px 0" }}>
+        <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
+        <Col>
         <Select
           placeholder="Select Company"
           style={{ width: 250 }}
@@ -185,6 +181,13 @@ const Driver = (props) => {
           ))}
         </Select>
       </Col>
+      {users.length > 0 && (
+          <Button onClick={() => setAddModalVisible(true)} style={{ background: "#1FA6E0", height: "40px", color: "#fff" }}>+ Add Drivers</Button>
+        )}
+        </div>
+       
+      </Col>
+     
       {loading ? (
         <Skeleton active />
       ) : users.length === 0 ? (

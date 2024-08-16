@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
-import { Col, Button, Modal, Form, Input, Upload, message, Table, Skeleton } from 'antd';
+import { Col, Button, Modal, Form, Input, Upload, message, Table, Skeleton, Image, Select, Spin } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { get, post, remove, updatePatch } from "../utility/httpService"; // Make sure to implement these methods
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
+import axios from 'axios';
 
 const Companies = (props) => {
   const [form] = Form.useForm();
@@ -15,6 +16,9 @@ const Companies = (props) => {
   const [loading, setLoading] = useState(true);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [editCompany, setEditCompany] = useState(null);
+  const [uploadImg , setUploadImg] = useState("");
+  const [managers, setManagers] = useState([])
+  const [imageLoading, setImageLoading] = useState(false);
 
   const columns = [
     {
@@ -27,7 +31,7 @@ const Companies = (props) => {
       dataIndex: 'logo',
       key: 'logo',
       render: (text) => (
-        <img src={text} alt="Company Logo" style={{ width: 50, height: 50 }} />
+       text === 'N/A' ? '-' : <img src={text} alt="Company Logo" style={{ width: 50, height: 50 }} />
       ),
     },
     {
@@ -39,64 +43,48 @@ const Companies = (props) => {
       title: 'Company Manager',
       dataIndex: 'manager',
       key: 'manager',
+      render: (text) => text?.firstName ? text?.firstName+' '+text?.lastName : '-',
     },
     {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
         <ThreeDotsDropdown
-          onDelete={() => handleDelete(record.key)}
+          onDelete={() => handleDelete(record.id)}
           onEdit={() => handleEdit(record)}
         />
       ),
     },
   ];
 
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (selectedRowKeys) => {
-      setSelectedRowKeys(selectedRowKeys);
-    },
-  };
-
-  const handleLogoUpload = async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await post('/companies/upload-logo', formData); // Adjust the API endpoint as needed
-      return response.data.url; // Assuming the response contains the uploaded file URL
-    } catch (error) {
-      message.error('Failed to upload logo');
-      throw error;
-    }
-  };
+  // const rowSelection = {
+  //   selectedRowKeys,
+  //   onChange: (selectedRowKeys) => {
+  //     setSelectedRowKeys(selectedRowKeys);
+  //   },
+  // };
 
   const handleUpdate = async () => {
     try {
       const values = await form.validateFields();
-      
-      // Check if logo field exists and is valid
-      let logoUrl = editCompany.logo;
-      if (values.logo && values.logo.file && values.logo.file.originFileObj) {
-        logoUrl = await handleLogoUpload(values.logo.file.originFileObj);
+  
+      const updateData = {
+        name: values?.name,
+        logo: uploadImg ? uploadImg : 'N/A',  
+        type: values?.type,
+      };
+
+      if(values.manager){
+        updateData.manager = values?.manager
       }
   
-      const updatedCompanyData = {
-        name: values.name,
-        logo: logoUrl ? logoUrl : 'N/A',  // Ensure logo is not empty
-        type: values.type,
-        manager: values.manager,
-      };
-  
-      await updatePatch(`/companies/${editCompany.key}`, updatedCompanyData);
+      await updatePatch(`/companies/${editCompany.id}`, updateData);
       message.success('Company updated successfully!');
       fetchUsers(currentPage, pageSize);
       setEditModal(false);
       form.resetFields();
-      setEditCompany(null);
+      setUploadImg("")
     } catch (error) {
-      console.error('Error:', error);
       if (error.response && error.response.data) {
         message.error(`Error: ${error.response.data.message}`);
       } else {
@@ -108,26 +96,23 @@ const Companies = (props) => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      
-      // Check if logo field exists and is valid
-      let logoUrl = '';
-      // if (values.logo && values.logo.file && values.logo.file.originFileObj) {
-      //   logoUrl = await handleLogoUpload(values.logo.file.originFileObj);
-      // }
   
       const newCompanyData = {
         name: values.name,
-        logo: logoUrl ? logoUrl : 'N/A',  // Ensure logo is not empty
+        logo: uploadImg ? uploadImg : 'N/A',  
         type: values.type,
-        // manager: values.manager,
       };
+
+      if(values.manager){
+        newCompanyData.manager = values.manager
+      }
   
-     const response = await post('/companies', newCompanyData);  // Adjust the API endpoint as needed
-     console.log(response)
+     await post('/companies', newCompanyData);
       message.success('Company added successfully!');
       fetchUsers(currentPage, pageSize);
       setAddModal(false);
       form.resetFields();
+      setUploadImg("")
     } catch (error) {
       console.error('Error:', error);
       if (error.response && error.response.data) {
@@ -149,32 +134,17 @@ const Companies = (props) => {
     }
   };
 
-  const handleMultiRowDelete = async () => {
-    try {
-      const deletePromises = selectedRowKeys.map((companyId) =>
-        remove(`/companies/${companyId}`)
-      );
-      await Promise.all(deletePromises);
-      message.success('Selected companies deleted successfully');
-      fetchUsers(currentPage, pageSize);
-      setSelectedRowKeys([]);
-    } catch (error) {
-      console.error('Error deleting companies:', error);
-      message.error('An error occurred while deleting companies. Please try again.');
-    }
-  };
-  
   const handleEdit = (company) => {
-    setEditCompany(company);
     form.setFieldsValue({
-      name: company.name,
-      type: company.type,
-      manager: company.manager,
-      logo: company.logo ? company.logo  : 'N/A'
+      name: company?.name,
+      type: company?.type,
+      manager: company?.manager?.id,
     });
+    setEditCompany(company)
+    setUploadImg(company.logo !== 'N/A' ? company?.logo  : '')
     setEditModal(true);
   };
-  console.log(totalResults)
+
   const fetchUsers = async (page = 1, limit = 10) => {
     try {
       const response = await get('/companies', { page, limit });
@@ -193,10 +163,45 @@ const Companies = (props) => {
     fetchUsers(currentPage, pageSize);
   }, [currentPage, pageSize]);
 
-  const handleTableChange = (pagination) => {
-    setCurrentPage(pagination.current);
-    setPageSize(pagination.pageSize);
+
+  const customRequest = ({ file, onSuccess, onError }) => {
+    const formData = new FormData();
+    formData.append('logo', file);
+    setImageLoading(true)
+    axios.post('https://api.healmefit.io/v1/companies/upload-logo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data', 
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+      },
+    })
+    .then(response => {
+      setUploadImg(response?.data?.logoPath)
+      onSuccess(response?.data?.logoPath);
+      message.success(`${file.name} file uploaded successfully.`);
+      setImageLoading(false)
+    })
+    .catch(error => {
+      onError(error);
+      setImageLoading(false)
+      message.error(`${file.name} file upload failed.`);
+    });
   };
+
+    // Fetch list of companies
+    const getManagersList = async () => {
+      try {
+        const response = await get('/users?role=manager');
+        console.log(response)
+        setManagers(response?.data?.results || []);
+      } catch (error) {
+        message.error('An error occurred while fetching companies.');
+      }
+    };
+
+    useEffect(() => {
+      getManagersList()
+    },[])
+  
 
   return (
     <div className={props.class} style={{ height: "100%" }}>
@@ -219,13 +224,16 @@ const Companies = (props) => {
       </Col>
       :
       <Table
-        rowSelection={rowSelection}
+        // rowSelection={rowSelection}
         columns={columns}
         dataSource={totalResults}
         pagination={{
             current: currentPage,
             pageSize: pageSize,
-            total: totalResults.length,
+            onChange: (page, pageSize) => {
+              setCurrentPage(page);
+              setPageSize(pageSize)
+            },
         }}
       />
       :
@@ -235,7 +243,7 @@ const Companies = (props) => {
         title='Add Company'
         open={AddModal}
         width={600}
-        onCancel={() => setAddModal(false)}
+        onCancel={() => { setAddModal(false); form.resetFields(); }}
         destroyOnClose
         centered
         footer={null}
@@ -258,22 +266,31 @@ const Companies = (props) => {
               label="Company Logo"
               valuePropName="file"
               getValueFromEvent={({ file }) => file}
-              extra="Upload a logo for the company"
             >
-              <Upload
+               {imageLoading && (
+                <div style={{ marginTop: 16 }}>
+                  <Spin tip="Uploading..." /> {/* Ant Design Spin component for loading */}
+                </div>
+              )}
+
+             {uploadImg === ""  ? <Upload
                 name="logo"
-                beforeUpload={() => false}
-                customRequest={({ file, onSuccess }) => {
-                  handleLogoUpload(file).then(url => {
-                    form.setFieldsValue({ logo: url });
-                    onSuccess(null, file);
-                  }).catch(err => console.error(err));
-                }}
+                customRequest={customRequest}
                 showUploadList={false}
                 accept="image/*"
               >
                 <Button icon={<UploadOutlined />}>Upload</Button>
-              </Upload>
+              </Upload> : (
+                <div style={{ marginTop: 16 }}>
+                  <Image
+                    width={150}
+                    height={150}
+                    src={uploadImg}
+                    alt="Uploaded Image Preview"
+                  />
+                  <p style={{cursor: 'poiinter'}} onClick={() => setUploadImg("")}>Click here to remove the Image</p>
+                </div>
+              )}
             </Form.Item>
             <Form.Item
               name="type"
@@ -285,9 +302,19 @@ const Companies = (props) => {
             <Form.Item
               name="manager"
               label="Manager"
-              rules={[{ required: false, message: 'Please input the manager!' }]}
+              rules={[{ required: false, message: 'Select input the manager!' }]}
             >
-              <Input />
+              <Select
+                  name={"manager"}
+                  placeholder="Select Manager"
+                >
+                  <Select.Option value="">None</Select.Option>
+                  {managers?.map(obj => (
+                    <Select.Option key={obj.id} value={obj.id}>
+                      {obj?.firstName+' '+obj?.lastName}
+                    </Select.Option>
+                  ))}
+                </Select>
             </Form.Item>
             <Form.Item>
               <Button type="primary" htmlType="submit">Add Company</Button>
@@ -324,20 +351,30 @@ const Companies = (props) => {
               getValueFromEvent={({ file }) => file}
               extra="Upload a logo for the company"
             >
-              <Upload
+               {imageLoading && (
+                <div style={{ marginTop: 16 }}>
+                  <Spin tip="Uploading..." /> {/* Ant Design Spin component for loading */}
+                </div>
+              )}
+
+             {uploadImg === ""  ? <Upload
                 name="logo"
-                beforeUpload={() => false}
-                customRequest={({ file, onSuccess }) => {
-                  handleLogoUpload(file).then(url => {
-                    form.setFieldsValue({ logo: url });
-                    onSuccess(null, file);
-                  }).catch(err => console.error(err));
-                }}
+                customRequest={customRequest}
                 showUploadList={false}
                 accept="image/*"
               >
                 <Button icon={<UploadOutlined />}>Upload</Button>
-              </Upload>
+              </Upload> : (
+                <div style={{ marginTop: 16 }}>
+                  <Image
+                    width={150}
+                    height={150}
+                    src={uploadImg}
+                    alt="Uploaded Image Preview"
+                  />
+                  <p style={{cursor: 'poiinter'}} onClick={() => setUploadImg("")}>Click here to remove the Image</p>
+                </div>
+              )}
             </Form.Item>
             <Form.Item
               name="type"
@@ -349,9 +386,19 @@ const Companies = (props) => {
             <Form.Item
               name="manager"
               label="Manager"
-              rules={[{ required: true, message: 'Please input the manager!' }]}
+              rules={[{ required: false, message: 'Select input the manager!' }]}
             >
-              <Input />
+              <Select
+                  name={"manager"}
+                  placeholder="Select Manager"
+                >
+                  <Select.Option value="">None</Select.Option>
+                  {managers?.map(obj => (
+                    <Select.Option key={obj.id} value={obj.id}>
+                      {obj?.firstName+' '+obj?.lastName}
+                    </Select.Option>
+                  ))}
+                </Select>
             </Form.Item>
             <Form.Item>
               <Button type="primary" htmlType="submit">Update Company</Button>
