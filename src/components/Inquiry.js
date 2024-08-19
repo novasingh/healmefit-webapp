@@ -13,6 +13,7 @@ import { get } from "../utility/httpService";
 const Inquiry = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [contactData, setContactData] = useState([])
   const [totalResults, setTotalResults] = useState(0);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
@@ -146,7 +147,15 @@ const Inquiry = () => {
         <Table
           columns={columns}
           dataSource={users}
-          pagination={{ current: currentPage, pageSize, total: totalResults }}
+          pagination={{
+            current: currentPage,
+            pageSize,
+            total: totalResults,
+            onChange: (page, pageSize) => {
+              setCurrentPage(page);
+              setPageSize(pageSize)
+            },
+          }}
           onChange={handleTableChange}
           className="fixed-pagination"
         />

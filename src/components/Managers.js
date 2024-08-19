@@ -369,7 +369,7 @@ const AddManagerModal = ({ visible, form, formLayout, isAddMoreDisabled, isAddMa
               </Form.Item>
               <Form.Item name={`company_${item.id}`} rules={[{ required: true, message: 'Please select a company!' }]} style={{ flex: 1 }}>
                 <Select placeholder='Select Company'>
-                  {companies.map(company => (
+                  {companies?.map(company => (
                     <Select.Option key={company.id} value={company.id}>
                       {company.name}
                     </Select.Option>

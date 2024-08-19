@@ -346,7 +346,11 @@ const Driver = () => {
           pagination={{
             current: currentPage,
             pageSize,
-            total: totalResults
+            total: totalResults,
+            onChange: (page, pageSize) => {
+              setCurrentPage(page);
+              setPageSize(pageSize)
+            },
           }}
           onChange={handleTableChange}
         />

@@ -257,7 +257,11 @@ const Admins = () => {
       pagination={{
         current: currentPage,
         pageSize: pageSize,
-        total: totalResults
+        total: totalResults,
+        onChange: (page, pageSize) => {
+          setCurrentPage(page);
+          setPageSize(pageSize)
+        },
       }}
       onChange={handleTableChange}
       className="fixed-pagination"
