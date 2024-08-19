@@ -1,9 +1,8 @@
 
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { AuthProvider, AuthContext } from './contexts/AuthContext';
-import Sidebar from './components/Sidebar';
+import { AuthProvider } from './contexts/AuthContext';
 import Home from './components/Home';
 import Driver from './components/Driver';
 import Login from './components/Login';
@@ -13,10 +12,13 @@ import Admins from './components/Admins';
 import Companies from './components/Companies';
 import Health from './components/Health';
 import Callback from './components/Callback';
-import Documents from './components/Documents';
+import Documents from './components/Documents'; 
 import ResetPassword from './components/ResetPassword'; 
 import ForgotPassword from './components/ForgotPassword';
 import Inquiry from './components/Inquiry';
+import BlankLayout from './components/layouts/BlankLayout';
+import MasterLayout from './components/layouts/MasterLayout';
+import PageNotFound from './components/PageNotFound';
 
 const App = () => {
   return (
@@ -31,26 +33,24 @@ const App = () => {
 };
 
 const Content = () => {
-  const { isAuthenticated, role, accessToken } = useContext(AuthContext);
   return (
     <>
-      {isAuthenticated && <Sidebar role={role} />}
       <div className="content">
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/callback" element={<Callback  />} />
-          <Route path="/home" element={<Home class="padding-4rem" role={role} accessToken={accessToken} />} />
-          <Route path="/driver" element={<Driver class="padding-4rem" accessToken={accessToken}/>} />
-          <Route path="/health" element={<Health class="padding-4rem" role={role} accessToken={accessToken}/>} />
-          <Route path="/driver/health" element={<Health class="padding-4rem" role={role} accessToken={accessToken}/>} />
-          <Route path="/documents" element={<Documents class="padding-4rem" role={role} accessToken={accessToken}/>} />
-          <Route path="/managers" element={<Managers class="padding-4rem"/>} />
-          <Route path="/admins" element={<Admins class="padding-4rem"/>} />
-          <Route path="/companies" element={<Companies class="padding-4rem"/>} />
-          <Route path="/inquiry" element={<Inquiry class="padding-4rem"/>} />
-
+          <Route path="/" element={<BlankLayout children={<Login />} />} />
+          <Route path="/reset-password" element={<ResetPassword children={<Login />} />} />
+          <Route path="/forgot-password" element={<ForgotPassword children={<Login />} />} />
+          <Route path="/callback" element={<MasterLayout children={<Callback  />} />} />
+          <Route path="/home" element={<MasterLayout children={<Home />} />} />
+          <Route path="/driver" element={<MasterLayout children={<Driver />} />} />
+          <Route path="/health" element={<MasterLayout children={<Health />} />} />
+          <Route path="/driver/health" element={<MasterLayout children={<Health />} />} />
+          <Route path="/documents" element={<MasterLayout children={<Documents />} />} />
+          <Route path="/managers" element={<MasterLayout children={<Managers  />} />} />
+          <Route path="/admins" element={<MasterLayout children={<Admins />} />} />
+          <Route path="/companies" element={<MasterLayout children={<Companies />} />} />
+          <Route path="/inquiry" element={<MasterLayout children={<Inquiry />} />} />
+          <Route path="/*" element={<PageNotFound />} />
         </Routes>
       </div>
     </>

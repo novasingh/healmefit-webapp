@@ -6,12 +6,11 @@ import {
   message,
   Table,
   Skeleton,
-  Button,
   Tooltip,
 } from "antd";
-import { get, remove } from "../utility/httpService";
+import { get } from "../utility/httpService";
 
-const Inquiry = (props) => {
+const Inquiry = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalResults, setTotalResults] = useState(0);
@@ -91,7 +90,7 @@ const Inquiry = (props) => {
   };
 
   return (
-    <div className={props.class} style={{ height: "100%" }}>
+    <div style={{ height: "100%" }}>
       <Header />
       <Col
         style={{

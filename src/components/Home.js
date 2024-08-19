@@ -6,7 +6,7 @@ import moment from "moment";
 import 'react-phone-input-2/lib/style.css';
 import PhoneInput from 'react-phone-input-2';
 
-const Home = (props) => {
+const Home = () => {
   const [form] = Form.useForm();
   const userData = JSON.parse(sessionStorage.getItem('user')) || {}
   const [loading, setLoading] = useState(false);
@@ -101,7 +101,7 @@ const Home = (props) => {
   };
 
   return (
-    <div className={props.class}>
+    <div>
       <Header />
       <WelcomeMessage userData={userData} /> {/* Display the WelcomeMessage */}
       <div

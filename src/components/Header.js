@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useContext } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input, Dropdown, Space, Menu, message } from 'antd';
@@ -7,8 +7,14 @@ import { AuthContext } from '../contexts/AuthContext';
 
 const Header = () => {
   const navigate = useNavigate();
-  const { userData , logout } = useContext(AuthContext);
-  
+  const { userData , logout, isAuthenticated } = useContext(AuthContext);
+
+  useEffect(() => {
+    if(!isAuthenticated){
+      navigate('/')
+    }
+  }, [isAuthenticated, navigate])
+
   const items = [
     {
       label: (
@@ -27,11 +33,11 @@ const Header = () => {
               fontSize: "14px",
             }}
           >
-             {userData?.firstName[0]+" "+userData?.lastName[0]}
+             {userData?.id && userData?.firstName[0]+" "+userData?.lastName[0]}
           </div>
           <div>
             <p style={{ margin: "auto", fontWeight: "600", fontSize: "14px" }}>
-              {userData?.firstName+" "+userData?.lastName}
+              {userData?.id &&  userData?.firstName+" "+userData?.lastName}
             </p>
           </div>
         </div>
@@ -75,7 +81,7 @@ const Header = () => {
     <Menu items={items} />
   );
 
-  return (
+  return isAuthenticated && userData?.id && (
     <div
       style={{
         display: "flex",
@@ -105,7 +111,7 @@ const Header = () => {
                 borderRadius: "50%",
               }}
             >
-              {userData?.firstName[0]+" "+userData?.lastName[0]}
+              {userData?.id &&  userData?.firstName[0]+" "+userData?.lastName[0]}
             </div>
           </Space>
         </a>

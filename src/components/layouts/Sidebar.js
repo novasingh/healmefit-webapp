@@ -1,20 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext} from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/HMFjpg.jpg'; // Replace with your logo path
-
-// Import icons from your chosen library
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // Example using Font Awesome
+import logo from '../../assets/HMFjpg.jpg'; 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faUser, faBuilding, faStethoscope, faFile, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { AuthContext } from '../../contexts/AuthContext';
+
 
 const Sidebar = (props) => {
-  const [role, setRole] = useState('');
-
-  useEffect(() => {
-    const storedRole = sessionStorage.getItem('role');
-    if (storedRole) {
-      setRole(storedRole);
-    }
-  }, []);
+  const { role} = useContext(AuthContext);
 
   const menuItems = {
     manager: [

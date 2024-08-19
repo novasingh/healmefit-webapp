@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
-const Driver = (props) => {
+const Driver = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [updateForm] = Form.useForm();
@@ -285,7 +285,7 @@ const Driver = (props) => {
   };
 
   return (
-    <div className={props.class} style={{ height: "100%" }}>
+    <div style={{ height: "100%" }}>
       <Header />
       <Col
         style={{

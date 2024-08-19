@@ -7,7 +7,7 @@ import { get, post, remove, updatePatch } from "../utility/httpService";
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
 const { Option } = Select;
 
-const Managers = (props) => {
+const Managers = () => {
   const [form] = Form.useForm();
   const [updateForm] = Form.useForm();
   const [addModalVisible, setAddModalVisible] = useState(false);
@@ -220,7 +220,7 @@ const Managers = (props) => {
 
 
   return (
-    <div className={props.class} style={{ height: "100%" }}>
+    <div style={{ height: "100%" }}>
       <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "2%" }}>
         <h2 style={{ fontSize: "25px", color: "#0B5676", fontWeight: "600", marginBottom: '10px' }}>Managers</h2>

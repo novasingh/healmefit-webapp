@@ -44,27 +44,6 @@ const Callback = () => {
       }
     };
 
-    // const storeTokens = async (accessToken, refreshToken) => {
-    //   try {
-    //     const response = await fetch('http://localhost:5000/token', {
-    //       method: 'POST',
-    //       headers: {
-    //         'Content-Type': 'application/json',
-    //       },
-    //       body: JSON.stringify({ accessToken, refreshToken }),
-    //     });
-
-    //     if (!response.ok) {
-    //       throw new Error('Failed to store tokens');
-    //     }
-
-    //     const result = await response.json();
-    //     console.log(result.message);
-    //   } catch (error) {
-    //     console.error('Error storing tokens:', error);
-    //   }
-    // };
-
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     if (code) {

@@ -17,7 +17,7 @@ const { Option } = Select;
 const CLIENT_ID = '23PGQL';
 const CLIENT_SECRET = '4ea0a9b6e679a00b512ee8478e94385d';
 
-const Health = (props) => {
+const Health = () => {
   const [AddModal, setAddModal] = useState(false);
   const navigate = useNavigate();
   const clientId = CLIENT_ID;
@@ -211,7 +211,7 @@ const Health = (props) => {
       <Spin />
     </Col>
   ) : (
-    <div className={props.class} style={{ height: "100%" }}>
+    <div style={{ height: "100%" }}>
       <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h3 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600", marginBottom: '10px', marginTop: "3%" }}>
