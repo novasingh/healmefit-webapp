@@ -72,7 +72,7 @@ const Managers = () => {
       const response = await get('/users?role=manager', { page, limit });
       const usersWithKeys = response.data.results.map(user => ({ ...user, key: user.id }));
       setManagers(usersWithKeys);
-      setTotalResults(response.totalResults);
+      setTotalResults(response.data.totalResults);
       setLoading(false);
     } catch (error) {
       setLoading(false);

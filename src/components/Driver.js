@@ -116,7 +116,7 @@ const Driver = () => {
           companyId: user.companyId, // Assuming users have a companyId field
         })) || []
       );
-      setTotalResults(response?.totalResults || 0);
+      setTotalResults(response?.data?.totalResults || 0);
     } catch (error) {
       message.error(
         "An error occurred while fetching users. Please try again."
@@ -358,92 +358,58 @@ const Driver = () => {
       <Modal
         title="Add Driver"
         visible={addModalVisible}
+        footer={null}
         onCancel={() => setAddModalVisible(false)}
-        onOk={handleSubmit}
-        okText="Add Driver"
-        cancelText="Cancel"
+        width={1084}
+        centered
       >
-        <Form form={form} layout="vertical" onChange={handleFormChange}>
-          {formLayout.map((item) => (
-            <React.Fragment key={item.id}>
-              <Form.Item
-                label="Name"
-                name={`name_${item.id}`}
-                rules={[
-                  { required: true, message: "Please input the name!" },
-                ]}
-              >
-                <Input placeholder="Enter name" />
+        <Form form={form} layout="vertical" onValuesChange={handleFormChange}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+          {formLayout.map((item, i) => (
+            <div key={item.id} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <Form.Item name={`name_${item.id}`} rules={[{ required: true, message: 'Please input the name!' }]} style={{ flex: 1 }}>
+                <Input placeholder='Name' />
               </Form.Item>
-              <Form.Item
-                label="Email"
-                name={`email_${item.id}`}
-                rules={[
-                  {
-                    required: true,
-                    type: "email",
-                    message: "Please input a valid email!",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter email" />
+              <Form.Item name={`email_${item.id}`} rules={[{ required: true, type: 'email', message: 'Please input a valid email!' }]} style={{ flex: 1 }}>
+                <Input placeholder='Email' />
               </Form.Item>
-              <Form.Item
-                label="Driver Number"
-                name={`driverN${item.id}`}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input the driver number!",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter driver number" />
+              <Form.Item name={`truckN${item.id}`} rules={[{ required: true, message: 'Please input the truck number!' }]} style={{ flex: 1 }}>
+                <Input placeholder='Truck Number' />
               </Form.Item>
-              <Form.Item
-                label="Truck Number"
-                name={`truckN${item.id}`}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input the truck number!",
-                  },
-                ]}
-              >
-                <Input placeholder="Enter truck number" />
+              <Form.Item name={`driverN${item.id}`} rules={[{ required: true, message: 'Please input the driver number!' }]} style={{ flex: 1 }}>
+                <Input placeholder='Driver Number' />
               </Form.Item>
-              <Form.Item
-                label="Company"
-                name={`company_${item.id}`}
-                rules={[
-                  { required: true, message: "Please select a company!" },
-                ]}
-              >
-                <Select placeholder="Select company">
-                  {companies.map((company) => (
-                    <Option key={company.id} value={company.id}>
+              <Form.Item name={`company_${item.id}`} rules={[{ required: true, message: 'Please select a company!' }]} style={{ flex: 1 }}>
+                <Select placeholder='Select Company'>
+                  {companies?.map(company => (
+                    <Select.Option key={company.id} value={company.id}>
                       {company.name}
-                    </Option>
+                    </Select.Option>
                   ))}
                 </Select>
               </Form.Item>
-              <Button
-                type="dashed"
-                danger
-                onClick={() => handleDeleteFormLayout(item.id)}
-                icon={<DeleteOutlined />}
-                style={{ marginBottom: "20px" }}
-              >
-                Delete
-              </Button>
-            </React.Fragment>
+              <div style={{ fontSize: '24px', cursor: 'pointer', marginBottom: '20px' }}>
+                <DeleteOutlined onClick={() => handleDeleteFormLayout(item.id)} />
+              </div>
+            </div>
           ))}
-          <Form.Item>
-            <Button type="dashed" onClick={addFormLayout}>
-              Add Another Driver
-            </Button>
-          </Form.Item>
-        </Form>
+         
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: 'center' }}>
+              <Button
+                onClick={addFormLayout}
+                style={{ marginBottom: "10px", width: "265px", height: "40px" }}
+              >
+                Add More
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                style={{ background: "#1FA6E0", width: "265px", height: "40px", color: "#fff" }}
+              >
+                Add Admin
+              </Button>
+            </div>
+      </Form>
       </Modal>
       <Modal
         title="Edit Driver"

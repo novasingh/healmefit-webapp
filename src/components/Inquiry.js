@@ -47,7 +47,7 @@ const Inquiry = () => {
     try {
       const response = await get("/contact", {
         page: currentPage,
-        limit: pageSize,
+        limit: pageSize
       });
       setUsers(
         response?.data?.results?.map((user) => ({
@@ -55,7 +55,7 @@ const Inquiry = () => {
           key: user.id,
         })) || []
       );
-      setTotalResults(response?.totalResults || 0);
+      setTotalResults(response?.data?.totalResults || 0);
     } catch (error) {
       message.error(
         "An error occurred while fetching inquiry. Please try again."
@@ -149,7 +149,7 @@ const Inquiry = () => {
           dataSource={users}
           pagination={{
             current: currentPage,
-            pageSize,
+            pageSize: 10,
             total: totalResults,
             onChange: (page, pageSize) => {
               setCurrentPage(page);
