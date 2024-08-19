@@ -17,7 +17,7 @@ const Callback = () => {
             code,
             grant_type: 'authorization_code',
             client_id: '23PGQL',
-            redirect_uri: 'http://localhost:3000/callback',
+            redirect_uri: 'http://localhost:3001/callback',
           },
           headers: {
             Authorization: `Basic ${btoa('23PGQL:4ea0a9b6e679a00b512ee8478e94385d')}`,

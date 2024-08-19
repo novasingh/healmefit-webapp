@@ -16,6 +16,7 @@ import Callback from './components/Callback';
 import Documents from './components/Documents';
 import ResetPassword from './components/ResetPassword'; 
 import ForgotPassword from './components/ForgotPassword';
+import Inquiry from './components/Inquiry';
 
 const App = () => {
   return (
@@ -48,6 +49,8 @@ const Content = () => {
           <Route path="/managers" element={<Managers class="padding-4rem"/>} />
           <Route path="/admins" element={<Admins class="padding-4rem"/>} />
           <Route path="/companies" element={<Companies class="padding-4rem"/>} />
+          <Route path="/inquiry" element={<Inquiry class="padding-4rem"/>} />
+
         </Routes>
       </div>
     </>
