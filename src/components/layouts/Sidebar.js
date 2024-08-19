@@ -21,6 +21,7 @@ const Sidebar = (props) => {
     ],
     admin: [
       { name: 'Home', link: '/home', icon: faHome },
+      { name: 'Health', link: '/health', icon: faStethoscope },
       { name: 'Driver', link: '/driver', icon: faUser },
       { name: 'Managers', link: '/managers', icon: faUsers },
       { name: 'Admins', link: '/admins', icon: faUsers },
@@ -40,7 +41,7 @@ const Sidebar = (props) => {
             fontSize: "20px",
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-start", // Align content to the left
+            justifyContent: "center", // Align content to the left
             border: "0.4px solid #d9d9d9",
             width: "100%",
             height: "70px",
