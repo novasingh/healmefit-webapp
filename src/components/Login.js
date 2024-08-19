@@ -21,9 +21,27 @@ const Login = () => {
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
     script.defer = true;
-    script.onload = () => initializeGoogleSignIn(); // Initialize Google Sign-In after the script is loaded
+  
+    script.onload = () => {
+      if (window.google && window.google.accounts) {
+        window.google.accounts.id.initialize({
+          client_id: 'YOUR_CLIENT_ID_HERE', // Replace with your actual client ID
+          callback: handleGoogleResponse,
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById('googleSignInDiv'),
+          { theme: 'outline', size: 'large', width: '100%' }
+        );
+        console.log('Google Sign-In button initialized');
+      }
+    };
+  
+    script.onerror = () => {
+      console.error('Failed to load Google Sign-In script');
+    };
+  
     document.body.appendChild(script);
-
+  
     return () => {
       document.body.removeChild(script);
     };
@@ -78,10 +96,11 @@ const Login = () => {
   const handleGoogleResponse = async (response) => {
     try {
       console.log('Google response received:', response);
-      const backendResponse = await post('http://44.211.250.6/v1/auth/google-login', {
+      const backendResponse = await post('https://api.healmefit.io/v1/auth/google-login', {
         credential: response.credential,
       });
 
+      console.log(backendResponse)
       if (backendResponse.status === 200) {
         const { user, tokens } = backendResponse.data;
         if (['manager', 'driver', 'admin'].includes(user.role)) {

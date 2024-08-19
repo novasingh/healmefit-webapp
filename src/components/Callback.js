@@ -17,16 +17,13 @@ const Callback = () => {
             code,
             grant_type: 'authorization_code',
             client_id: '23PGQL',
-            redirect_uri: 'http://localhost:3000/callback',
+            redirect_uri: 'http://localhost:3001/callback',
           },
           headers: {
             Authorization: `Basic ${btoa('23PGQL:4ea0a9b6e679a00b512ee8478e94385d')}`,
             'Content-Type': 'application/x-www-form-urlencoded',
           }
         })
-        console.log('response', response)
-
-  
         const { access_token, refresh_token, expires_in, token_type} = response.data;
         localStorage.setItem('fitbitAccessToken', access_token);
         localStorage.setItem('fitbitRefreshToken', refresh_token);
@@ -46,27 +43,6 @@ const Callback = () => {
         console.error('Error fetching tokens:', error);
       }
     };
-
-    // const storeTokens = async (accessToken, refreshToken) => {
-    //   try {
-    //     const response = await fetch('http://localhost:5000/token', {
-    //       method: 'POST',
-    //       headers: {
-    //         'Content-Type': 'application/json',
-    //       },
-    //       body: JSON.stringify({ accessToken, refreshToken }),
-    //     });
-
-    //     if (!response.ok) {
-    //       throw new Error('Failed to store tokens');
-    //     }
-
-    //     const result = await response.json();
-    //     console.log(result.message);
-    //   } catch (error) {
-    //     console.error('Error storing tokens:', error);
-    //   }
-    // };
 
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');

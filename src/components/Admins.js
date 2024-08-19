@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import { DeleteOutlined } from '@ant-design/icons';
-import { Col, Button, Modal, Form, Input, message, Table, Skeleton } from 'antd';
+import { Col, Button, Modal, Form, Input, message, Table, Skeleton, Select } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
-import { get, post, remove } from "../utility/httpService";
+import { get, post, remove, updatePatch } from "../utility/httpService";
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
 
-const Admins = (props) => {
+const Admins = () => {
   const [form] = Form.useForm();
+  const [updateForm] = Form.useForm();
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const [AddModal, setAddModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -40,7 +42,7 @@ const Admins = (props) => {
       title: 'Action',
       dataIndex: 'action',
       render: (_, record) => (
-        <ThreeDotsDropdown onDelete={() => handleDeleteUser(record?.id)} onEdit={() => null} emailId={record?.email} />
+        <ThreeDotsDropdown onDelete={() => handleDeleteUser(record?.id)} onEdit={() => selectedUserData(record)} emailId={record?.email} />
       ),
     },
   ];
@@ -181,9 +183,55 @@ const Admins = (props) => {
     setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
   };
+
+  const selectedUserData = (data) => {
+    updateForm.setFieldsValue({
+      id: data?.id,
+      email: data?.email,
+      phone: data?.truckN,
+      name: `${data?.firstName} ${data?.lastName}`,
+    });
+    setSelectedUser(data);
+    setEditModalVisible(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalVisible(false);
+    setSelectedUser(null);
+    updateForm.resetFields()
+  };
+
+
+  const handleUpdate = async () => {
+    try {
+      const values = await updateForm.validateFields();
+      const response = await updatePatch(`/users/${selectedUser.id}`, {
+        email: values.email,
+        phone: values.phone,
+        firstName: values.name.split(' ').length > 0 ? values.name.split(' ')[0] : 'User',
+        lastName: values.name.split(' ') ? values.name.split(' ')[1] : 'user',
+      });
+      if (response.status === 200) {
+        message.success("Admin updated successfully!");
+        closeEditModal();
+        updateForm.resetFields()
+        fetchUsers();
+      } else {
+        message.error("An error occurred while updating the admin.");
+      }
+    } catch (error) {
+      message.error(
+        `Error: ${
+          error.response?.data?.message ||
+          "An error occurred while updating the admin. Please try again."
+        }`
+      );
+    }
+  };
+  
   
   return (
-    <div className={props.class} style={{ height: "100%" }}>
+    <div style={{ height: "100%" }}>
       <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: '2%' }}>
         <h2 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600",  marginBottom: '10px' }}>Admins</h2>
@@ -267,17 +315,17 @@ const Admins = (props) => {
                 </div>
               ))}
             </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: 'center' }}>
               <Button
                 onClick={addFormLayout}
-                style={{ marginBottom: "10px", width: "100%", height: "40px" }}
+                style={{ marginBottom: "10px", width: "265px", height: "40px" }}
                 disabled={isAddMoreDisabled}
               >
                 Add More
               </Button>
               <Button
                 onClick={handleSubmit}
-                style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}
+                style={{ background: "#1FA6E0", width: "265px", height: "40px", color: "#fff" }}
                 disabled={isAddDriverDisabled}
               >
                 Add Admin
@@ -299,6 +347,51 @@ const Admins = (props) => {
             <p><strong>Role:</strong> {selectedUser.role}</p>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        title="Edit Admin"
+        visible={editModalVisible}
+        onCancel={closeEditModal}
+        onOk={handleUpdate}
+        okText="Update Admin"
+        cancelText="Cancel"
+        centered
+      >
+        <Form form={updateForm} layout="vertical">
+          <Form.Item
+            label="Name"
+            name="name"
+            rules={[{ required: true, message: "Please input the name!" }]}
+          >
+            <Input placeholder="Enter name" />
+          </Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              {
+                required: true,
+                type: "email",
+                message: "Please input a valid email!",
+              },
+            ]}
+          >
+            <Input placeholder="Enter email" disabled={true} />
+          </Form.Item>
+          <Form.Item
+            label="Phone Number"
+            name="phone"
+            rules={[
+              {
+                required: true,
+                message: "Please input the phone number!",
+              },
+            ]}
+          >
+            <Input placeholder="Enter phone number" />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );

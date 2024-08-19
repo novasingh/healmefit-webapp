@@ -1,43 +1,57 @@
 import React, { useState } from 'react';
 import { Dropdown, Menu, Modal, Button, Input, message } from 'antd';
-import { EllipsisOutlined } from '@ant-design/icons';
-import { post, remove } from '../utility/httpService';
+import { MoreOutlined } from '@ant-design/icons';
+import { post } from '../utility/httpService';
 
-const ThreeDotsDropdown = ({ onEdit, onDelete, emailId }) => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
+const ThreeDotsDropdown = ({ onEdit, onDelete, emailId, driverName, role }) => {
+  const [isInviteModalVisible, setIsInviteModalVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [description, setDescription] = useState('');
-  const [loading , setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSendInvite = () => {
-    setIsModalVisible(true);
+    setIsInviteModalVisible(true);
     setDescription('');
   };
 
-  const handleCancel = () => {
-    setIsModalVisible(false);
+  const handleCancelInvite = () => {
+    setIsInviteModalVisible(false);
   };
 
   const handleSend = async () => {
-    console.log(emailId)
-   setLoading(true)
-   await post('/auth/send-invitation-email', {
-      email : emailId,
+    setLoading(true);
+    await post('/auth/send-invitation-email', {
+      email: emailId,
       text: description
     }).then((response) => {
-      message.success('Send Invitation Successfully.')
-    }, error => {
-      console.log(error)
-    }) 
-    setLoading(false)
-    setIsModalVisible(false);
+      message.success('Invitation sent successfully.');
+    }).catch((error) => {
+      console.log(error);
+    });
+    setLoading(false);
+    setIsInviteModalVisible(false);
   };
+
+  const showDeleteConfirm = () => {
+    setIsDeleteModalVisible(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalVisible(false);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete();
+    setIsDeleteModalVisible(false);
+  };
+
 
   const menu = (
     <Menu>
-      <Menu.Item key="edit" onClick={onEdit}>
+      <Menu.Item key="edit" onClick={() => onEdit()}>
         Edit
       </Menu.Item>
-      <Menu.Item key="delete" onClick={() => onDelete()}>
+      <Menu.Item key="delete" onClick={showDeleteConfirm}>
         Delete
       </Menu.Item>
       <Menu.Item key="send-invite" onClick={handleSendInvite}>
@@ -49,30 +63,31 @@ const ThreeDotsDropdown = ({ onEdit, onDelete, emailId }) => {
   return (
     <>
       <Dropdown overlay={menu} trigger={['click']}>
-        <EllipsisOutlined style={{ fontSize: '24px', cursor: 'pointer', transform: 'rotate(90deg)' }} />
+        <Button  icon={<MoreOutlined style={{fontSize: '20px'}} />} type="text" />
       </Dropdown>
 
+      {/* Send Invitation Modal */}
       <Modal
         title="Send Invitation Link"
-        visible={isModalVisible}
-        onCancel={handleCancel}
-        centered // Center the modal
+        visible={isInviteModalVisible}
+        onCancel={handleCancelInvite}
+        centered
         footer={[
-          <Button key="cancel" onClick={handleCancel}>
+          <Button key="cancel" onClick={handleCancelInvite}>
             Cancel
           </Button>,
-          <Button key="send" type="primary" onClick={handleSend} loading={loading} >
+          <Button key="send" type="primary" onClick={handleSend} loading={loading}>
             Send
           </Button>,
         ]}
         style={{
           padding: '20px',
           borderRadius: '10px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', // Box shadow for depth
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         }}
       >
         <p>Please follow the steps below to activate the account:</p>
-        <ol style={{paddingLeft: '30px'}}>
+        <ol style={{ paddingLeft: '30px' }}>
           <li>Review the email below or enter the correct one.</li>
           <li>Add any additional instructions in the description (optional).</li>
           <li>Click "Send" to send the invitation link to the user.</li>
@@ -85,9 +100,27 @@ const ThreeDotsDropdown = ({ onEdit, onDelete, emailId }) => {
           style={{
             borderRadius: '5px',
             boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)',
-            marginTop: '10px'
+            marginTop: '10px',
           }}
         />
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        title="Confirm Deletion"
+        visible={isDeleteModalVisible}
+        onCancel={handleDeleteCancel}
+        centered
+        footer={[
+          <Button key="cancel" onClick={handleDeleteCancel}>
+            Cancel
+          </Button>,
+          <Button key="confirm" type="primary" danger onClick={handleConfirmDelete}>
+            Confirm
+          </Button>,
+        ]}
+      >
+        <p>Are you sure you want to delete?</p>
       </Modal>
     </>
   );

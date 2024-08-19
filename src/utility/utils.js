@@ -12,7 +12,6 @@ function normalize(value, minVal, maxVal) {
 }
 
 export function calculateHealthScore(age, bmi, heartRate, steps, sleep) {
-    console.log(age)
     // Normalization
     const normalizedAge = normalize(age, 20, 80);
     const normalizedBmi = normalize(bmi, 15, 40);

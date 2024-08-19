@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import { DeleteOutlined } from '@ant-design/icons';
-import { Col, Button, Modal, Form, Input, message, Table, Skeleton } from 'antd';
+import { Col, Button, Modal, Form, Input, message, Table, Skeleton, Select } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
-import { get, post, remove } from "../utility/httpService";
+import { get, post, remove, updatePatch } from "../utility/httpService";
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
+const { Option } = Select;
 
-const Managers = (props) => {
+const Managers = () => {
   const [form] = Form.useForm();
+  const [updateForm] = Form.useForm();
   const [addModalVisible, setAddModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalResults, setTotalResults] = useState(0);
@@ -21,8 +24,20 @@ const Managers = (props) => {
   const [isAddMoreDisabled, setIsAddMoreDisabled] = useState(true);
   const [isAddManagerDisabled, setIsAddManagerDisabled] = useState(true);
   
-  const token = sessionStorage.getItem('token');
+  const [companies, setCompanies] = useState([]); // Changed Companies to companies
 
+  const fetchCompanies = async () => {
+    try {
+      const response = await get('/companies', { limit : 1000}); // Adjust the endpoint as needed
+      setCompanies(response?.data?.results );
+    } catch (error) {
+      message.error('An error occurred while fetching companies. Please try again.');
+    }
+  };
+  
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
   const columns = [
     {
       title: 'Name',
@@ -41,13 +56,13 @@ const Managers = (props) => {
     {
       title: 'Company',
       dataIndex: 'company',
-      render: (_, record) => record?.company?.name || '-',
+      render: (_, record) => record?.company?.name ?  record?.company?.name : '-',
     },
     {
       title: 'Action',
       dataIndex: 'action',
       render: (_, record) => (
-        <ThreeDotsDropdown onDelete={() => handleDeleteUser(record.id)} onEdit={() => null} emailId={record.email} />
+        <ThreeDotsDropdown onDelete={() => handleDeleteUser(record.id)} onEdit={() => selectedUserData(record)} emailId={record.email} />
       ),
     },
   ];
@@ -78,7 +93,7 @@ const Managers = (props) => {
 
   const addFormLayout = () => {
     updateFormValues();
-    setFormLayout([...formLayout, { id: uuidv4(), email: '', phone: '', name: '', role: 'manager' }]);
+    setFormLayout([...formLayout, { id: uuidv4(), email: '', phone: '', name: '', companyId: '', role: 'manager' }]);
   };
 
   const updateFormValues = () => {
@@ -119,6 +134,7 @@ const Managers = (props) => {
           email: values[`email_${id}`],
           phone: values[`phone_${id}`],
           name: values[`name_${id}`],
+          companyId: values[`company_${id}`],
           role: 'manager',
         });
       });
@@ -156,8 +172,55 @@ const Managers = (props) => {
     setPageSize(pagination.pageSize);
   };
 
+  const selectedUserData = (data) => {
+    updateForm.setFieldsValue({
+      id: data?.id,
+      email: data?.email,
+      phone: data?.phone,
+      name: `${data?.firstName} ${data?.lastName}`,
+      company: data?.company?.id,
+    });
+    setSelectedUser(data);
+    setEditModalVisible(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalVisible(false);
+    setSelectedUser(null);
+    updateForm.resetFields()
+  };
+  
+  const handleUpdate = async () => {
+    try {
+      const values = await updateForm.validateFields();
+      const response = await updatePatch(`/users/${selectedUser.id}`, {
+        email: values.email,
+        phone: values.phone,
+        firstName: values.name.split(' ').length > 0 ? values.name.split(' ')[0] : 'User',
+        lastName: values.name.split(' ') ? values.name.split(' ')[1] : 'user',
+        company: values.company,
+      });
+      if (response.status === 200) {
+        message.success("Manager updated successfully!");
+        closeEditModal();
+        updateForm.resetFields()
+        fetchUsers();
+      } else {
+        message.error("An error occurred while updating the manager.");
+      }
+    } catch (error) {
+      message.error(
+        `Error: ${
+          error.response?.data?.message ||
+          "An error occurred while updating the manager. Please try again."
+        }`
+      );
+    }
+  };
+
+
   return (
-    <div className={props.class} style={{ height: "100%" }}>
+    <div style={{ height: "100%" }}>
       <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "2%" }}>
         <h2 style={{ fontSize: "25px", color: "#0B5676", fontWeight: "600", marginBottom: '10px' }}>Managers</h2>
@@ -170,7 +233,14 @@ const Managers = (props) => {
           <Table
             columns={columns}
             dataSource={managers}
-            pagination={{ current: currentPage, pageSize, total: totalResults }}
+            pagination={{
+              current: currentPage,
+              pageSize: pageSize,
+              onChange: (page, pageSize) => {
+                setCurrentPage(page);
+                setPageSize(pageSize)
+              },
+            }}
             onChange={handleTableChange}
             className="fixed-pagination"
           />
@@ -191,6 +261,7 @@ const Managers = (props) => {
         handleDeleteFormLayout={handleDeleteFormLayout}
         addFormLayout={addFormLayout}
         onCancel={() => setAddModalVisible(false)}
+        companies={companies} // Pass companies to AddManagerModal
       />
       {selectedUser && (
         <ManagerDetailsModal
@@ -199,6 +270,65 @@ const Managers = (props) => {
           onCancel={() => setViewModalVisible(false)}
         />
       )}
+       <Modal
+        title="Edit Manager"
+        visible={editModalVisible}
+        onCancel={closeEditModal}
+        onOk={handleUpdate}
+        okText="Update Manager"
+        cancelText="Cancel"
+        centered
+      >
+        <Form form={updateForm} layout="vertical">
+          <Form.Item
+            label="Name"
+            name="name"
+            rules={[{ required: true, message: "Please input the name!" }]}
+          >
+            <Input placeholder="Enter name" />
+          </Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              {
+                required: true,
+                type: "email",
+                message: "Please input a valid email!",
+              },
+            ]}
+          >
+            <Input placeholder="Enter email" disabled={true} />
+          </Form.Item>
+          <Form.Item
+            label="Phone Number"
+            name="phone"
+            rules={[
+              {
+                required: true,
+                message: "Please input the phone!",
+              },
+            ]}
+          >
+            <Input placeholder="Enter phone number" />
+          </Form.Item>
+          <Form.Item
+            label="Company"
+            name="company"
+            rules={[
+              { required: true, message: "Please select a company!" },
+            ]}
+          >
+            <Select placeholder="Select company">
+              {companies.map((company) => (
+                <Option key={company.id} value={company.id}>
+                  {company.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
@@ -213,7 +343,7 @@ const EmptyState = ({ onClick }) => (
   </Col>
 );
 
-const AddManagerModal = ({ visible, form, formLayout, isAddMoreDisabled, isAddManagerDisabled, handleChange, handleSubmit, handleDeleteFormLayout, addFormLayout, onCancel }) => (
+const AddManagerModal = ({ visible, form, formLayout, isAddMoreDisabled, isAddManagerDisabled, handleChange, handleSubmit, handleDeleteFormLayout, addFormLayout, onCancel, companies }) => (
   <Modal
     title='Add Manager'
     open={visible}
@@ -237,18 +367,43 @@ const AddManagerModal = ({ visible, form, formLayout, isAddMoreDisabled, isAddMa
               <Form.Item name={`phone_${item.id}`} rules={[{ required: true, message: 'Please input the phone number!' }]} style={{ flex: 1 }}>
                 <Input placeholder='Phone' />
               </Form.Item>
-              <div style={{fontSize: '24px', cursor: 'pointer', marginBottom: '20px'}}>
-              <DeleteOutlined onClick={() => handleDeleteFormLayout(item.id)} />
+              <Form.Item name={`company_${item.id}`} rules={[{ required: true, message: 'Please select a company!' }]} style={{ flex: 1 }}>
+                <Select placeholder='Select Company'>
+                  {companies.map(company => (
+                    <Select.Option key={company.id} value={company.id}>
+                      {company.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <div style={{ fontSize: '24px', cursor: 'pointer', marginBottom: '20px' }}>
+                <DeleteOutlined onClick={() => handleDeleteFormLayout(item.id)} />
               </div>
             </div>
           ))}
-          <Button onClick={addFormLayout} disabled={isAddMoreDisabled}>+ Add more</Button>
+         
         </div>
-        <Button type="primary" htmlType="submit" disabled={isAddManagerDisabled} style={{ marginTop: "20px" }}>Add Managers</Button>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: 'center' }}>
+              <Button
+                onClick={addFormLayout}
+                style={{ marginBottom: "10px", width: "265px", height: "40px" }}
+                disabled={isAddMoreDisabled}
+              >
+                Add More
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                style={{ background: "#1FA6E0", width: "265px", height: "40px", color: "#fff" }}
+                disabled={isAddManagerDisabled}
+              >
+                Add Admin
+              </Button>
+            </div>
       </Form>
     </div>
   </Modal>
 );
+
 
 const ManagerDetailsModal = ({ visible, user, onCancel }) => (
   <Modal
