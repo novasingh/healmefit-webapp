@@ -54,7 +54,7 @@ const Admins = () => {
       });
       const usersWithKeys = response?.data?.results?.map(user => ({ ...user, key: user.id }));
       setGetAllUsers(usersWithKeys);
-      setTotalResults(response.totalResults);
+      setTotalResults(response.data.totalResults);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -257,7 +257,11 @@ const Admins = () => {
       pagination={{
         current: currentPage,
         pageSize: pageSize,
-        total: totalResults
+        total: totalResults,
+        onChange: (page, pageSize) => {
+          setCurrentPage(page);
+          setPageSize(pageSize)
+        },
       }}
       onChange={handleTableChange}
       className="fixed-pagination"

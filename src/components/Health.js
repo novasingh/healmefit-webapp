@@ -19,6 +19,7 @@ const CLIENT_SECRET = '4ea0a9b6e679a00b512ee8478e94385d';
 
 const Health = () => {
   const [AddModal, setAddModal] = useState(false);
+  const [isDevicePaired, setIsDevicePaired] = useState(false);
   const navigate = useNavigate();
   const clientId = CLIENT_ID;
   const redirectUri = 'http://localhost:3000/callback';
@@ -122,6 +123,7 @@ const Health = () => {
           localStorage.setItem('fitbitRefreshToken', response.data.refreshToken);
           await fetchAllData();
           setHaveTokens(true);
+          setIsDevicePaired(true);
         }
       }
     } catch (error) {
@@ -144,7 +146,13 @@ const Health = () => {
   const handleSyncClick = async () => {
     await fetchAllData();
   };
-
+  const handleUnpairDevice = () => {
+    // Logic to unpair the device, e.g., removing tokens
+    localStorage.removeItem('fitbitAccessToken');
+    localStorage.removeItem('fitbitRefreshToken');
+    setIsDevicePaired(false);
+    setHaveTokens(false);
+  };
   const heartRate = heartData?.restingHeartRate || 61;
   const heartRatePercentage = (heartRate / 100) * 100;
 
@@ -238,7 +246,11 @@ const Health = () => {
 >
   Sync
 </Button>
-        </div>
+{!isDevicePaired ? (
+            <Button onClick={handleFitbitAuth} type="primary" style={{ height: '40px' }} >Pair Device</Button>
+          ) : (
+            <Button onClick={handleUnpairDevice} type="danger" style={{ backgroundColor: '#d3d3d3', height: '40px', color: '#000' }}>Unpair Device</Button>
+          )}        </div>
       </Col>
       {!haveTokens ? (
         <Col lg={24} style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80%" }}>
@@ -250,8 +262,8 @@ const Health = () => {
         </Col>
       ) : (
         <>
-          <Row gutter={[16, 16]}>
-  <Col lg={20} md={24}>
+     <Row gutter={[16, 16]}>
+     <Col lg={20} md={24}>
     <div style={{borderRadius:"8px", border:"0.4px solid #d9d9d9", padding: '20px', display:"flex", justifyContent:"space-around"}}>
       <div style={{display:"flex", flexDirection:"column", alignItems:"center", gap:"5px"}}>
         <div style={{color:"#BBBBBB", fontSize:"16px"}}>Age</div>
@@ -267,48 +279,51 @@ const Health = () => {
       </div>
     </div>
   </Col>
-  <Col lg={5} md={12}>
-    <div style={{borderRadius:"8px", border:"0.4px solid #d9d9d9", padding: '20px'}}>
-      <div style={{display:"flex", alignItems:"center", gap:"10px", marginBottom:"10px"}}>
-        <HeartFilled style={{color: "#8B5CF6", fontSize: "24px"}} />
-        <span style={{fontSize:"18px", fontWeight:600}}>Resting Heart Rate</span>
+  {/* First row */}
+  <Col lg={12} md={12}>
+    <div style={{ borderRadius: "8px", border: "0.4px solid #d9d9d9", padding: '20px' }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+        <HeartFilled style={{ color: "#8B5CF6", fontSize: "24px" }} />
+        <span style={{ fontSize: "18px", fontWeight: 600 }}>Resting Heart Rate</span>
       </div>
-      <div style={{fontSize:"36px", fontWeight:700}}>{heartData?.restingHeartRate || 61} bpm</div>
-      <div style={{color:"#BBBBBB", fontSize:"14px"}}>Daily Average</div>
-      <div style={{color:"#10B981", fontSize:"14px", marginTop:"5px"}}>Excellent</div>
+      <div style={{ fontSize: "36px", fontWeight: 700 }}>{heartData?.restingHeartRate || 61} bpm</div>
+      <div style={{ color: "#BBBBBB", fontSize: "14px" }}>Daily Average</div>
+      <div style={{ color: "#10B981", fontSize: "14px", marginTop: "5px" }}>Excellent</div>
     </div>
   </Col>
-<Col lg={5} md={12}>
-    <div style={{borderRadius:"8px", border:"0.4px solid #d9d9d9", padding: '20px'}}>
-      <div style={{display:"flex", alignItems:"center", gap:"10px", marginBottom:"10px"}}>
-        <MoonFilled style={{color: "#3B82F6", fontSize: "24px"}} />
-        <span style={{fontSize:"18px", fontWeight:600}}>Sleep</span>
+  <Col lg={12} md={12}>
+    <div style={{ borderRadius: "8px", border: "0.4px solid #d9d9d9", padding: '20px' }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+        <MoonFilled style={{ color: "#3B82F6", fontSize: "24px" }} />
+        <span style={{ fontSize: "18px", fontWeight: 600 }}>Sleep</span>
       </div>
-      <div style={{fontSize:"36px", fontWeight:700}}>{sleepHours}h {sleepMinutes}m</div>
-      <div style={{color:"#BBBBBB", fontSize:"14px"}}>Last Night</div>
-      <div style={{color:"#F59E0B", fontSize:"14px", marginTop:"5px"}}>Fair</div>
+      <div style={{ fontSize: "36px", fontWeight: 700 }}>{sleepHours}h {sleepMinutes}m</div>
+      <div style={{ color: "#BBBBBB", fontSize: "14px" }}>Last Night</div>
+      <div style={{ color: "#F59E0B", fontSize: "14px", marginTop: "5px" }}>Fair</div>
     </div>
-  </Col>  
-  <Col lg={5} md={12}>
-  <div style={{borderRadius:"8px", border:"0.4px solid #d9d9d9", padding: '20px'}}>
-    <div style={{display:"flex", alignItems:"center", gap:"10px", marginBottom:"10px"}}>
-      <StepForwardOutlined style={{color: "#10B981", fontSize: "24px"}} />
-      <span style={{fontSize:"18px", fontWeight:600}}>Steps</span>
-    </div>
-    <div style={{fontSize:"36px", fontWeight:700}}>{stepData?.steps || 4050}</div>
-    <div style={{color:"#BBBBBB", fontSize:"14px"}}>Daily Average</div>
-    <div style={{color:"#EF4444", fontSize:"14px", marginTop:"5px"}}>Poor</div>
-  </div>
-</Col>
-  <Col lg={5} md={12}>
-    <div style={{borderRadius:"8px", border:"0.4px solid #d9d9d9", padding: '20px'}}>
-      <div style={{display:"flex", alignItems:"center", gap:"10px", marginBottom:"10px"}}>
-        <CalculatorOutlined style={{color: "#3B82F6", fontSize: "24px"}} />
-        <span style={{fontSize:"18px", fontWeight:600}}>BMI</span>
+  </Col>
+
+  {/* Second row */}
+  <Col lg={12} md={12}>
+    <div style={{ borderRadius: "8px", border: "0.4px solid #d9d9d9", padding: '20px' }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+        <StepForwardOutlined style={{ color: "#10B981", fontSize: "24px" }} />
+        <span style={{ fontSize: "18px", fontWeight: 600 }}>Steps</span>
       </div>
-      <div style={{fontSize:"36px", fontWeight:700}}>20.3</div>
-      <div style={{color:"#BBBBBB", fontSize:"14px"}}>Last calculated 7/26/23</div>
-      <div style={{color:"#10B981", fontSize:"14px", marginTop:"5px"}}>Good</div>
+      <div style={{ fontSize: "36px", fontWeight: 700 }}>{stepData?.steps || 4050}</div>
+      <div style={{ color: "#BBBBBB", fontSize: "14px" }}>Daily Average</div>
+      <div style={{ color: "#EF4444", fontSize: "14px", marginTop: "5px" }}>Poor</div>
+    </div>
+  </Col>
+  <Col lg={12} md={12}>
+    <div style={{ borderRadius: "8px", border: "0.4px solid #d9d9d9", padding: '20px' }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+        <CalculatorOutlined style={{ color: "#3B82F6", fontSize: "24px" }} />
+        <span style={{ fontSize: "18px", fontWeight: 600 }}>BMI</span>
+      </div>
+      <div style={{ fontSize: "36px", fontWeight: 700 }}>20.3</div>
+      <div style={{ color: "#BBBBBB", fontSize: "14px" }}>Last calculated 7/26/23</div>
+      <div style={{ color: "#10B981", fontSize: "14px", marginTop: "5px" }}>Good</div>
     </div>
   </Col>
 </Row>
