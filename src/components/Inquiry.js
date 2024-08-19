@@ -1,58 +1,157 @@
-// src/components/Inquiry.js
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './Inquiry.css';
-import { get, post } from "../utility/httpService";// import './Inquiry.css'; // Create this file for custom styling if needed
+import React, { useState, useEffect, useCallback } from "react";
+import Header from "./Header";
+import "../style.css";
+import {
+  Col,
+  message,
+  Table,
+  Skeleton,
+  Button,
+  Tooltip,
+} from "antd";
+import { get, remove } from "../utility/httpService";
 
-const Inquiry = () => {
-  const [inquiries, setInquiries] = useState([]);
+const Inquiry = (props) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalResults, setTotalResults] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState([]);
+
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "name",
+    },
+    { title: "Email", dataIndex: "email" },
+    {
+      title: "Message",
+      dataIndex: "message",
+      render: (_, record) =>
+        record.message ? (
+          <Tooltip placement="bottom" title={record.message}>
+            <div style={{width: '150px', textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>{record.message}</div>
+          </Tooltip>
+        ) : (
+          "-"
+        ),
+    },
+    {
+      title: "Phone Number",
+      dataIndex: "phone",
+    },
+  ];
+
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await get("/contact", {
+        page: currentPage,
+        limit: pageSize,
+      });
+      setUsers(
+        response?.data?.results?.map((user) => ({
+          ...user,
+          key: user.id,
+        })) || []
+      );
+      setTotalResults(response?.totalResults || 0);
+    } catch (error) {
+      message.error(
+        "An error occurred while fetching inquiry. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, pageSize]);
+
+  // const handleDeleteUser = async (id) => {
+  //   await remove(`/contact/${id}`).then(
+  //     (response) => {
+  //       if (response) {
+  //         message.success("Inquiry Deleted Successfully.");
+  //         fetchUsers();
+  //       }
+  //     },
+  //     (error) => {
+  //       console.log(error);
+  //     }
+  //   );
+  // };
 
   useEffect(() => {
-    fetchInquiries();
-  }, []);
-
-  const fetchInquiries = async () => {
-    try {
-      const response = await get('/contact');
-      if (Array.isArray(response.data)) {
-        setInquiries(response.data);
-      } else {
-        console.error('Unexpected response format:', response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching inquiries:', error);
+    if (currentPage && pageSize) {
+      fetchUsers();
     }
+  }, [currentPage, fetchUsers, pageSize]);
+
+  const handleTableChange = (pagination) => {
+    setCurrentPage(pagination.current);
+    setPageSize(pagination.pageSize);
   };
 
   return (
-    <div className="inquiry-container">
-      <h3 className="inquiry-title">Inquiries</h3>
-      <table className="inquiry-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Message</th>
-          </tr>
-        </thead>
-        <tbody>
-          {inquiries.length > 0 ? (
-            inquiries.map((inquiry) => (
-              <tr key={inquiry.id}>
-                <td>{inquiry.name}</td>
-                <td>{inquiry.email}</td>
-                <td>{inquiry.phone}</td>
-                <td>{inquiry.message}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="4">No inquiries available</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+    <div className={props.class} style={{ height: "100%" }}>
+      <Header />
+      <Col
+        style={{
+          paddingTop: "2%",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "25px",
+            color: "#0B5676",
+            letterSpacing: "1px",
+            fontWeight: "600",
+            marginBottom: "10px",
+          }}
+        >
+          Inquiry
+        </h2>
+        <div
+          style={{ display: "flex", alignItems: "center", gap: "20px" }}
+        ></div>
+      </Col>
+      {loading ? (
+        <Skeleton active />
+      ) : users.length === 0 ? (
+        <Col
+          lg={24}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "80%",
+          }}
+        >
+          <Col
+            lg={10}
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+          >
+            <div
+              style={{
+                textAlign: "center",
+                color: "#BBBBBB",
+                fontWeight: "600",
+              }}
+            >
+              Looks like you have no inquiry yet.
+            </div>
+          </Col>
+        </Col>
+      ) : (
+        <Table
+          columns={columns}
+          dataSource={users}
+          pagination={{ current: currentPage, pageSize, total: totalResults }}
+          onChange={handleTableChange}
+          className="fixed-pagination"
+        />
+      )}
     </div>
   );
 };

@@ -3,12 +3,15 @@ import Header from './Header';
 import { DeleteOutlined } from '@ant-design/icons';
 import { Col, Button, Modal, Form, Input, message, Table, Skeleton, Select } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
-import { get, post, remove } from "../utility/httpService";
+import { get, post, remove, updatePatch } from "../utility/httpService";
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
+const { Option } = Select;
 
 const Managers = (props) => {
   const [form] = Form.useForm();
+  const [updateForm] = Form.useForm();
   const [addModalVisible, setAddModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalResults, setTotalResults] = useState(0);
@@ -21,13 +24,12 @@ const Managers = (props) => {
   const [isAddMoreDisabled, setIsAddMoreDisabled] = useState(true);
   const [isAddManagerDisabled, setIsAddManagerDisabled] = useState(true);
   
-  const token = sessionStorage.getItem('token');
   const [companies, setCompanies] = useState([]); // Changed Companies to companies
 
   const fetchCompanies = async () => {
     try {
-      const response = await get('/companies'); // Adjust the endpoint as needed
-      setCompanies(response.data);
+      const response = await get('/companies', { limit : 1000}); // Adjust the endpoint as needed
+      setCompanies(response?.data?.results );
     } catch (error) {
       message.error('An error occurred while fetching companies. Please try again.');
     }
@@ -60,7 +62,7 @@ const Managers = (props) => {
       title: 'Action',
       dataIndex: 'action',
       render: (_, record) => (
-        <ThreeDotsDropdown onDelete={() => handleDeleteUser(record.id)} onEdit={() => null} emailId={record.email} />
+        <ThreeDotsDropdown onDelete={() => handleDeleteUser(record.id)} onEdit={() => selectedUserData(record)} emailId={record.email} />
       ),
     },
   ];
@@ -169,7 +171,53 @@ const Managers = (props) => {
     setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
   };
+
+  const selectedUserData = (data) => {
+    updateForm.setFieldsValue({
+      id: data?.id,
+      email: data?.email,
+      phone: data?.phone,
+      name: `${data?.firstName} ${data?.lastName}`,
+      company: data?.company?.id,
+    });
+    setSelectedUser(data);
+    setEditModalVisible(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalVisible(false);
+    setSelectedUser(null);
+    updateForm.resetFields()
+  };
   
+  const handleUpdate = async () => {
+    try {
+      const values = await updateForm.validateFields();
+      const response = await updatePatch(`/users/${selectedUser.id}`, {
+        email: values.email,
+        phone: values.phone,
+        firstName: values.name.split(' ').length > 0 ? values.name.split(' ')[0] : 'User',
+        lastName: values.name.split(' ') ? values.name.split(' ')[1] : 'user',
+        company: values.company,
+      });
+      if (response.status === 200) {
+        message.success("Manager updated successfully!");
+        closeEditModal();
+        updateForm.resetFields()
+        fetchUsers();
+      } else {
+        message.error("An error occurred while updating the manager.");
+      }
+    } catch (error) {
+      message.error(
+        `Error: ${
+          error.response?.data?.message ||
+          "An error occurred while updating the manager. Please try again."
+        }`
+      );
+    }
+  };
+
 
   return (
     <div className={props.class} style={{ height: "100%" }}>
@@ -222,6 +270,65 @@ const Managers = (props) => {
           onCancel={() => setViewModalVisible(false)}
         />
       )}
+       <Modal
+        title="Edit Manager"
+        visible={editModalVisible}
+        onCancel={closeEditModal}
+        onOk={handleUpdate}
+        okText="Update Manager"
+        cancelText="Cancel"
+        centered
+      >
+        <Form form={updateForm} layout="vertical">
+          <Form.Item
+            label="Name"
+            name="name"
+            rules={[{ required: true, message: "Please input the name!" }]}
+          >
+            <Input placeholder="Enter name" />
+          </Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              {
+                required: true,
+                type: "email",
+                message: "Please input a valid email!",
+              },
+            ]}
+          >
+            <Input placeholder="Enter email" disabled={true} />
+          </Form.Item>
+          <Form.Item
+            label="Phone Number"
+            name="phone"
+            rules={[
+              {
+                required: true,
+                message: "Please input the phone!",
+              },
+            ]}
+          >
+            <Input placeholder="Enter phone number" />
+          </Form.Item>
+          <Form.Item
+            label="Company"
+            name="company"
+            rules={[
+              { required: true, message: "Please select a company!" },
+            ]}
+          >
+            <Select placeholder="Select company">
+              {companies.map((company) => (
+                <Option key={company.id} value={company.id}>
+                  {company.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
@@ -274,9 +381,24 @@ const AddManagerModal = ({ visible, form, formLayout, isAddMoreDisabled, isAddMa
               </div>
             </div>
           ))}
-          <Button onClick={addFormLayout} disabled={isAddMoreDisabled}>+ Add more</Button>
+         
         </div>
-        <Button type="primary" htmlType="submit" disabled={isAddManagerDisabled} style={{ marginTop: "20px" }}>Add Managers</Button>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: 'center' }}>
+              <Button
+                onClick={addFormLayout}
+                style={{ marginBottom: "10px", width: "265px", height: "40px" }}
+                disabled={isAddMoreDisabled}
+              >
+                Add More
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                style={{ background: "#1FA6E0", width: "265px", height: "40px", color: "#fff" }}
+                disabled={isAddManagerDisabled}
+              >
+                Add Admin
+              </Button>
+            </div>
       </Form>
     </div>
   </Modal>

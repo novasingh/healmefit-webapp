@@ -13,6 +13,7 @@ const Companies = (props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalResults, setTotalResults] = useState([]);
+  const [companiesData, setCompaniesData] = useState([])
   const [loading, setLoading] = useState(true);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [editCompany, setEditCompany] = useState(null);
@@ -56,13 +57,6 @@ const Companies = (props) => {
       ),
     },
   ];
-
-  // const rowSelection = {
-  //   selectedRowKeys,
-  //   onChange: (selectedRowKeys) => {
-  //     setSelectedRowKeys(selectedRowKeys);
-  //   },
-  // };
 
   const handleUpdate = async () => {
     try {
@@ -147,9 +141,15 @@ const Companies = (props) => {
 
   const fetchUsers = async (page = 1, limit = 10) => {
     try {
-      const response = await get('/companies', { page, limit });
-     
-      setTotalResults(response.data || []);
+      const response = await get('/companies', {
+        page: currentPage,
+        limit: pageSize,
+      });
+      setCompaniesData(response?.data?.results?.map(user => ({
+        ...user,
+        key: user.id,
+      })) || []);
+      setTotalResults(response?.totalResults || 0);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -191,7 +191,6 @@ const Companies = (props) => {
     const getManagersList = async () => {
       try {
         const response = await get('/users?role=manager');
-        console.log(response)
         setManagers(response?.data?.results || []);
       } catch (error) {
         message.error('An error occurred while fetching companies.');
@@ -209,12 +208,12 @@ const Companies = (props) => {
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: '2%' }}>
         <h2 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600", marginBottom: '10px' }}>Companies</h2>
         <div style={{ display: "flex", gap: "6px" }}>
-          {totalResults.length > 0 && <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>+ Add Company</Button>}
+          {companiesData.length > 0 && <Button onClick={() => setAddModal(true)} style={{ background: "#1FA6E0", width: "100%", height: "40px", color: "#fff" }}>+ Add Company</Button>}
         </div>
       </Col>
       {
       !loading ?
-      totalResults.length === 0 ? 
+      companiesData.length === 0 ? 
       <Col lg={24} style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80%" }}>
         <Col lg={10} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <div style={{ textAlign: "center", color: "#BBBBBB", fontWeight: "600" }}>Looks like you have no company yet.</div>
@@ -226,7 +225,7 @@ const Companies = (props) => {
       <Table
         // rowSelection={rowSelection}
         columns={columns}
-        dataSource={totalResults}
+        dataSource={companiesData}
         pagination={{
             current: currentPage,
             pageSize: pageSize,

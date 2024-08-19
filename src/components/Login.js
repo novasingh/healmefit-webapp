@@ -100,6 +100,7 @@ const Login = () => {
         credential: response.credential,
       });
 
+      console.log(backendResponse)
       if (backendResponse.status === 200) {
         const { user, tokens } = backendResponse.data;
         if (['manager', 'driver', 'admin'].includes(user.role)) {

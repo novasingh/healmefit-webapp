@@ -24,9 +24,6 @@ const Callback = () => {
             'Content-Type': 'application/x-www-form-urlencoded',
           }
         })
-        console.log('response', response)
-
-  
         const { access_token, refresh_token, expires_in, token_type} = response.data;
         localStorage.setItem('fitbitAccessToken', access_token);
         localStorage.setItem('fitbitRefreshToken', refresh_token);

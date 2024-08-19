@@ -42,7 +42,6 @@ function Documents(props) {
 
   const deleteDocument = (documentId) => {
     // Implement document delete API call here
-    console.log('Deleting document:', documentId);
     setDocuments(prevDocuments =>
       prevDocuments.map(doc =>
         doc.id === documentId ? { ...doc, status: 'not_uploaded', file: null } : doc

@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input, Button, Form, notification, Tooltip, Collapse } from "antd";
 import Header from "./Header";
-import { AuthContext } from "../contexts/AuthContext";
 import { get, updatePatch } from "../utility/httpService";
 import moment from "moment";
 import 'react-phone-input-2/lib/style.css';
@@ -9,7 +8,7 @@ import PhoneInput from 'react-phone-input-2';
 
 const Home = (props) => {
   const [form] = Form.useForm();
-  const { userData } = useContext(AuthContext);
+  const userData = JSON.parse(sessionStorage.getItem('user')) || {}
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(userData);
 
@@ -89,7 +88,7 @@ const Home = (props) => {
     if (!isVisible) return null;
 
     return (
-      <div style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#E7F8D6', padding: '10px', borderRadius: '5px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#E7F8D6', padding: '10px', borderRadius: '5px', marginTop: '10px' }}>
         <p style={{ color: "#88C43E", margin: "auto", textAlign: "left", flex: 1 }}>
           Welcome {userData?.firstName}! Don’t forget to enter all missing
           information on your profile.

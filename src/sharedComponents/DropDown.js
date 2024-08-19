@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Dropdown, Menu, Modal, Button, Input, message } from 'antd';
-import { EllipsisOutlined } from '@ant-design/icons';
+import { MoreOutlined } from '@ant-design/icons';
 import { post } from '../utility/httpService';
 
 const ThreeDotsDropdown = ({ onEdit, onDelete, emailId, driverName, role }) => {
@@ -63,7 +63,7 @@ const ThreeDotsDropdown = ({ onEdit, onDelete, emailId, driverName, role }) => {
   return (
     <>
       <Dropdown overlay={menu} trigger={['click']}>
-        <EllipsisOutlined style={{ fontSize: '24px', cursor: 'pointer', transform: 'rotate(90deg)' }} />
+        <Button  icon={<MoreOutlined style={{fontSize: '20px'}} />} type="text" />
       </Dropdown>
 
       {/* Send Invitation Modal */}

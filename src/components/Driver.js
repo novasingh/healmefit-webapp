@@ -1,27 +1,48 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import Header from './Header';
-import '../style.css';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Col, Button, Modal, Form, Input, message, Table, Skeleton, Select } from 'antd';
-import { v4 as uuidv4 } from 'uuid';
-import { get, post, remove } from "../utility/httpService";
-import ThreeDotsDropdown from '../sharedComponents/DropDown';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from "react";
+import Header from "./Header";
+import "../style.css";
+import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  Col,
+  Button,
+  Modal,
+  Form,
+  Input,
+  message,
+  Table,
+  Skeleton,
+  Select,
+} from "antd";
+import { v4 as uuidv4 } from "uuid";
+import { get, post, remove, updatePatch } from "../utility/httpService";
+import ThreeDotsDropdown from "../sharedComponents/DropDown";
+import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
 const Driver = (props) => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const [updateForm] = Form.useForm();
   const [addModalVisible, setAddModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalResults, setTotalResults] = useState(0);
-  const [formLayout, setFormLayout] = useState([{ id: uuidv4(), email: '', truckN: '', driverN: '', name: '', company: '', role: 'driver' }]);
+  const [formLayout, setFormLayout] = useState([
+    {
+      id: uuidv4(),
+      email: "",
+      truckN: "",
+      driverN: "",
+      name: "",
+      company: "",
+      role: "driver",
+    },
+  ]);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [viewModalVisible, setViewModalVisible] = useState(false);
 
   // New state for companies and selected company
   const [companies, setCompanies] = useState([]);
@@ -29,29 +50,41 @@ const Driver = (props) => {
 
   const columns = [
     {
-      title: 'Name',
-      dataIndex: 'name',
+      title: "Name",
+      dataIndex: "name",
       render: (_, record) => (
         <a onClick={() => navigate(`/driver/health`)}>
           {`${record.firstName} ${record.lastName}`}
         </a>
       ),
     },
-    { title: 'Email', dataIndex: 'email' },
-    { title: 'Driver N', dataIndex: 'driverN', render: (_, record) => record.driverN || '-' },
-    { title: 'Truck N', dataIndex: 'truckN', render: (_, record) => record.truckN || '-' },
+    { title: "Email", dataIndex: "email" },
     {
-      title: 'Company',
-      dataIndex: 'company',
+      title: "Driver N",
+      dataIndex: "driverN",
+      render: (_, record) => record.driverN || "-",
+    },
+    {
+      title: "Truck N",
+      dataIndex: "truckN",
+      render: (_, record) => record.truckN || "-",
+    },
+    {
+      title: "Company",
+      dataIndex: "company",
       render: (_, record) => {
-        return record?.company?.name ? record?.company?.name : '-';
+        return record?.company?.name ? record?.company?.name : "-";
       },
     },
     {
-      title: 'Action',
-      dataIndex: 'action',
+      title: "Action",
+      dataIndex: "action",
       render: (_, record) => (
-        <ThreeDotsDropdown onDelete={() => handleDeleteUser(record?.id)} onEdit={() => null} emailId={record?.email} />
+        <ThreeDotsDropdown
+          onDelete={() => handleDeleteUser(record?.id)}
+          onEdit={() => selectedUserData(record)}
+          emailId={record?.email}
+        />
       ),
     },
   ];
@@ -59,53 +92,58 @@ const Driver = (props) => {
   // Fetch list of companies
   const fetchCompanies = async () => {
     try {
-      const response = await get('/companies');
-      setCompanies(response?.data || []);
+      const response = await get("/companies", {
+        limit: 1000,
+      });
+      setCompanies(response?.data?.results || []);
     } catch (error) {
-      message.error('An error occurred while fetching companies.');
+      message.error("An error occurred while fetching companies.");
     }
   };
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await get('/users?role=driver', {
+      const response = await get("/users?role=driver", {
         page: currentPage,
         limit: pageSize,
-        company: selectedCompany,  // Include the selected company
+        company: selectedCompany, // Include the selected company
       });
-      setUsers(response?.data?.results?.map(user => ({
-        ...user,
-        key: user.id,
-        companyId: user.companyId  // Assuming users have a companyId field
-      })) || []);
+      setUsers(
+        response?.data?.results?.map((user) => ({
+          ...user,
+          key: user.id,
+          companyId: user.companyId, // Assuming users have a companyId field
+        })) || []
+      );
       setTotalResults(response?.totalResults || 0);
     } catch (error) {
-      message.error('An error occurred while fetching users. Please try again.');
+      message.error(
+        "An error occurred while fetching users. Please try again."
+      );
     } finally {
       setLoading(false);
     }
   }, [currentPage, pageSize, selectedCompany]);
 
-  const handleDeleteUser = async(id) => {
-    await remove(`/users/${id}`).then((response) => {
-      if(response){
-        message.success('Driver Deleted Successfully.')
-        fetchUsers()
-      }
-    }, error => {
-      console.log(error)
-    })
-  }
+  const handleDeleteUser = async (id) => {
+    try {
+      await remove(`/users/${id}`);
+      message.success("Driver Deleted Successfully.");
+      fetchUsers();
+    } catch (error) {
+      message.error("An error occurred while deleting the driver.");
+    }
+  };
 
   useEffect(() => {
-    if(currentPage && pageSize){
+    if (currentPage && pageSize) {
       fetchUsers();
     }
   }, [currentPage, fetchUsers, pageSize]);
 
   useEffect(() => {
-    fetchCompanies();  // Fetch companies on component mount
+    fetchCompanies(); // Fetch companies on component mount
   }, []);
 
   const handleTableChange = (pagination) => {
@@ -114,170 +152,364 @@ const Driver = (props) => {
   };
 
   const addFormLayout = () => {
-    setFormLayout([...formLayout, { id: uuidv4(), email: '', truckN: '', driverN: '', name: '', company: '', role: 'driver' }]);
+    setFormLayout([
+      ...formLayout,
+      {
+        id: uuidv4(),
+        email: "",
+        truckN: "",
+        driverN: "",
+        name: "",
+        company: "",
+        role: "driver",
+      },
+    ]);
   };
 
   const handleDeleteFormLayout = (id) => {
-    setFormLayout(formLayout.filter(item => item.id !== id));
+    setFormLayout(formLayout.filter((item) => item.id !== id));
   };
 
   const handleFormChange = () => {
-    const allFieldsFilled = formLayout.every(item => {
-      const values = form.getFieldsValue([`email_${item.id}`, `name_${item.id}`, `truckN${item.id}`, `driverN${item.id}`, `company_${item.id}`]);
-      return Object.values(values).every(value => !!value);
+    const allFieldsFilled = formLayout.every((item) => {
+      const values = form.getFieldsValue([
+        `email_${item.id}`,
+        `name_${item.id}`,
+        `truckN${item.id}`,
+        `driverN${item.id}`,
+        `company_${item.id}`,
+      ]);
+      return Object.values(values).every((value) => !!value);
     });
-    formLayout.length > 0 && form.setFieldsValue({ isAddMoreDisabled: !allFieldsFilled, isAddDriverDisabled: !allFieldsFilled });
+    formLayout.length > 0 &&
+      form.setFieldsValue({
+        isAddMoreDisabled: !allFieldsFilled,
+        isAddDriverDisabled: !allFieldsFilled,
+      });
+  };
+
+  const selectedUserData = (data) => {
+    updateForm.setFieldsValue({
+      id: data?.id,
+      email: data?.email,
+      truckN: data?.truckN,
+      driverN: data?.driverN,
+      name: `${data?.firstName} ${data?.lastName}`,
+      company: data?.company?.id,
+      role: "driver",
+    });
+    setSelectedUser(data);
+    setEditModalVisible(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalVisible(false);
+    setSelectedUser(null);
+    updateForm.resetFields()
   };
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
       const responses = await Promise.all(
-        formLayout.map(item => post('/users', {
-          email: values[`email_${item.id}`],
-          truckN: values[`truckN${item.id}`],
-          driverN: values[`driverN${item.id}`],
-          name: values[`name_${item.id}`],
-          company: values[`company_${item.id}`],  // Use companyId to link the company
-          role: 'driver',
-        }))
+        formLayout.map((item) =>
+          post("/users", {
+            email: values[`email_${item.id}`],
+            truckN: values[`truckN${item.id}`],
+            driverN: values[`driverN${item.id}`],
+            name: values[`name_${item.id}`],
+            company: values[`company_${item.id}`], // Use companyId to link the company
+            role: "driver",
+          })
+        )
       );
-      const allSuccessful = responses.every(response => response.status === 201);
-      if(allSuccessful){
-        message.success('Drivers added successfully!');
+      const allSuccessful = responses.every(
+        (response) => response.status === 201
+      );
+      if (allSuccessful) {
+        message.success("Drivers added successfully!");
         setAddModalVisible(false);
         form.resetFields();
-        setFormLayout([{ id: uuidv4(), email: '', truckN: '', driverN: '', name: '', company: '', role: 'driver' }]);
-        fetchUsers()
-      }else {
-        message.error('One or more requests failed.');
+        setFormLayout([
+          {
+            id: uuidv4(),
+            email: "",
+            truckN: "",
+            driverN: "",
+            name: "",
+            company: "",
+            role: "driver",
+          },
+        ]);
+        fetchUsers();
+      } else {
+        message.error("One or more requests failed.");
       }
-
     } catch (error) {
-      message.error(`Error: ${error.response?.data?.message || 'An error occurred while adding drivers. Please try again.'}`);
+      message.error(
+        `Error: ${
+          error.response?.data?.message ||
+          "An error occurred while adding drivers. Please try again."
+        }`
+      );
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const values = await updateForm.validateFields();
+      const response = await updatePatch(`/users/${selectedUser.id}`, {
+        email: values.email,
+        truckN: values.truckN,
+        driverN: values.driverN,
+        firstName: values.name.split(' ').length > 0 ? values.name.split(' ')[0] : 'User',
+        lastName: values.name.split(' ') ? values.name.split(' ')[1] : 'user',
+        company: values.company,
+      });
+      if (response.status === 200) {
+        message.success("Driver updated successfully!");
+        closeEditModal();
+        updateForm.resetFields()
+        fetchUsers();
+      } else {
+        message.error("An error occurred while updating the driver.");
+      }
+    } catch (error) {
+      message.error(
+        `Error: ${
+          error.response?.data?.message ||
+          "An error occurred while updating the driver. Please try again."
+        }`
+      );
     }
   };
 
   return (
     <div className={props.class} style={{ height: "100%" }}>
       <Header />
-      <Col style={{ paddingTop: "2%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600", marginBottom: '10px' }}>Drivers</h2>
-        <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
-        <Col>
-        <Select
-          placeholder="Select Company"
-          style={{ width: 250 }}
-          onChange={(value) => {
-            setSelectedCompany(value === "none" ? null : value);
-            setCurrentPage(1); // Reset to first page
+      <Col
+        style={{
+          paddingTop: "2%",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "25px",
+            color: "#0B5676",
+            letterSpacing: "1px",
+            fontWeight: "600",
+            marginBottom: "10px",
           }}
         >
-          <Select.Option value="none">None</Select.Option>
-          {companies.map(company => (
-            <Select.Option key={company.id} value={company.id}>
-              {company.name}
-            </Select.Option>
-          ))}
-        </Select>
-      </Col>
-      {users.length > 0 && (
-          <Button onClick={() => setAddModalVisible(true)} style={{ background: "#1FA6E0", height: "40px", color: "#fff" }}>+ Add Drivers</Button>
-        )}
-        </div>
-       
-      </Col>
-     
-      {loading ? (
-        <Skeleton active />
-      ) : users.length === 0 ? (
-        <Col lg={24} style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80%" }}>
-          <Col lg={10} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ textAlign: "center", color: "#BBBBBB", fontWeight: "600" }}>Looks like you have no drivers yet.</div>
-            <div style={{ textAlign: "center", color: "#BBBBBB", fontWeight: "400" }}>Add a driver and we will send them an invite to join your team.</div>
-            <Button onClick={() => setAddModalVisible(true)} style={{ background: "#1FA6E0", height: "40px", color: "#fff" }}>+ Add Drivers</Button>
+          Drivers
+        </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+          <Col>
+            <Select
+              placeholder="Select Company"
+              style={{ width: 250 }}
+              onChange={(value) => {
+                setSelectedCompany(value === "none" ? null : value);
+                setCurrentPage(1);
+              }}
+            >
+              <Option value="none">None</Option>
+              {companies.map((company) => (
+                <Option key={company.id} value={company.id}>
+                  {company.name}
+                </Option>
+              ))}
+            </Select>
           </Col>
-        </Col>
-      ) : (
+          <Button
+            type="primary"
+            onClick={() => setAddModalVisible(true)}
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "5px",
+            }}
+          >
+            <PlusOutlined />
+            Add Driver
+          </Button>
+        </div>
+      </Col>
+      <Skeleton loading={loading}>
         <Table
-          columns={columns}
           dataSource={users}
-          pagination={{ current: currentPage, pageSize, total: totalResults }}
+          columns={columns}
+          pagination={{
+            current: currentPage,
+            pageSize,
+            total: totalResults
+          }}
           onChange={handleTableChange}
-          className="fixed-pagination"
         />
-      )}
+      </Skeleton>
       <Modal
-        title="Add Drivers"
+        title="Add Driver"
         visible={addModalVisible}
         onCancel={() => setAddModalVisible(false)}
         onOk={handleSubmit}
-        okButtonProps={{ disabled: form.getFieldValue('isAddDriverDisabled') }}
-        cancelButtonProps={{ disabled: form.getFieldValue('isAddDriverDisabled') }}
+        okText="Add Driver"
+        cancelText="Cancel"
       >
-        <Form
-          form={form}
-          onFieldsChange={handleFormChange}
-        >
-          {formLayout.map(item => (
-            <Form.Item key={item.id}>
-              <div style={{ marginBottom: "20px", padding: "15px", border: "1px solid #E6E6E6", borderRadius: "8px" }}>
-                <Form.Item
-                  name={`email_${item.id}`}
-                  label="Email"
-                  rules={[{ required: true, message: 'Please input email!' }]}
-                >
-                  <Input placeholder="Email" />
-                </Form.Item>
-                <Form.Item
-                  name={`name_${item.id}`}
-                  label="Name"
-                  rules={[{ required: true, message: 'Please input name!' }]}
-                >
-                  <Input placeholder="Name" />
-                </Form.Item>
-                <Form.Item
-                  name={`truckN${item.id}`}
-                  label="Truck N"
-                  rules={[{ required: true, message: 'Please input truck number!' }]}
-                >
-                  <Input placeholder="Truck Number" />
-                </Form.Item>
-                <Form.Item
-                  name={`driverN${item.id}`}
-                  label="Driver N"
-                  rules={[{ required: true, message: 'Please input driver number!' }]}
-                >
-                  <Input placeholder="Driver Number" />
-                </Form.Item>
-                <Form.Item
-                  name={`company_${item.id}`}
-                  label="Company"
-                  rules={[{ required: true, message: 'Please select company!' }]}
-                >
-                  <Select placeholder="Select Company">
-                    {companies.map(company => (
-                      <Option key={company.id} value={company.id}>
-                        {company.name}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-                <Button type="link" danger onClick={() => handleDeleteFormLayout(item.id)}>
-                  <DeleteOutlined /> Delete
-                </Button>
-              </div>
-            </Form.Item>
+        <Form form={form} layout="vertical" onChange={handleFormChange}>
+          {formLayout.map((item) => (
+            <React.Fragment key={item.id}>
+              <Form.Item
+                label="Name"
+                name={`name_${item.id}`}
+                rules={[
+                  { required: true, message: "Please input the name!" },
+                ]}
+              >
+                <Input placeholder="Enter name" />
+              </Form.Item>
+              <Form.Item
+                label="Email"
+                name={`email_${item.id}`}
+                rules={[
+                  {
+                    required: true,
+                    type: "email",
+                    message: "Please input a valid email!",
+                  },
+                ]}
+              >
+                <Input placeholder="Enter email" />
+              </Form.Item>
+              <Form.Item
+                label="Driver Number"
+                name={`driverN${item.id}`}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input the driver number!",
+                  },
+                ]}
+              >
+                <Input placeholder="Enter driver number" />
+              </Form.Item>
+              <Form.Item
+                label="Truck Number"
+                name={`truckN${item.id}`}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input the truck number!",
+                  },
+                ]}
+              >
+                <Input placeholder="Enter truck number" />
+              </Form.Item>
+              <Form.Item
+                label="Company"
+                name={`company_${item.id}`}
+                rules={[
+                  { required: true, message: "Please select a company!" },
+                ]}
+              >
+                <Select placeholder="Select company">
+                  {companies.map((company) => (
+                    <Option key={company.id} value={company.id}>
+                      {company.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Button
+                type="dashed"
+                danger
+                onClick={() => handleDeleteFormLayout(item.id)}
+                icon={<DeleteOutlined />}
+                style={{ marginBottom: "20px" }}
+              >
+                Delete
+              </Button>
+            </React.Fragment>
           ))}
-          <Button
-            type="dashed"
-            onClick={addFormLayout}
-            style={{ width: '100%' }}
-            icon={<PlusOutlined />}
-            disabled={form.getFieldValue('isAddMoreDisabled')}
+          <Form.Item>
+            <Button type="dashed" onClick={addFormLayout}>
+              Add Another Driver
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+      <Modal
+        title="Edit Driver"
+        visible={editModalVisible}
+        onCancel={closeEditModal}
+        onOk={handleUpdate}
+        okText="Update Driver"
+        cancelText="Cancel"
+        centered
+      >
+        <Form form={updateForm} layout="vertical">
+          <Form.Item
+            label="Name"
+            name="name"
+            rules={[{ required: true, message: "Please input the name!" }]}
           >
-            Add More
-          </Button>
+            <Input placeholder="Enter name" />
+          </Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              {
+                required: true,
+                type: "email",
+                message: "Please input a valid email!",
+              },
+            ]}
+          >
+            <Input placeholder="Enter email" disabled={true} />
+          </Form.Item>
+          <Form.Item
+            label="Driver Number"
+            name="driverN"
+            rules={[
+              {
+                required: true,
+                message: "Please input the driver number!",
+              },
+            ]}
+          >
+            <Input placeholder="Enter driver number" />
+          </Form.Item>
+          <Form.Item
+            label="Truck Number"
+            name="truckN"
+            rules={[
+              {
+                required: true,
+                message: "Please input the truck number!",
+              },
+            ]}
+          >
+            <Input placeholder="Enter truck number" />
+          </Form.Item>
+          <Form.Item
+            label="Company"
+            name="company"
+            rules={[
+              { required: true, message: "Please select a company!" },
+            ]}
+          >
+            <Select placeholder="Select company">
+              {companies.map((company) => (
+                <Option key={company.id} value={company.id}>
+                  {company.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
         </Form>
       </Modal>
     </div>
