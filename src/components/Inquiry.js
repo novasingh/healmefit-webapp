@@ -7,6 +7,7 @@ import {
   Table,
   Skeleton,
   Tooltip,
+  Button, // Import Button component
 } from "antd";
 import { get } from "../utility/httpService";
 
@@ -30,7 +31,16 @@ const Inquiry = () => {
       render: (_, record) =>
         record.message ? (
           <Tooltip placement="bottom" title={record.message}>
-            <div style={{width: '150px', textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}>{record.message}</div>
+            <div
+              style={{
+                width: "150px",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+              }}
+            >
+              {record.message}
+            </div>
           </Tooltip>
         ) : (
           "-"
@@ -65,20 +75,6 @@ const Inquiry = () => {
     }
   }, [currentPage, pageSize]);
 
-  // const handleDeleteUser = async (id) => {
-  //   await remove(`/contact/${id}`).then(
-  //     (response) => {
-  //       if (response) {
-  //         message.success("Inquiry Deleted Successfully.");
-  //         fetchUsers();
-  //       }
-  //     },
-  //     (error) => {
-  //       console.log(error);
-  //     }
-  //   );
-  // };
-
   useEffect(() => {
     if (currentPage && pageSize) {
       fetchUsers();
@@ -88,6 +84,10 @@ const Inquiry = () => {
   const handleTableChange = (pagination) => {
     setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
+  };
+
+  const handleRefresh = () => {
+    fetchUsers();
   };
 
   return (
@@ -101,20 +101,22 @@ const Inquiry = () => {
           alignItems: "center",
         }}
       >
-        <h2
-          style={{
-            fontSize: "25px",
-            color: "#0B5676",
-            letterSpacing: "1px",
-            fontWeight: "600",
-            marginBottom: "10px",
-          }}
-        >
-          Inquiry
-        </h2>
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "20px" }}
-        ></div>
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+          <h2
+            style={{
+              fontSize: "25px",
+              color: "#0B5676",
+              letterSpacing: "1px",
+              fontWeight: "600",
+              marginBottom: "10px",
+            }}
+          >
+            Inquiry
+          </h2>
+          <Button onClick={handleRefresh} type="primary" style={{ display: "flex",height: '35px', alignItems: "center", gap: "20px" }} >
+            Refresh
+          </Button>
+        </div>
       </Col>
       {loading ? (
         <Skeleton active />
