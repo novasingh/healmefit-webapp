@@ -357,7 +357,7 @@ const Driver = () => {
       </Skeleton>
       <Modal
         title="Add Driver"
-        visible={addModalVisible}
+        open={addModalVisible}
         footer={null}
         onCancel={() => setAddModalVisible(false)}
         width={1084}
@@ -406,14 +406,14 @@ const Driver = () => {
                 onClick={handleSubmit}
                 style={{ background: "#1FA6E0", width: "265px", height: "40px", color: "#fff" }}
               >
-                Add Admin
+                Add Driver
               </Button>
             </div>
       </Form>
       </Modal>
       <Modal
         title="Edit Driver"
-        visible={editModalVisible}
+        open={editModalVisible}
         onCancel={closeEditModal}
         onOk={handleUpdate}
         okText="Update Driver"

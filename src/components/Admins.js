@@ -355,7 +355,7 @@ const Admins = () => {
 
       <Modal
         title="Edit Admin"
-        visible={editModalVisible}
+        open={editModalVisible}
         onCancel={closeEditModal}
         onOk={handleUpdate}
         okText="Update Admin"

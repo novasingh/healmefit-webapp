@@ -113,9 +113,9 @@ const Inquiry = () => {
           >
             Inquiry
           </h2>
-          <Button onClick={handleRefresh} type="primary" style={{ display: "flex",height: '35px', alignItems: "center", gap: "20px" }} >
+          {/* <Button onClick={handleRefresh} type="primary" style={{ display: "flex",height: '35px', alignItems: "center", gap: "20px" }} >
             Refresh
-          </Button>
+          </Button> */}
         </div>
       </Col>
       {loading ? (

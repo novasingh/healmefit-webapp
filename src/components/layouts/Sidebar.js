@@ -21,7 +21,6 @@ const Sidebar = (props) => {
     ],
     admin: [
       { name: 'Home', link: '/home', icon: faHome },
-      { name: 'Health', link: '/health', icon: faStethoscope },
       { name: 'Driver', link: '/driver', icon: faUser },
       { name: 'Managers', link: '/managers', icon: faUsers },
       { name: 'Admins', link: '/admins', icon: faUsers },
