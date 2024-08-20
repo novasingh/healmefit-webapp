@@ -1,19 +1,37 @@
-import React, { useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { PlusOutlined } from '@ant-design/icons';
+import { remove } from '../utility/httpService';
+import { AuthContext } from '../contexts/AuthContext';
 
 function DocumentCard({ document, onUpload, onDelete }) {
+  const { userData } = useContext(AuthContext);
   const fileInputRef = useRef(null);
   const [message, setMessage] = useState('');
   const [isUploaded, setIsUploaded] = useState(document.status === 'uploaded');
+  
+  useEffect(() => {
+    if(document.status){
+      setIsUploaded(document.status === 'uploaded')
+    }
+  }, [document.status])
+  
 
   const handleUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      await onUpload(file, document.id);
-      setIsUploaded(true); // Set the card to green
-      setMessage('Document uploaded successfully!');
-      setTimeout(() => setMessage(''), 3000);
+      const formData = new FormData();
+      formData.append('logo', file);
+      axios.post('https://api.healmefit.io/v1/companies/upload-logo', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data', 
+          'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+        },
+      })
+      .then(response => {
+        setIsUploaded(true);
+        onUpload(response?.data.logoPath, document)
+      })
     }
   };
 
@@ -23,13 +41,12 @@ function DocumentCard({ document, onUpload, onDelete }) {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (id) => {
     try {
-      await axios.delete(`/documents/${document.id}`);
-      onDelete(document.id);
-      setIsUploaded(false); // Reset the card color if deleted
-      setMessage('Document deleted successfully!');
-      setTimeout(() => setMessage(''), 3000);
+      await remove(`/document/${userData?.id}/documents/${document.uid}`).then((res) => {
+        onDelete(document);
+        setIsUploaded(false);
+      })
     } catch (error) {
       console.error('Error deleting document:', error);
     }
@@ -41,7 +58,7 @@ function DocumentCard({ document, onUpload, onDelete }) {
         {isUploaded ? 'Uploaded' : 'Not uploaded'}
       </p>
       <h4 className="document-name">{document.name}</h4>
-      <p className="document-description">{document.description}</p>
+      {!isUploaded && <p className="document-description">{document.description}</p>}
       {document.expireDate && (
         <p className="document-expire">Expires: {document.expireDate.format('YYYY-MM-DD')}</p>
       )}

@@ -357,7 +357,7 @@ const Driver = () => {
       </Skeleton>
       <Modal
         title="Add Driver"
-        visible={addModalVisible}
+        open={addModalVisible}
         footer={null}
         onCancel={() => setAddModalVisible(false)}
         width={1084}
@@ -413,7 +413,7 @@ const Driver = () => {
       </Modal>
       <Modal
         title="Edit Driver"
-        visible={editModalVisible}
+        open={editModalVisible}
         onCancel={closeEditModal}
         onOk={handleUpdate}
         okText="Update Driver"

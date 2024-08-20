@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Select, Switch, DatePicker, Input, Upload } from 'antd';
+import { Modal, Select, Switch, DatePicker, Input, Upload, Button } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import axios from 'axios';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -10,26 +11,20 @@ function DocumentUploadModal({ isVisible, onClose, onSubmit, documentTypes, pres
   const [isExpired, setIsExpired] = useState(false);
   const [expireDate, setExpireDate] = useState(null);
   const [description, setDescription] = useState('');
+  const [uploadedFiles, setUploadedFiles] = useState(null)
   const [fileList, setFileList] = useState([]);
 
   useEffect(() => {
     if (preselectedDocument) {
-      setSelectedDocument(preselectedDocument.name);
+      setSelectedDocument(preselectedDocument?.name);
       setDescription(preselectedDocument.description || '');
     }
   }, [preselectedDocument]);
 
   const handleOk = () => {
-    onSubmit({
-      id: preselectedDocument ? preselectedDocument.id : null,
-      name: selectedDocument,
-      status: 'uploaded',
-      description: description,
-      expireDate: isExpired ? expireDate : null,
-      files: fileList
-    });
+    onSubmit(uploadedFiles.logoPath, uploadedFiles)
     resetFields();
-    onClose();
+    onClose();   
   };
 
   const handleCancel = () => {
@@ -45,25 +40,46 @@ function DocumentUploadModal({ isVisible, onClose, onSubmit, documentTypes, pres
     setFileList([]);
   };
 
-  const handleFileChange = ({ fileList }) => setFileList(fileList);
+  const handleFileChange = ({ fileList }) => {
+    const file = fileList[0]?.originFileObj
+    const formData = new FormData();
+    formData.append('logo', file);
+     axios.post('https://api.healmefit.io/v1/companies/upload-logo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data', 
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+      },
+    })
+    .then(response => {
+      const data ={...preselectedDocument}
+      data.name = selectedDocument;
+      data.type = selectedDocument;
+      data.description = description;
+      data.isExpired = isExpired;
+      data.logoPath = response?.data.logoPath;
+      setUploadedFiles(data)
+    })    
+  };
 
   return (
     <Modal
       title="Add Document"
-      visible={isVisible}
+      open={isVisible}
       onOk={handleOk}
       onCancel={handleCancel}
+      centered
     >
       {!preselectedDocument && (
         <Select
           style={{ width: '100%', marginBottom: 16 }}
           placeholder="Select document type"
           onChange={(value) => setSelectedDocument(value)}
-          value={selectedDocument}
+          value={selectedDocument?.name}
         >
           {documentTypes.map(doc => (
             <Option key={doc.id} value={doc.name}>{doc.name}</Option>
           ))}
+          <Option key={6} value={'Other'}>Other</Option>
         </Select>
       )}
       <div style={{ marginBottom: 16 }}>
@@ -85,15 +101,10 @@ function DocumentUploadModal({ isVisible, onClose, onSubmit, documentTypes, pres
         style={{ marginBottom: 16 }}
       />
       <Upload
-        listType="picture-card"
-        fileList={fileList}
         onChange={handleFileChange}
         beforeUpload={() => false}
       >
-        <div>
-          <PlusOutlined />
-          <div style={{ marginTop: 8 }}>Upload</div>
-        </div>
+        <Button icon={<PlusOutlined />}>Click to Upload</Button>
       </Upload>
     </Modal>
   );

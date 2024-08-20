@@ -71,7 +71,7 @@ function Documents() {
       </div>
       <Modal
         title="Add Document"
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
       >

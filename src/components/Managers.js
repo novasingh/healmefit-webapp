@@ -272,7 +272,7 @@ const Managers = () => {
       )}
        <Modal
         title="Edit Manager"
-        visible={editModalVisible}
+        open={editModalVisible}
         onCancel={closeEditModal}
         onOk={handleUpdate}
         okText="Update Manager"
