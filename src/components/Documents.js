@@ -219,7 +219,7 @@ function Documents() {
               <span className="upload-count">
                 {uploadedCount}/{documents.length} uploaded
               </span>
-              <button className="see-less-button">See less ^</button>
+              {/* <button className="see-less-button">See less ^</button> */}
             </div>
           </div>
           <section className="documents-section">
