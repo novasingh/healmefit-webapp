@@ -16,11 +16,11 @@ const Callback = () => {
           params: {
             code,
             grant_type: 'authorization_code',
-            client_id: '23PGQL',
-            redirect_uri: 'http://localhost:3001/callback',
+            client_id: process.env.REACT_APP_FITBIT_CLIENT_ID,
+            redirect_uri: process.env.REACT_APP_FITBIT_REDIRECT_URI,
           },
           headers: {
-            Authorization: `Basic ${btoa('23PGQL:4ea0a9b6e679a00b512ee8478e94385d')}`,
+            Authorization: `Basic ${btoa(`${process.env.REACT_APP_FITBIT_CLIENT_ID}:${process.env.REACT_APP_FITBIT_CLIENT_SECRET}`)}`,
             'Content-Type': 'application/x-www-form-urlencoded',
           }
         })
