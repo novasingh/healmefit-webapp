@@ -23,19 +23,13 @@ import icon2 from "../assets/Icon (1).png";
 
 const { Option } = Select;
 
-const CLIENT_ID = "23PGQL";
-const CLIENT_SECRET = "4ea0a9b6e679a00b512ee8478e94385d";
-
 const Health = () => {
   const [AddModal, setAddModal] = useState(false);
   const [isDevicePaired, setIsDevicePaired] = useState(false);
   const navigate = useNavigate();
-  const clientId = CLIENT_ID;
-  const redirectUri = "http://localhost:3000/callback";
-  const scope = "activity nutrition profile settings sleep heartrate";
-  const fitbitAuthUrl = `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
-    redirectUri
-  )}&scope=${encodeURIComponent(scope)}&expires_in=604800`;
+  const fitbitAuthUrl = `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${process.env.REACT_APP_FITBIT_CLIENT_ID}&redirect_uri=${encodeURIComponent(
+    process.env.REACT_APP_FITBIT_REDIRECT_URI
+  )}&scope=${encodeURIComponent(process.env.REACT_APP_FITBIT_SCOPE)}&expires_in=604800`;
 
   const { userData } = useContext(AuthContext);
   const [heartData, setHeartData] = useState();
@@ -95,8 +89,8 @@ const Health = () => {
     const body = new URLSearchParams({
       grant_type: "refresh_token",
       refresh_token: refreshToken,
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
+      client_id: process.env.REACT_APP_FITBIT_CLIENT_ID,
+      client_secret: process.env.REACT_APP_FITBIT_CLIENT_SECRET,
     });
 
     try {
@@ -104,7 +98,7 @@ const Health = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Basic ${btoa(`${CLIENT_ID}:${CLIENT_SECRET}`)}`,
+          Authorization: `Basic ${btoa(`${process.env.REACT_APP_FITBIT_CLIENT_ID}:${process.env.REACT_APP_FITBIT_CLIENT_SECRET}`)}`,
         },
         body: body.toString(),
       });

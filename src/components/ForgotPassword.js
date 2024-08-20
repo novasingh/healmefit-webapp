@@ -67,7 +67,7 @@ const ForgotPassword = () => {
         </form>
        </>}
         <div className="login-footer">
-          <Link to="/">Login in </Link>
+          <Link to="/">Log in </Link>
         </div>
         <footer>
           <p>&copy; 2024 Heal Me Fit</p>

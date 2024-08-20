@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://api.fitbit.com/1/user/-';
+const BASE_URL = process.env.REACT_APP_FITBIT_BASE_URL;
 
 const getFitbitData = async (endpoint, token) => {
   try {

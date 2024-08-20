@@ -1,5 +1,5 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { message } from 'antd';
+import React, { useState, useContext } from 'react';
+import { Button, message, Spin } from 'antd';
 import { AuthContext } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
@@ -8,6 +8,7 @@ import emailicon from '../assets/email.png';
 import healmefitlogo from '../assets/HMFjpg.jpg';
 import checkmarkicon from '../assets/Frame 97.png';
 import { post } from '../utility/httpService';
+import { LoadingOutlined } from '@ant-design/icons';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -15,58 +16,61 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
+  // useEffect(() => {
+  //   const script = document.createElement('script');
+  //   script.src = 'https://accounts.google.com/gsi/client';
+  //   script.async = true;
+  //   script.defer = true;
   
-    script.onload = () => {
-      if (window.google && window.google.accounts) {
-        window.google.accounts.id.initialize({
-          client_id: 'YOUR_CLIENT_ID_HERE', // Replace with your actual client ID
-          callback: handleGoogleResponse,
-        });
-        window.google.accounts.id.renderButton(
-          document.getElementById('googleSignInDiv'),
-          { theme: 'outline', size: 'large', width: '100%' }
-        );
-        console.log('Google Sign-In button initialized');
-      }
-    };
+  //   script.onload = () => {
+  //     if (window.google && window.google.accounts) {
+  //       window.google.accounts.id.initialize({
+  //         client_id: 'YOUR_CLIENT_ID_HERE', // Replace with your actual client ID
+  //         callback: handleGoogleResponse,
+  //       });
+  //       window.google.accounts.id.renderButton(
+  //         document.getElementById('googleSignInDiv'),
+  //         { theme: 'outline', size: 'large', width: '100%' }
+  //       );
+  //       console.log('Google Sign-In button initialized');
+  //     }
+  //   };
   
-    script.onerror = () => {
-      console.error('Failed to load Google Sign-In script');
-    };
+  //   script.onerror = () => {
+  //     console.error('Failed to load Google Sign-In script');
+  //   };
   
-    document.body.appendChild(script);
+  //   document.body.appendChild(script);
   
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+  //   return () => {
+  //     document.body.removeChild(script);
+  //   };
+  // }, []);
 
-  const initializeGoogleSignIn = () => {
-    if (window.google && window.google.accounts) {
-      window.google.accounts.id.initialize({
-        client_id: '502464504225-suhn1s1437jq3neg8g57pat8po7pce3c.apps.googleusercontent.com', // Ensure this is correct
-        callback: handleGoogleResponse,
-      });
-      window.google.accounts.id.renderButton(
-        document.getElementById('googleSignInDiv'),
-        { theme: 'outline', size: 'large', width: '100%' }
-      );
-      console.log('Google Sign-In button initialized');
-    } else {
-      console.log('Google object not available yet');
-    }
-  };
+  // const initializeGoogleSignIn = () => {
+  //   if (window.google && window.google.accounts) {
+  //     window.google.accounts.id.initialize({
+  //       client_id: '502464504225-suhn1s1437jq3neg8g57pat8po7pce3c.apps.googleusercontent.com', // Ensure this is correct
+  //       callback: handleGoogleResponse,
+  //     });
+  //     window.google.accounts.id.renderButton(
+  //       document.getElementById('googleSignInDiv'),
+  //       { theme: 'outline', size: 'large', width: '100%' }
+  //     );
+  //     console.log('Google Sign-In button initialized');
+  //   } else {
+  //     console.log('Google object not available yet');
+  //   }
+  // };
 
   const handleSubmit = async (event) => {
+   
     event.preventDefault();
     setErrorMessage('');
     try {
+       setLoading(true)
       const response = await post('/auth/login', {
         email,
         password,
@@ -81,43 +85,47 @@ const Login = () => {
         if (['manager', 'driver', 'admin'].includes(user.role)) {
           message.success("Successfully Logged In");
           login(user, tokens.access.token);
+          setLoading(false)
           navigate('/home');
         } else {
           message.error('User role not authorized');
+          setLoading(false)
         }
-      } else {
-        message.error('Invalid login credentials');
-      }
+      }else{
+        setLoading(false)
+
+      } 
     } catch (error) {
+      setLoading(false)
       message.error('Error during login');
     }
   };
 
-  const handleGoogleResponse = async (response) => {
-    try {
-      console.log('Google response received:', response);
-      const backendResponse = await post('https://api.healmefit.io/v1/auth/google-login', {
-        credential: response.credential,
-      });
+  // const handleGoogleResponse = async (response) => {
+  //   try {
+  //     console.log('Google response received:', response);
+  //     const backendResponse = await post('https://api.healmefit.io/v1/auth/google-login', {
+  //       credential: response.credential,
+  //     });
 
-      console.log(backendResponse)
-      if (backendResponse.status === 200) {
-        const { user, tokens } = backendResponse.data;
-        if (['manager', 'driver', 'admin'].includes(user.role)) {
-          message.success("Successfully Logged In with Google");
-          login(user, tokens.access.token);
-          navigate('/home');
-        } else {
-          message.error('User role not authorized');
-        }
-      } else {
-        message.error('Google login failed');
-      }
-    } catch (error) {
-      console.error('Error during Google login:', error);
-      message.error('Error during Google login');
-    }
-  };
+  //     console.log(backendResponse)
+  //     if (backendResponse.status === 200) {
+  //       const { user, tokens } = backendResponse.data;
+  //       if (['manager', 'driver', 'admin'].includes(user.role)) {
+  //         message.success("Successfully Logged In with Google");
+  //         login(user, tokens.access.token);
+  //         navigate('/home');
+  //       } else {
+  //         message.error('User role not authorized');
+  //       }
+  //     } else {
+  //       message.error('Google login failed');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error during Google login:', error);
+  //     message.error('Error during Google login');
+  //   }
+  // };
 
   return (
     <div className="login-container">
@@ -135,8 +143,8 @@ const Login = () => {
         <h2>Welcome To Heal Me Fit!</h2>
         <p></p><br />
         <form onSubmit={handleSubmit}>
-          <div id="googleSignInDiv"></div>
-          <div className="divider">or</div>
+          {/* <div id="googleSignInDiv"></div>
+          <div className="divider">or</div> */}
           <div className="input-box">
             <input
               type="email"
@@ -157,7 +165,7 @@ const Login = () => {
           </div>
           {errorMessage && <p className="error-message">{errorMessage}</p>}
           <div className="input-box">
-            <input type="submit" value="Log In" />
+            <input disabled={loading} type="submit" value={loading ? 'Loading...' : 'Log In'} />
           </div>
         </form>
         <div className="login-footer">
