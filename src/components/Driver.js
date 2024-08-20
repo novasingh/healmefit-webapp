@@ -406,7 +406,7 @@ const Driver = () => {
                 onClick={handleSubmit}
                 style={{ background: "#1FA6E0", width: "265px", height: "40px", color: "#fff" }}
               >
-                Add Admin
+                Add Driver
               </Button>
             </div>
       </Form>

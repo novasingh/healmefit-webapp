@@ -1,14 +1,17 @@
 import React, { useRef, useState } from 'react';
 import axios from 'axios';
+import { PlusOutlined } from '@ant-design/icons';
 
-function DocumentCard({ document, onUpload, onDelete, userID }) {
+function DocumentCard({ document, onUpload, onDelete }) {
   const fileInputRef = useRef(null);
   const [message, setMessage] = useState('');
+  const [isUploaded, setIsUploaded] = useState(document.status === 'uploaded');
 
   const handleUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
       await onUpload(file, document.id);
+      setIsUploaded(true); // Set the card to green
       setMessage('Document uploaded successfully!');
       setTimeout(() => setMessage(''), 3000);
     }
@@ -24,6 +27,7 @@ function DocumentCard({ document, onUpload, onDelete, userID }) {
     try {
       await axios.delete(`/documents/${document.id}`);
       onDelete(document.id);
+      setIsUploaded(false); // Reset the card color if deleted
       setMessage('Document deleted successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
@@ -32,29 +36,34 @@ function DocumentCard({ document, onUpload, onDelete, userID }) {
   };
 
   return (
-    <div style={{color:"#1FA6E0", height:"28vh"}} className={`document-card ${document.status}`}>
-      <p style={{fontSize:"12px",color:document.status !== 'uploaded' ? "#1FA6E0" : '#88C43E',paddingBottom:"8px"}}>
-        {document.status === 'uploaded' ? 'Uploaded' : 'Not uploaded'}
+    <div className={`document-card ${isUploaded ? 'uploaded' : ''}`}>
+      <p className="document-status">
+        {isUploaded ? 'Uploaded' : 'Not uploaded'}
       </p>
-      <h4 style={{textAlign:"left"}}>{document.name}</h4>
-      
-      {document.status === 'uploaded' ? (
-        <>
-          <button className="button-preview" onClick={handlePreview}>Preview</button>
+      <h4 className="document-name">{document.name}</h4>
+      <p className="document-description">{document.description}</p>
+      {document.expireDate && (
+        <p className="document-expire">Expires: {document.expireDate.format('YYYY-MM-DD')}</p>
+      )}
+      {isUploaded ? (
+        <div className="document-actions">
+          <button className="button-preview" onClick={handlePreview}>View</button>
           <button className="button-delete" onClick={handleDelete}>Delete</button>
-        </>
+        </div>
       ) : (
-        <>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            style={{ display: 'none' }} 
+        <div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
             onChange={handleUpload}
           />
-          <button className="upload-icon" onClick={() => fileInputRef.current.click()}>+</button>
-        </>
+          <button className="upload-icon" onClick={() => fileInputRef.current.click()}>
+            <PlusOutlined />
+          </button>
+        </div>
       )}
-      {message && <p>{message}</p>}
+      {message && <p className="message">{message}</p>}
     </div>
   );
 }

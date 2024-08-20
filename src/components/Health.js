@@ -9,6 +9,8 @@ import { calculateHealthScore, isTokenExpired } from '../utility/utils';
 import Chart from 'react-apexcharts';
 import { fetchDeviceData, fetchHeartDetail, fetchProfileData, fetchSleepData, fetchStepData } from '../utility/fitbitServices';
 import { HeartFilled, MoonFilled, StepForwardOutlined, CalculatorOutlined } from '@ant-design/icons';
+import icon1 from '../assets/Icon.png';
+import icon2 from '../assets/Icon (1).png'
 
 
 const { Option } = Select;
@@ -35,6 +37,19 @@ const Health = () => {
   const [haveTokens, setHaveTokens] = useState(false);
   const [loading, setLoading] = useState(false);
   const [timeRange, setTimeRange] = useState('1d'); // Default to one day
+  const HealthMetric = ({ icon, title, value, subtext, status, statusColor, recommendation }) => (
+    <div style={{padding: '20px', backgroundColor: '#f9fafb', borderRadius: '8px'}}>
+      <div style={{display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px"}}>
+        {icon}
+        <span style={{fontSize: "16px", fontWeight: 600}}>{title}</span>
+      </div>
+      <div style={{fontSize: "32px", fontWeight: 700}}>{value}</div>
+      <div style={{color: "#6B7280", fontSize: "14px"}}>{subtext}</div>
+      <div style={{color: statusColor, fontSize: "14px", marginTop: "5px"}}>
+        {status} <span style={{color: "#6B7280"}}>{recommendation}</span>
+      </div>
+    </div>
+  );
 
   const handleFitbitAuth = () => {
     window.location.href = fitbitAuthUrl;
@@ -211,6 +226,8 @@ const Health = () => {
         },
       },
       labels: ['Heart Rate', 'Sleep', 'BMI', 'Steps'],
+
+      
     },
   };
 
@@ -236,9 +253,9 @@ const Health = () => {
   onChange={handleTimeRangeChange} 
   style={{ width: "150px", height: "40px" }}  // Consistent width and height
 >
-  <Option value="1d">One Day</Option>
-  <Option value="1w">One Week</Option>
-  <Option value="1m">One Month</Option>
+  <Option value="1d">Today</Option>
+  <Option value="1w">Last 7 Days</Option>
+  <Option value="1m">Last 30 Days</Option>
 </Select>
 <Button 
   onClick={handleSyncClick} 
@@ -262,74 +279,102 @@ const Health = () => {
         </Col>
       ) : (
         <>
-     <Row gutter={[16, 16]}>
-     <Col lg={20} md={24}>
-    <div style={{borderRadius:"8px", border:"0.4px solid #d9d9d9", padding: '20px', display:"flex", justifyContent:"space-around"}}>
-      <div style={{display:"flex", flexDirection:"column", alignItems:"center", gap:"5px"}}>
-        <div style={{color:"#BBBBBB", fontSize:"16px"}}>Age</div>
-        <div style={{fontSize:"24px", fontWeight:700}}>{profileData?.user?.age}</div>
-      </div>
-      <div style={{display:"flex", flexDirection:"column", alignItems:"center", gap:"5px"}}>
-        <div style={{color:"#BBBBBB", fontSize:"16px"}}>Height</div>
-        <div style={{fontSize:"24px", fontWeight:700}}>{String(profileData?.user?.height).split('.')[0]}"</div>
-      </div>
-      <div style={{display:"flex", flexDirection:"column", alignItems:"center", gap:"5px"}}>
-        <div style={{color:"#BBBBBB", fontSize:"16px"}}>Weight</div>
-        <div style={{fontSize:"24px", fontWeight:700}}>{profileData?.user?.weight} lb</div>
-      </div>
-    </div>
-  </Col>
-  {/* First row */}
-  <Col lg={12} md={12}>
-    <div style={{ borderRadius: "8px", border: "0.4px solid #d9d9d9", padding: '20px' }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-        <HeartFilled style={{ color: "#8B5CF6", fontSize: "24px" }} />
-        <span style={{ fontSize: "18px", fontWeight: 600 }}>Resting Heart Rate</span>
-      </div>
-      <div style={{ fontSize: "36px", fontWeight: 700 }}>{heartData?.restingHeartRate || 61} bpm</div>
-      <div style={{ color: "#BBBBBB", fontSize: "14px" }}>Daily Average</div>
-      <div style={{ color: "#10B981", fontSize: "14px", marginTop: "5px" }}>Excellent</div>
-    </div>
-  </Col>
-  <Col lg={12} md={12}>
-    <div style={{ borderRadius: "8px", border: "0.4px solid #d9d9d9", padding: '20px' }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-        <MoonFilled style={{ color: "#3B82F6", fontSize: "24px" }} />
-        <span style={{ fontSize: "18px", fontWeight: 600 }}>Sleep</span>
-      </div>
-      <div style={{ fontSize: "36px", fontWeight: 700 }}>{sleepHours}h {sleepMinutes}m</div>
-      <div style={{ color: "#BBBBBB", fontSize: "14px" }}>Last Night</div>
-      <div style={{ color: "#F59E0B", fontSize: "14px", marginTop: "5px" }}>Fair</div>
-    </div>
-  </Col>
+        
+        <Row gutter={[16, 16]}>
+      {/* Top row with Age, Height, Weight */}
+      <Col span={5}>
+        <div style={{padding: '20px', backgroundColor: '#f9fafb', borderRadius: '8px'}}>
+          <div style={{color: "#6B7280", fontSize: "14px", marginBottom: '4px', marginLeft: 80}}>Age</div>
+          <div style={{fontSize: "24px", fontWeight: 700, marginLeft: 80}}>{profileData?.age || 21}</div>
+        </div>
+      </Col>
+      <Col span={5}>
+        <div style={{padding: '20px', backgroundColor: '#f9fafb', borderRadius: '8px'}}>
+          <div style={{color: "#6B7280", fontSize: "14px", marginBottom: '4px', marginLeft: 80}}>Height</div>
+          <div style={{fontSize: "24px", fontWeight: 700, marginLeft: 70}}>{profileData?.height || 187.9}</div>
+        </div>
+      </Col>
+      <Col span={5}>
+        <div style={{padding: '20px', backgroundColor: '#f9fafb', borderRadius: '8px'}}>
+          <div style={{color: "#6B7280", fontSize: "14px", marginBottom: '4px', marginLeft: 80}}>Weight</div>
+          <div style={{fontSize: "24px", fontWeight: 700, marginLeft: 70}}>{profileData?.weight || 180} lb</div>
+        </div>
+      </Col>
 
-  {/* Second row */}
-  <Col lg={12} md={12}>
-    <div style={{ borderRadius: "8px", border: "0.4px solid #d9d9d9", padding: '20px' }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-        <StepForwardOutlined style={{ color: "#10B981", fontSize: "24px" }} />
-        <span style={{ fontSize: "18px", fontWeight: 600 }}>Steps</span>
-      </div>
-      <div style={{ fontSize: "36px", fontWeight: 700 }}>{stepData?.steps || 4050}</div>
-      <div style={{ color: "#BBBBBB", fontSize: "14px" }}>Daily Average</div>
-      <div style={{ color: "#EF4444", fontSize: "14px", marginTop: "5px" }}>Poor</div>
-    </div>
-  </Col>
-  <Col lg={12} md={12}>
-    <div style={{ borderRadius: "8px", border: "0.4px solid #d9d9d9", padding: '20px' }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-        <CalculatorOutlined style={{ color: "#3B82F6", fontSize: "24px" }} />
-        <span style={{ fontSize: "18px", fontWeight: 600 }}>BMI</span>
-      </div>
-      <div style={{ fontSize: "36px", fontWeight: 700 }}>20.3</div>
-      <div style={{ color: "#BBBBBB", fontSize: "14px" }}>Last calculated 7/26/23</div>
-      <div style={{ color: "#10B981", fontSize: "14px", marginTop: "5px" }}>Good</div>
-    </div>
-  </Col>
-</Row>
-<Col lg={24} md={24} style={{display:"flex", justifyContent:"center", marginTop: "20px"}}>
-  <Chart options={chartOptions.options} series={chartOptions.series} type="radialBar" height={350} width={350} />
+      {/* Left column with health metrics */}
+      <Col span={12}>
+        <Row gutter={[16, 16]}>
+          <Col span={10}>
+            <HealthMetric
+              icon={<HeartFilled style={{color: "#8B5CF6", fontSize: "20px"}} />}
+              title="Resting Heart Rate"
+              value={`${heartData?.restingHeartRate || 61} bpm`}
+              subtext="Daily average"
+              status="Excellent"
+              statusColor="#10B981"
+              recommendation="(40-75bpm)"
+            />
+          </Col>
+          <Col span={10}>
+            <HealthMetric
+              icon={<MoonFilled style={{color: "#3B82F6", fontSize: "20px"}} />}
+              title="Sleep"
+              value={`${sleepData?.hours || 5}h ${sleepData?.minutes || 45}m`}
+              subtext="Last night"
+              status="Fair"
+              statusColor="#F59E0B"
+              recommendation="(Recommended 7-9h)"
+            />
+          </Col>
+          <Col span={10}>
+  <HealthMetric
+    icon={
+      <img 
+        src={icon1}
+        alt="icon" 
+        style={{ color: "#10B981", fontSize: "20px", width: "20px", height: "20px" }} 
+      />
+    }
+    title="Steps"
+    value={stepData?.steps || 4050}
+    subtext="Daily average"
+    status="Poor"
+    statusColor="#EF4444"
+    recommendation="(Recommended 10,000)"
+  />
 </Col>
+
+          <Col span={10}>
+            <HealthMetric
+              icon={
+                <img 
+                  src={icon2}
+                  alt="icon" 
+                  style={{ color: "#10B981", fontSize: "20px", width: "20px", height: "20px" }} 
+                />
+              }
+              title="BMI"
+              value={profileData?.bmi || 20.3}
+              subtext="Last 7 Days"
+              status="Good"
+              statusColor="#10B981"
+              recommendation="(18.5 - 24.9)"
+            />
+          </Col>
+        </Row>
+      </Col>
+
+      {/* Right column with chart */}
+      <Col span={12}>
+        <div style={{height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'auto'}}>
+          <Chart options={chartOptions.options} series={chartOptions.series} type="radialBar" height={550} width={500} />
+        </div>
+      </Col>
+    </Row>
+
+{/* <Col lg={24} md={24} style={{display:"flex", justifyContent:"center", marginTop: "20px"}}>
+  <Chart options={chartOptions.options} series={chartOptions.series} type="radialBar" height={350} width={350} />
+</Col> */}
         </>
       )}
       <Modal centered={true} open={AddModal} footer={null} onCancel={() => setAddModal(false)}>

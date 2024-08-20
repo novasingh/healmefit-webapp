@@ -396,7 +396,7 @@ const AddManagerModal = ({ visible, form, formLayout, isAddMoreDisabled, isAddMa
                 style={{ background: "#1FA6E0", width: "265px", height: "40px", color: "#fff" }}
                 disabled={isAddManagerDisabled}
               >
-                Add Admin
+                Add Manager
               </Button>
             </div>
       </Form>
