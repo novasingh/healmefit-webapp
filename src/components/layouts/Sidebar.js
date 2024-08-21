@@ -1,6 +1,6 @@
 import React, { useContext} from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../../assets/HMFjpg.jpg'; 
+import logo from '../../assets/HealMeFit-Logo.webp'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faUser, faBuilding, faStethoscope, faFile, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { AuthContext } from '../../contexts/AuthContext';

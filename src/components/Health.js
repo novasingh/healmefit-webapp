@@ -18,8 +18,8 @@ import {
   HeartFilled,
   MoonFilled
 } from "@ant-design/icons";
-import icon1 from "../assets/Icon.png";
-import icon2 from "../assets/Icon (1).png";
+import icon1 from "../assets/sleep-hmf.webp";
+import icon2 from "../assets/BMI-hmf.webp";
 
 const { Option } = Select;
 

@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import { message } from 'antd';
 import { Link } from 'react-router-dom';
 import './Login.css'; // Assuming you have styles for login page
-import facebookicon from '../assets/facebook.png';
-import emailicon from '../assets/email.png';
-import healmefitlogo from '../assets/HMFjpg.jpg';
-import checkmarkicon from '../assets/ResetLogin.png'; // Assuming you have the checkmark icon
+import facebookicon from '../assets/facebook-hmf.webp';
+import emailicon from '../assets/email-hmf.webp';
+import healmefitlogo from '../assets/HealMeFit-Logo.webp';
+import checkmarkicon from '../assets/ResetLogin.webp'; // Assuming you have the checkmark icon
 import { post } from '../utility/httpService';
 
 const ForgotPassword = () => {

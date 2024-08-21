@@ -3,10 +3,10 @@ import { Button, message, Spin } from 'antd';
 import { AuthContext } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
-import facebookicon from '../assets/facebook.png';
-import emailicon from '../assets/email.png';
-import healmefitlogo from '../assets/HMFjpg.jpg';
-import checkmarkicon from '../assets/Frame 97.png';
+import facebookicon from '../assets/facebook-hmf.webp';
+import emailicon from '../assets/email-hmf.webp';
+import healmefitlogo from '../assets/HealMeFit-Logo.webp';
+import checkmarkicon from '../assets/login-hmf.webp';
 import { post } from '../utility/httpService';
 import { LoadingOutlined } from '@ant-design/icons';
 

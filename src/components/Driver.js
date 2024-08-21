@@ -53,7 +53,7 @@ const Driver = () => {
       title: "Name",
       dataIndex: "name",
       render: (_, record) => (
-        <a onClick={() => navigate(`/driver/health`)}>
+        <a onClick={() => navigate(`/driver/driverdetail`)}>
           {`${record.firstName} ${record.lastName}`}
         </a>
       ),
