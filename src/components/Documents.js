@@ -6,7 +6,7 @@ import Header from "./Header";
 import { Button, Col, message, Spin, Table, Space } from "antd";
 import { get, post } from "../utility/httpService";
 import { AuthContext } from "../contexts/AuthContext";
-import { DownloadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const initialDocuments = [
   {
@@ -177,9 +177,24 @@ function Documents() {
       title: "Uploaded on",
       dataIndex: "uploadDate",
       key: "uploadDate",
+      render: (date) => new Date(date).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      }),
     },
     {
-      title: "",
+      title: "Expire Date",
+      dataIndex: "expireDate",
+      key: "expireDate",
+      render: (date) => new Date(date).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      }),
+    },
+    {
+      title: "Action",
       key: "action",
       render: (_, record) => (
         <Space size="middle">
@@ -187,10 +202,17 @@ function Documents() {
             onClick={() => window.open(record.fileUrl, "_blank")}
             icon={<DownloadOutlined />}
           />
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record.key)}
+          />
         </Space>
       ),
     },
   ];
+  
+  
 
   const handleClose = (notiId) => {
       get(`/notifications/${notiId}/read`).then((res) => {
