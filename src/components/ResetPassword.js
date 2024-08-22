@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { Input, message } from "antd";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "./Login.css";
-import facebookicon from "../assets/facebook.png";
-import emailicon from "../assets/email.png";
-import healmefitlogo from "../assets/HMFjpg.jpg";
-import checkmarkicon from "../assets/ResetLogin.png";
+import facebookicon from "../assets/facebook-hmf.webp";
+import emailicon from "../assets/email-hmf.webp";
+import healmefitlogo from "../assets/HealMeFit-Logo.webp";
+import checkmarkicon from "../assets/ResetLogin.webp";
 import { post } from "../utility/httpService";
 
 const ResetPassword = () => {
@@ -101,7 +101,7 @@ const ResetPassword = () => {
           </div>
           <footer>
             <p>&copy; 2024 Heal Me Fit</p>
-            <p>123 Street, San Jose, CA 12345 USA</p>
+            <p>3104 E. Camelback Rd, Ste 2634, Phoenix, AZ 85016</p>
             <br></br>
             <div className="social-links">
               <a href="https://www.facebook.com/HealMeFit">

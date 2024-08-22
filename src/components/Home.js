@@ -158,7 +158,7 @@ const Home = () => {
                 style={{ justifyContent: "space-between", display: "flex", flexWrap: "wrap", gap: "20px" }}
               >
                 <Form.Item label={<div style={{ color: "#BBBBBB" }}>First Name</div>} name="firstName" rules={[{ required: true, message: "Please enter your first name" }]}>
-                  <Input style={{ width: "300px", color: "#000" }} placeholder="Enter First Name" />
+                  <Input style={{ width: "300px", color: "#000" }} placeholder="Enter First Name" defaultValue={profileData?.firstName} />
                 </Form.Item>
                 <Form.Item label={<div style={{ color: "#BBBBBB" }}>Last Name</div>} name="lastName" rules={[{ required: true, message: "Please enter your last name" }]}>
                   <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Last Name" />

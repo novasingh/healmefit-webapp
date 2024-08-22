@@ -1,5 +1,6 @@
 .documents-dashboard {
     padding: 20px;
+    margin-top: -100px;
   }
   
   .dashboard-header {
@@ -19,6 +20,7 @@
   .upload-button {
     width: 10%;
     height: 40px;
+    margin-top: 80px;
     color: #1FA6E0;
     border: 1.5px solid #1FA6E0;
     font-weight: 600;

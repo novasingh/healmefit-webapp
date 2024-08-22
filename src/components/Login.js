@@ -3,10 +3,10 @@ import { Button, message, Spin } from 'antd';
 import { AuthContext } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
-import facebookicon from '../assets/facebook.png';
-import emailicon from '../assets/email.png';
-import healmefitlogo from '../assets/HMFjpg.jpg';
-import checkmarkicon from '../assets/Frame 97.png';
+import facebookicon from '../assets/facebook-hmf.webp';
+import emailicon from '../assets/email-hmf.webp';
+import healmefitlogo from '../assets/HealMeFit-Logo.webp';
+import checkmarkicon from '../assets/login-hmf.webp';
 import { post } from '../utility/httpService';
 import { LoadingOutlined } from '@ant-design/icons';
 
@@ -173,7 +173,7 @@ const Login = () => {
         </div>
         <footer>
           <p>&copy; 2024 Heal Me Fit</p>
-          <p>123 Street, San Jose, CA 12345 USA</p><br />
+          <p>3104 E. Camelback Rd, Ste 2634, Phoenix, AZ 85016</p><br />
           <div className="social-links">
           <a href="https://www.facebook.com/HealMeFit"><img src={facebookicon} alt="Facebook" /></a>
           <a href="mailto:support@healmefit.com"><img src={emailicon} alt="Email" /></a>

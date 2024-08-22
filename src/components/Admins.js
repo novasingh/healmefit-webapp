@@ -58,8 +58,6 @@ const Admins = () => {
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      console.error('Error fetching users:', error);
-      message.error('An error occurred while fetching users. Please try again.');
     }
   };
 
@@ -69,8 +67,6 @@ const Admins = () => {
         message.success('Admin Deleted Successfully.')
         fetchUsers()
       }
-    }, error => {
-      console.log(error)
     })
   }
 
@@ -161,11 +157,7 @@ const Admins = () => {
       }else {
         message.error('One or more requests failed.');
       }
-
-      message.success('Admins added successfully!');
-      
     } catch (error) {
-      console.error('Error:', error);
       if (error.response && error.response.data) {
         message.error(`Error: ${error.response.data.message}`);
       } else {

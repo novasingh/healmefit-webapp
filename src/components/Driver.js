@@ -16,7 +16,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { get, post, remove, updatePatch } from "../utility/httpService";
 import ThreeDotsDropdown from "../sharedComponents/DropDown";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -53,9 +53,9 @@ const Driver = () => {
       title: "Name",
       dataIndex: "name",
       render: (_, record) => (
-        <a onClick={() => navigate(`/driver/health`)}>
+        <Link to={`/driver/${record.id}`}>
           {`${record.firstName} ${record.lastName}`}
-        </a>
+        </Link>
       ),
     },
     { title: "Email", dataIndex: "email" },
@@ -74,6 +74,13 @@ const Driver = () => {
       dataIndex: "company",
       render: (_, record) => {
         return record?.company?.name ? record?.company?.name : "-";
+      },
+    },
+    {
+      title: "Health Score",
+      dataIndex: "healthScore",
+      render: (_, record) => {
+        return record?.healthData?.healthScore ? Math.round(record?.healthData?.healthScore) : "-";
       },
     },
     {

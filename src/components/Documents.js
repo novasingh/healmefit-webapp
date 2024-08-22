@@ -4,9 +4,9 @@ import DocumentUploadModal from "./DocumentUploadModal";
 import "./Documents.css";
 import Header from "./Header";
 import { Button, Col, message, Spin, Table, Space } from "antd";
-import { get, post } from "../utility/httpService";
+import { get, post, remove } from "../utility/httpService";
 import { AuthContext } from "../contexts/AuthContext";
-import { DownloadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const initialDocuments = [
   {
@@ -54,6 +54,7 @@ function Documents() {
   const [loading, setLoading] = useState(false);
   const { userData } = useContext(AuthContext);
   const [tableData, setTableData] = useState([]);
+  const [notificationsList, setNotificationsList] = useState([])
 
   useEffect(() => {
     const count = documents.filter((doc) => doc.status === "uploaded").length;
@@ -86,17 +87,28 @@ function Documents() {
     setLoading(false);
   }, [userData?.id]);
 
+  const getAllNotifactions = useCallback(async() => {
+    const response = await get(`/notifications/${userData?.id}`);
+    setNotificationsList(response?.data)
+
+  }, [userData?.id])
+
   useEffect(() => {
     fetchDocuments();
-  }, [fetchDocuments]);
+    getAllNotifactions()
+  }, [fetchDocuments, getAllNotifactions]);
 
   const handleUpload = async (uploadedFile, documentId) => {
-    await post(`/document/${userData.id}/documents`, {
+    const data = {
       name: documentId.name,
       description: documentId.description,
       fileUrl: uploadedFile,
       type: documentId.type,
-    }).then((res) => {
+    }
+    if (documentId?.expireAt){
+      data.expireAt = documentId.expireAt
+    }
+    await post(`/document/${userData.id}/documents`, data ).then((res) => {
       if (res.status === 201) {
         message.success(`${documentId.type} uploaded successfully.`);
         const updatedDocuments = documents.map((doc) =>
@@ -115,17 +127,25 @@ function Documents() {
     });
   };
 
-  const handleDelete = (documentId) => {
-    if (documentId) {
-      const updatedDocuments = documents.map((doc) =>
-        doc.id === documentId.id
-          ? { ...doc, status: "not_uploaded", file: null, uid: null }
-          : doc
-      );
-      setDocuments(updatedDocuments);
-      message.success(`${documentId.type} deleted successfully.`);
+  const handleDelete = (document) => {
+    if (document) {
+
+      remove(`/document/${userData?.id}/documents/${document._id}`).then((res) => {
+        if(res){
+          const updatedDocuments = documents.map((doc) =>
+            doc.id === document.id
+              ? { ...doc, status: "not_uploaded", file: null, uid: null }
+              : doc
+          );
+          setDocuments(updatedDocuments);
+          message.success(`${document.type} deleted successfully.`);
+          fetchDocuments();
+        } 
+      })
     }
   };
+
+ 
 
   const progressPercentage = (uploadedCount / documents.length) * 100;
 
@@ -167,9 +187,24 @@ function Documents() {
       title: "Uploaded on",
       dataIndex: "uploadDate",
       key: "uploadDate",
+      render: (date) => new Date(date).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      }),
     },
     {
-      title: "",
+      title: "Expire Date",
+      dataIndex: "expireAt",
+      key: "expireAt",
+      render: (date) => date ?  new Date(date).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      }) : '-',
+    },
+    {
+      title: "Action",
       key: "action",
       render: (_, record) => (
         <Space size="middle">
@@ -177,10 +212,25 @@ function Documents() {
             onClick={() => window.open(record.fileUrl, "_blank")}
             icon={<DownloadOutlined />}
           />
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record)}
+          />
         </Space>
       ),
     },
   ];
+  
+  
+
+  const handleClose = (notiId) => {
+      get(`/notifications/${notiId}/read`).then((res) => {
+       if(res.status === 200) {
+        getAllNotifactions()
+       }
+      })
+  }
 
   return loading ? (
     <Col
@@ -196,6 +246,16 @@ function Documents() {
   ) : (
     <div>
       <Header />
+      {notificationsList.length > 0 && notificationsList.map((obj) => !obj.isRead && (
+        <div key={obj.id} style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#E7F8D6', padding: '10px', borderRadius: '5px', marginTop: '10px' }}>
+         <p style={{ color: "#88C43E", margin: "auto", textAlign: "left", flex: 1 }}>
+          {obj.message}
+         </p>
+         <button onClick={() => handleClose(obj.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '26px', color: 'black', marginLeft: '10px' }}>
+           &times;
+         </button>
+       </div>
+      ))}
       <div className="documents-dashboard">
         <main className="dashboard-main">
           <header className="dashboard-header">
@@ -219,7 +279,7 @@ function Documents() {
               <span className="upload-count">
                 {uploadedCount}/{documents.length} uploaded
               </span>
-              <button className="see-less-button">See less ^</button>
+              {/* <button className="see-less-button">See less ^</button> */}
             </div>
           </div>
           <section className="documents-section">

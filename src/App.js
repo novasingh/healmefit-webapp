@@ -19,6 +19,7 @@ import Inquiry from './components/Inquiry';
 import BlankLayout from './components/layouts/BlankLayout';
 import MasterLayout from './components/layouts/MasterLayout';
 import PageNotFound from './components/PageNotFound';
+import DriverDetail from './components/DriverDetail';
 
 const App = () => {
   return (
@@ -44,11 +45,12 @@ const Content = () => {
           <Route path="/home" element={<MasterLayout children={<Home />} />} />
           <Route path="/driver" element={<MasterLayout children={<Driver />} />} />
           <Route path="/health" element={<MasterLayout children={<Health />} />} />
-          <Route path="/driver/health" element={<MasterLayout children={<Health />} />} />
+          <Route path="/driver/driverdetail" element={<MasterLayout children={<DriverDetail />} />} />
           <Route path="/documents" element={<MasterLayout children={<Documents />} />} />
           <Route path="/managers" element={<MasterLayout children={<Managers  />} />} />
           <Route path="/admins" element={<MasterLayout children={<Admins />} />} />
           <Route path="/companies" element={<MasterLayout children={<Companies />} />} />
+          <Route path="/driver/:id" element={<MasterLayout children={<DriverDetail />} />} />
           <Route path="/inquiry" element={<MasterLayout children={<Inquiry />} />} />
           <Route path="/*" element={<PageNotFound />} />
         </Routes>
