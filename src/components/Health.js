@@ -154,25 +154,31 @@ const Health = () => {
       setProfileData(profile);
       setDeviceData(device);
 
-      const data = {
-        age: profile?.user?.age,
-        sleep: sleep?.summary?.totalTimeInBed,
-        steps: profile?.user?.averageDailySteps,
-        heartRate: heart["activities-heart"][0]?.value?.restingHeartRate,
-        bmi: calculateBMI(
-          profile?.user?.weight || 42,
-          profileData?.user?.height
-        ),
-        healthScore: (calculateHealthScore(
+      const healthScore = Math.round(
+        calculateHealthScore(
           profile?.user?.age,
           calculateBMI(
-            profile?.user?.weight || 42,
+            profile?.user?.weight || 65,
             profile?.user?.height
           ),
           heart["activities-heart"][0]?.value?.restingHeartRate,
           profile?.user?.averageDailySteps,
           sleep?.summary?.totalTimeInBed / 60
-        ) * 100).toString()
+        ) * 100
+      );
+
+      const bmiData = calculateBMI(
+        profile?.user?.weight || 65,
+        profile?.user?.height
+      )
+
+      const data = {
+        age: profile?.user?.age,
+        sleep: sleep?.summary?.totalTimeInBed,
+        steps: profile?.user?.averageDailySteps,
+        heartRate: heart["activities-heart"][0]?.value?.restingHeartRate,
+        bmi: +bmiData,
+        healthScore: healthScore
       };
 
       setHealthData(data);
@@ -230,18 +236,19 @@ const Health = () => {
     setIsDevicePaired(false);
     setHaveTokens(false);
   };
-  const heartRate = healthData?.heartRate || 61;
-  const heartRatePercentage = (heartRate / 100) * 100;
+  const heartRate = healthData?.heartRate || 72;
+  const heartRatePercentage = Math.round((heartRate / 78) * 100);
 
   const avgSteps = (profileData?.user?.averageDailySteps / 10000) * 100;
 
+  console.log(calculateSleepPercentage(healthData?.sleep))
   const chartOptions = {
     series: [
       heartRatePercentage,
       calculateSleepPercentage(healthData?.sleep),
       Math.round(
         (calculateBMI(
-          profileData?.user?.weight || 42,
+          profileData?.user?.weight || 65,
           profileData?.user?.height
         ) /
           25) *
@@ -286,18 +293,7 @@ const Health = () => {
               color: "black",
               fontSize: "18px",
               formatter: function (w) {
-                return Math.round(
-                  calculateHealthScore(
-                    healthData?.age,
-                    calculateBMI(
-                      profileData?.user?.weight || 62,
-                      profileData?.user?.height
-                    ),
-                    healthData?.heartRate,
-                    healthData?.steps,
-                    healthData?.sleep / 60
-                  ) * 100
-                );
+                return  healthData?.healthScore
               },
             },
           },
@@ -601,7 +597,7 @@ const Health = () => {
                         />
                       }
                       title="Steps"
-                      value={profileData?.user?.averageDailySteps || "N/A"}
+                      value={ healthData?.steps || "N/A"}
                       subtext="Daily average"
                       status="Poor"
                       statusColor="#EF4444"
@@ -625,11 +621,8 @@ const Health = () => {
                       }
                       title="BMI"
                       value={
-                        profileData?.user?.height
-                          ? calculateBMI(
-                              profileData?.user?.weight || 62,
-                              profileData?.user?.height
-                            )
+                        healthData?.bmi
+                          ?  healthData?.bmi
                           : "N/A"
                       }
                       subtext="Last 7 Days"

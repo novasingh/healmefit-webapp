@@ -47,8 +47,8 @@ export function calculateBMI(weightKg, heightCM) {
 export function calculateSleepPercentage(minutesSlept) {
     const hoursSlept = minutesSlept / 60;
     
-    const maxSleepHours = 8;
-    const minSleepHours = 7;
+    const maxSleepHours = 9;
+    const minSleepHours = 1;
     
     let percentage;
 
