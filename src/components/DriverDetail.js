@@ -6,7 +6,7 @@ import PhoneInput from 'react-phone-input-2';
 import { get, post } from '../utility/httpService';
 import { useParams } from 'react-router-dom';
 import { useCallback } from 'react';
-import { calculateHealthScore } from '../utility/utils';
+import { calculateHealthScore, calculateSleepPercentage, convertDecimalHours } from '../utility/utils';
 import Header from './Header';
 
 const { Option } = Select;
@@ -84,12 +84,17 @@ const DriverDetail = () => {
     setDescription('');
   };
 
+  const heartRate =profileData?.healthData?.heartRate || 61;
+  const heartRatePercentage = (heartRate / 100) * 100;
+
+  const avgSteps = (profileData?.healthData?.steps / 10000) * 100;
+
   const chartOptions = {
     series: [
-      profileData?.healthData?.heartRate || 0,
-      profileData?.healthData?.sleep || 0,
-      profileData?.healthData?.bmi || 0,
-      profileData?.healthData?.steps || 0,
+      heartRatePercentage,
+      calculateSleepPercentage(profileData?.healthData?.sleep),
+      Math.round((profileData?.healthData?.bmi /25) * 100).toFixed(2),
+      avgSteps,
     ],
     options: {
       chart: {
@@ -108,15 +113,15 @@ const DriverDetail = () => {
               show: true,
               label: 'Health Score',
               formatter: () => {
-                  return Math.round(
-                    calculateHealthScore(
-                      profileData?.healthData?.age || 25,
-                      profileData?.healthData?.bmi,
-                      profileData?.healthData?.heartRate,
-                      profileData?.healthData?.steps,
-                      profileData?.healthData?.sleep
-                    ) * 100
-                  );
+                return Math.round(
+                  calculateHealthScore(
+                    profileData?.healthData?.age,
+                    profileData?.healthData?.bmi,
+                    profileData?.healthData?.heartRate,
+                    profileData?.healthData?.steps,
+                    profileData?.healthData?.sleep / 60
+                  ) * 100
+                );
               },
             },
           },
@@ -254,7 +259,7 @@ const DriverDetail = () => {
           </div>
           <div>
             <h2>Sleep</h2>
-            <p style={{fontSize: '18px', fontWeight: 600}}>{profileData?.healthData?.sleep ? `${profileData?.healthData?.sleep} hours` : 'No data available'}</p>
+            <p style={{fontSize: '18px', fontWeight: 600}}>{profileData?.healthData?.sleep ? `${convertDecimalHours(profileData?.healthData?.sleep)}` : 'No data available'}</p>
           </div>
           <div>
             <h2>BMI</h2>

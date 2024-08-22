@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Select, Switch, DatePicker, Input, Upload, Button } from 'antd';
+import { Modal, Select, Switch, DatePicker, Input, Upload, Button, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
@@ -27,17 +27,11 @@ function DocumentUploadModal({ isVisible, onClose, onSubmit, documentTypes, pres
 
   const handleOk = () => {
     if (!uploadedFiles) {
-      console.error("No files uploaded yet.");
+      message.error("No files uploaded yet.");
       return;
     }
 
-    const documentTitle = isOther ? otherDocumentTitle : selectedDocument;
-
-    onSubmit(uploadedFiles.logoPath, { 
-      ...uploadedFiles, 
-      name: documentTitle, 
-      type: isOther ? 'Other' : selectedDocument // Ensure the type is 'Other' if custom title is used
-    });
+    onSubmit(uploadedFiles.logoPath, uploadedFiles);
     resetFields();
     onClose();
   };
@@ -70,12 +64,14 @@ function DocumentUploadModal({ isVisible, onClose, onSubmit, documentTypes, pres
     })
     .then(response => {
       const data = { ...preselectedDocument };
+      const documentTitle = isOther ? otherDocumentTitle : selectedDocument;
       data.name = selectedDocument;
       data.type = selectedDocument;
       data.description = description;
       data.isExpired = isExpired;
-      data.expireDate = expireDate;
+      data.expireAt = expireDate;
       data.logoPath = response?.data.logoPath;
+      data.title = documentTitle
       setUploadedFiles(data);
     });
   };

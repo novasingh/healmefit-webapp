@@ -37,3 +37,37 @@ export function calculateHealthScore(age, bmi, heartRate, steps, sleep) {
 
     return healthScore;
 }
+
+export function calculateBMI(weightKg, heightCM) {
+    const heightM = heightCM / 100;
+    const bmi = weightKg / (heightM * heightM);
+    return bmi.toFixed(2); 
+}
+
+export function calculateSleepPercentage(minutesSlept) {
+    const hoursSlept = minutesSlept / 60;
+    
+    const maxSleepHours = 8;
+    const minSleepHours = 7;
+    
+    let percentage;
+
+    if (hoursSlept >= maxSleepHours) {
+        percentage = 100;
+    } else if (hoursSlept >= minSleepHours) {
+        percentage = 90 + (100 - 90) * ((hoursSlept - minSleepHours) / (maxSleepHours - minSleepHours));
+    } else {
+        percentage = 0;
+    }
+    
+    return percentage.toFixed(2);
+}
+
+export const convertDecimalHours = (totalSleep) => {
+    const hours = Math.floor(totalSleep / 60);
+    const minutes = totalSleep % 60;
+    const decimalHours = `${hours}.${minutes}`;
+    const hoursSleep = Math.floor(decimalHours);
+    const minutesSleep = Math.round((decimalHours - hoursSleep) * 60);
+    return `${hoursSleep}hr ${minutesSleep}min`;
+  };
