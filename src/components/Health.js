@@ -157,21 +157,21 @@ const Health = () => {
       const data = {
         age: profile?.user?.age,
         sleep: sleep?.summary?.totalTimeInBed,
-        steps: steps?.summary?.steps,
+        steps: profile?.user?.averageDailySteps,
         heartRate: heart["activities-heart"][0]?.value?.restingHeartRate,
         bmi: calculateBMI(
-          profile?.user?.weight || 62,
+          profile?.user?.weight || 42,
           profileData?.user?.height
         ),
         healthScore: (calculateHealthScore(
-          healthData?.age,
+          profile?.user?.age,
           calculateBMI(
-            profileData?.user?.weight || 62,
-            profileData?.user?.height
+            profile?.user?.weight || 42,
+            profile?.user?.height
           ),
-          healthData?.heartRate,
-          healthData?.steps,
-          healthData?.sleep / 60
+          heart["activities-heart"][0]?.value?.restingHeartRate,
+          profile?.user?.averageDailySteps,
+          sleep?.summary?.totalTimeInBed / 60
         ) * 100).toString()
       };
 
@@ -241,13 +241,13 @@ const Health = () => {
       calculateSleepPercentage(healthData?.sleep),
       Math.round(
         (calculateBMI(
-          profileData?.user?.weight || 62,
+          profileData?.user?.weight || 42,
           profileData?.user?.height
         ) /
           25) *
           100
       ).toFixed(2),
-      avgSteps,
+      avgSteps > 100 ? 100 : Math.round(avgSteps),
     ],
     options: {
       chart: {
