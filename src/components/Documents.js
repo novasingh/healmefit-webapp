@@ -4,7 +4,7 @@ import DocumentUploadModal from "./DocumentUploadModal";
 import "./Documents.css";
 import Header from "./Header";
 import { Button, Col, message, Spin, Table, Space } from "antd";
-import { get, post } from "../utility/httpService";
+import { get, post, remove } from "../utility/httpService";
 import { AuthContext } from "../contexts/AuthContext";
 import { DownloadOutlined, DeleteOutlined } from "@ant-design/icons";
 
@@ -99,12 +99,16 @@ function Documents() {
   }, [fetchDocuments, getAllNotifactions]);
 
   const handleUpload = async (uploadedFile, documentId) => {
-    await post(`/document/${userData.id}/documents`, {
+    const data = {
       name: documentId.name,
       description: documentId.description,
       fileUrl: uploadedFile,
       type: documentId.type,
-    }).then((res) => {
+    }
+    if (documentId?.expireAt){
+      data.expireAt = documentId.expireAt
+    }
+    await post(`/document/${userData.id}/documents`, data ).then((res) => {
       if (res.status === 201) {
         message.success(`${documentId.type} uploaded successfully.`);
         const updatedDocuments = documents.map((doc) =>
@@ -123,15 +127,21 @@ function Documents() {
     });
   };
 
-  const handleDelete = (documentId) => {
-    if (documentId) {
-      const updatedDocuments = documents.map((doc) =>
-        doc.id === documentId.id
-          ? { ...doc, status: "not_uploaded", file: null, uid: null }
-          : doc
-      );
-      setDocuments(updatedDocuments);
-      message.success(`${documentId.type} deleted successfully.`);
+  const handleDelete = (document) => {
+    if (document) {
+
+      remove(`/document/${userData?.id}/documents/${document._id}`).then((res) => {
+        if(res){
+          const updatedDocuments = documents.map((doc) =>
+            doc.id === document.id
+              ? { ...doc, status: "not_uploaded", file: null, uid: null }
+              : doc
+          );
+          setDocuments(updatedDocuments);
+          message.success(`${document.type} deleted successfully.`);
+          fetchDocuments();
+        } 
+      })
     }
   };
 
@@ -185,13 +195,13 @@ function Documents() {
     },
     {
       title: "Expire Date",
-      dataIndex: "expireDate",
-      key: "expireDate",
-      render: (date) => new Date(date).toLocaleDateString('en-US', {
+      dataIndex: "expireAt",
+      key: "expireAt",
+      render: (date) => date ?  new Date(date).toLocaleDateString('en-US', {
         month: 'long',
         day: 'numeric',
         year: 'numeric'
-      }),
+      }) : '-',
     },
     {
       title: "Action",
@@ -205,7 +215,7 @@ function Documents() {
           <Button
             danger
             icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.key)}
+            onClick={() => handleDelete(record)}
           />
         </Space>
       ),
