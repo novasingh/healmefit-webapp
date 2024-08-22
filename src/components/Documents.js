@@ -54,6 +54,7 @@ function Documents() {
   const [loading, setLoading] = useState(false);
   const { userData } = useContext(AuthContext);
   const [tableData, setTableData] = useState([]);
+  const [notificationsList, setNotificationsList] = useState([])
 
   useEffect(() => {
     const count = documents.filter((doc) => doc.status === "uploaded").length;
@@ -86,9 +87,16 @@ function Documents() {
     setLoading(false);
   }, [userData?.id]);
 
+  const getAllNotifactions = useCallback(async() => {
+    const response = await get(`/notifications/${userData?.id}`);
+    setNotificationsList(response?.data)
+
+  }, [userData?.id])
+
   useEffect(() => {
     fetchDocuments();
-  }, [fetchDocuments]);
+    getAllNotifactions()
+  }, [fetchDocuments, getAllNotifactions]);
 
   const handleUpload = async (uploadedFile, documentId) => {
     await post(`/document/${userData.id}/documents`, {
@@ -126,6 +134,8 @@ function Documents() {
       message.success(`${documentId.type} deleted successfully.`);
     }
   };
+
+ 
 
   const progressPercentage = (uploadedCount / documents.length) * 100;
 
@@ -182,6 +192,14 @@ function Documents() {
     },
   ];
 
+  const handleClose = (notiId) => {
+      get(`/notifications/${notiId}/read`).then((res) => {
+       if(res.status === 200) {
+        getAllNotifactions()
+       }
+      })
+  }
+
   return loading ? (
     <Col
       style={{
@@ -196,6 +214,16 @@ function Documents() {
   ) : (
     <div>
       <Header />
+      {notificationsList.length > 0 && notificationsList.map((obj) => !obj.isRead && (
+        <div key={obj.id} style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#E7F8D6', padding: '10px', borderRadius: '5px', marginTop: '10px' }}>
+         <p style={{ color: "#88C43E", margin: "auto", textAlign: "left", flex: 1 }}>
+          {obj.message}
+         </p>
+         <button onClick={() => handleClose(obj.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '26px', color: 'black', marginLeft: '10px' }}>
+           &times;
+         </button>
+       </div>
+      ))}
       <div className="documents-dashboard">
         <main className="dashboard-main">
           <header className="dashboard-header">

@@ -1,44 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Modal, Select, message, Table, Tooltip, Collapse } from 'antd';
+import { Form, Input, Button, Modal, Select, message, Table, Tooltip, Collapse, Spin, Col } from 'antd';
 import Chart from 'react-apexcharts';
 import { DownloadOutlined } from '@ant-design/icons';
 import PhoneInput from 'react-phone-input-2';
 import { get, post } from '../utility/httpService';
+import { useParams } from 'react-router-dom';
+import { useCallback } from 'react';
+import { calculateHealthScore } from '../utility/utils';
+import Header from './Header';
 
 const { Option } = Select;
 
-const DriverDetail = ({ driverId }) => {
-  const [form] = Form.useForm();
+const DriverDetail = () => {
   const { Panel } = Collapse;
-
+  const  { id } = useParams();
+  const [loading , setLoading] = useState(false);
   const [profileData, setProfileData] = useState({});
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState('');
   const [description, setDescription] = useState('');
-  const [healthMetrics, setHealthMetrics] = useState({
-    heartRate: null,
-    sleep: null,
-    bmi: null,
-    steps: null,
-  });
+
+
+  const fetchDriverDetails = useCallback(async () => {
+    try {
+      const driverAPI = get(`/users/${id}`);
+      const documentAPI = get(`/document/${id}/documents`);
+      Promise.all([driverAPI, documentAPI])
+        .then((responses) => {
+          setProfileData(responses[0].data);
+          setUploadedDocuments(responses[1].data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          setLoading(false);
+          console.error("Error in one of the requests:", error);
+        });
+    } catch (error) {
+      setLoading(false);
+    }
+  }, [id]);
 
   useEffect(() => {
-    if (driverId) {
-      const fetchDriverDetails = async () => {
-        try {
-          const response = await get(`/drivers/${driverId}`);
-          setProfileData(response.data.profileData);
-          setUploadedDocuments(response.data.uploadedDocuments);
-          setHealthMetrics(response.data.healthMetrics);
-        } catch (error) {
-          console.error('Error fetching driver details:', error);
-          message.error('Failed to fetch driver details.');
-        }
-      };
+    if (id) {
+      setLoading(true)
       fetchDriverDetails();
     }
-  }, [driverId]);
+  }, [fetchDriverDetails, id]);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -48,8 +56,8 @@ const DriverDetail = ({ driverId }) => {
     if (selectedDocument && description) {
       try {
         const response = await post('/notifications/request-upload', {
-          managerId: profileData.managerId,
-          driverId: profileData.driverId,
+          managerId: JSON.parse(sessionStorage.getItem('user')).id,
+          driverId: profileData.id,
           documentName: selectedDocument,
           documentDescription: description,
           expireDate: new Date().toISOString(),
@@ -60,9 +68,7 @@ const DriverDetail = ({ driverId }) => {
           setIsModalVisible(false);
           setSelectedDocument('');
           setDescription('');
-        } else {
-          message.error('Failed to send the document request.');
-        }
+        } 
       } catch (error) {
         message.error('An error occurred while sending the document request.');
         console.error(error);
@@ -80,10 +86,10 @@ const DriverDetail = ({ driverId }) => {
 
   const chartOptions = {
     series: [
-      healthMetrics.heartRate || 0,
-      healthMetrics.sleep || 0,
-      healthMetrics.bmi || 0,
-      healthMetrics.steps || 0,
+      profileData?.healthData?.heartRate || 0,
+      profileData?.healthData?.sleep || 0,
+      profileData?.healthData?.bmi || 0,
+      profileData?.healthData?.steps || 0,
     ],
     options: {
       chart: {
@@ -102,13 +108,15 @@ const DriverDetail = ({ driverId }) => {
               show: true,
               label: 'Health Score',
               formatter: () => {
-                const totalScore =
-                  (healthMetrics.heartRate +
-                    healthMetrics.sleep +
-                    healthMetrics.bmi +
-                    healthMetrics.steps) /
-                  4;
-                return totalScore ? `${Math.round(totalScore)}%` : 'No Data';
+                  return Math.round(
+                    calculateHealthScore(
+                      profileData?.healthData?.age || 25,
+                      profileData?.healthData?.bmi,
+                      profileData?.healthData?.heartRate,
+                      profileData?.healthData?.steps,
+                      profileData?.healthData?.sleep
+                    ) * 100
+                  );
               },
             },
           },
@@ -121,42 +129,95 @@ const DriverDetail = ({ driverId }) => {
   const documentColumns = [
     { title: 'Document Name', dataIndex: 'name', key: 'name' },
     { title: 'Description', dataIndex: 'description', key: 'description' },
-    { title: 'Expires On', dataIndex: 'expiresOn', key: 'expiresOn' },
     {
       title: 'Actions',
       key: 'actions',
+      width: '150px',
       render: (_, record) =>
         record.name ? (
           <Tooltip title="Download">
-            <Button type="primary" icon={<DownloadOutlined />} />
+            <Button type="primary" onClick={() => window.open(record.fileUrl, "_blank")} icon={<DownloadOutlined />} />
           </Tooltip>
         ) : null,
     },
   ];
 
-  return (
+  return loading ? (
+    <Col
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100%",
+    }}
+  >
+    <Spin />
+  </Col>
+  ) : profileData?.id && (
     <div>
+       <Header />
       {/* Personal Info and Company Info Panels */}
-      <div>
+      <div style={{marginTop: '15px'}}>
         <Collapse defaultActiveKey={['1', '2']} expandIconPosition="end">
           <Panel header={<h4 style={{ color: '#0B5676' }}>Personal Info</h4>} key="1">
+            {profileData?.id && 
             <Form
-              form={form}
-              initialValues={profileData}
               layout="vertical"
               style={{ justifyContent: 'space-between', display: 'flex', flexWrap: 'wrap', gap: '20px' }}
             >
-              {/* Form Items for Personal Info */}
-            </Form>
+              <Form.Item label={<div style={{ color: "#BBBBBB" }}>First Name</div>} name="firstName">
+                  <Input style={{ width: "300px", color: "#000" }} placeholder="Enter First Name" defaultValue={profileData?.firstName}  disabled />
+                </Form.Item>
+                <Form.Item label={<div style={{ color: "#BBBBBB" }}>Last Name</div>} name="lastName">
+                  <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Last Name" defaultValue={profileData?.lastName} disabled />
+                </Form.Item>
+                <Form.Item label={<div style={{ color: "#BBBBBB" }}>Email</div>} name="email">
+                  <Tooltip title="Email can't be edited">
+                    <Input
+                      style={{
+                        width: "300px",
+                        color: "#333",
+                        backgroundColor: "#f5f5f5",
+                        cursor: "not-allowed",
+                      }}
+                      defaultValue={profileData?.email}
+                      disabled
+                    />
+                  </Tooltip>
+                </Form.Item>
+                <Form.Item label={<div style={{ color: "#BBBBBB" }}>Phone</div>} name="phone">
+                  <PhoneInput
+                    country={'us'}
+                    enableSearch={true}
+                    containerStyle={{ width: "300px" }}
+                    inputStyle={{ width: "100%", color: "#000" }}
+                    placeholder="Enter Phone Number"
+                    value={profileData?.phone}
+                    disabled={true}
+                  />
+                </Form.Item>
+                <Form.Item label={<div style={{ color: "#BBBBBB" }}>Address</div>} name="address">
+                  <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Address" defaultValue={profileData?.email} disabled />
+                </Form.Item>
+            </Form>}
           </Panel>
           <Panel header={<h4 style={{ color: '#0B5676' }}>Company Info</h4>} key="2">
             <Form
-              form={form}
-              initialValues={profileData}
               layout="vertical"
               style={{ justifyContent: 'space-between', display: 'flex', flexWrap: 'wrap', gap: '20px' }}
             >
-              {/* Form Items for Company Info */}
+              <Form.Item label={<div style={{ color: "#BBBBBB" }}>Truck Number</div>} name="truckN">
+                    <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Truck Number" defaultValue={profileData?.truckN} disabled />
+                  </Form.Item>
+                  <Form.Item label={<div style={{ color: "#BBBBBB" }}>Driver Number</div>} name="driverN">
+                    <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Driver Number" defaultValue={profileData?.driverN} disabled />
+                  </Form.Item>
+                  <Form.Item label={<div style={{ color: "#BBBBBB" }}>License Plate</div>} name="licensePlate">
+                    <Input style={{ width: "300px", color: "#000" }} placeholder="Enter License Plate" defaultValue={profileData?.licensePlate} disabled />
+                  </Form.Item>
+                  <Form.Item label={<div style={{ color: "#BBBBBB" }}>Insurance Number</div>} name="insuranceN">
+                    <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Insurance Number" defaultValue={profileData?.insuranceN} disabled />
+                  </Form.Item>
             </Form>
           </Panel>
         </Collapse>
@@ -164,7 +225,8 @@ const DriverDetail = ({ driverId }) => {
 
       {/* Uploaded Documents */}
       <div style={{ marginTop: '20px' }}>
-        <h3 style={{ color: '#1FA6E0' }}>Uploaded Documents</h3>
+       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
+       <h2 style={{ color: '#1FA6E0' }}>Uploaded Documents</h2>
         <Button
           type="primary"
           onClick={showModal}
@@ -178,34 +240,35 @@ const DriverDetail = ({ driverId }) => {
         >
           Request a Document
         </Button>
-        <Table columns={documentColumns} dataSource={uploadedDocuments} rowKey="id" />
+       </div>
+        <Table columns={documentColumns} dataSource={uploadedDocuments} pagination={false} rowKey="id" />
       </div>
 
       {/* Health Metrics in Grid */}
       <div style={{ marginTop: '20px' }}>
-        <h3 style={{ color: '#0B5676' }}>Driver Health Metrics</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+        <h2 style={{ color: '#0B5676' }}>Driver Health Metrics</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginTop: '15px' }}>
           <div>
-            <h4>Heart Rate</h4>
-            <p>{healthMetrics.heartRate ? `${healthMetrics.heartRate} bpm` : 'No data available'}</p>
+            <h2>Heart Rate</h2>
+            <p style={{fontSize: '18px', fontWeight: 600}}>{profileData?.healthData?.heartRate ? `${profileData?.healthData?.heartRate}/min bpm` : 'No data available'}</p>
           </div>
           <div>
-            <h4>Sleep</h4>
-            <p>{healthMetrics.sleep ? `${healthMetrics.sleep} hours` : 'No data available'}</p>
+            <h2>Sleep</h2>
+            <p style={{fontSize: '18px', fontWeight: 600}}>{profileData?.healthData?.sleep ? `${profileData?.healthData?.sleep} hours` : 'No data available'}</p>
           </div>
           <div>
-            <h4>BMI</h4>
-            <p>{healthMetrics.bmi ? `${healthMetrics.bmi}` : 'No data available'}</p>
+            <h2>BMI</h2>
+            <p style={{fontSize: '18px', fontWeight: 600}}>{profileData?.healthData?.bmi ? `${profileData?.healthData?.bmi}` : 'No data available'}</p>
           </div>
           <div>
-            <h4>Steps</h4>
-            <p>{healthMetrics.steps ? `${healthMetrics.steps} steps` : 'No data available'}</p>
+            <h2>Steps</h2>
+            <p style={{fontSize: '18px', fontWeight: 600}}>{profileData?.healthData?.steps ? `${profileData?.healthData?.steps} steps` : 'No data available'}</p>
           </div>
         </div>
 
         {/* Charts */}
         <div style={{ marginTop: '20px' }}>
-          {healthMetrics.heartRate || healthMetrics.sleep || healthMetrics.bmi || healthMetrics.steps ? (
+          {profileData?.healthData?.heartRate || profileData?.healthData?.sleep || profileData?.healthData?.bmi || profileData?.healthData?.steps ? (
             <Chart options={chartOptions.options} series={chartOptions.series} type="radialBar" height={350} />
           ) : (
             <p>No data available to display charts</p>
@@ -214,7 +277,7 @@ const DriverDetail = ({ driverId }) => {
       </div>
 
       {/* Modal for Requesting Documents */}
-      <Modal title="Request a Document" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+      <Modal title="Request a Document" centered open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
         <Form layout="vertical">
           <Form.Item label="Document Type">
             <Select
@@ -234,6 +297,7 @@ const DriverDetail = ({ driverId }) => {
           <Form.Item label="Description">
             <Input.TextArea
               value={description}
+              required
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter description"
             />

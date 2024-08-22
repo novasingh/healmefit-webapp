@@ -16,7 +16,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { get, post, remove, updatePatch } from "../utility/httpService";
 import ThreeDotsDropdown from "../sharedComponents/DropDown";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -53,9 +53,9 @@ const Driver = () => {
       title: "Name",
       dataIndex: "name",
       render: (_, record) => (
-        <a onClick={() => navigate(`/driver/driverdetail`)}>
+        <Link to={`/driver/${record.id}`}>
           {`${record.firstName} ${record.lastName}`}
-        </a>
+        </Link>
       ),
     },
     { title: "Email", dataIndex: "email" },

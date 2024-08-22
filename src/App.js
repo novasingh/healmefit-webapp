@@ -50,7 +50,7 @@ const Content = () => {
           <Route path="/managers" element={<MasterLayout children={<Managers  />} />} />
           <Route path="/admins" element={<MasterLayout children={<Admins />} />} />
           <Route path="/companies" element={<MasterLayout children={<Companies />} />} />
-          <Route path="/driverdetail" element={<DriverDetail children={<DriverDetail />} />} />
+          <Route path="/driver/:id" element={<MasterLayout children={<DriverDetail />} />} />
           <Route path="/inquiry" element={<MasterLayout children={<Inquiry />} />} />
           <Route path="/*" element={<PageNotFound />} />
         </Routes>
