@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Header from './Header';
 import { DeleteOutlined } from '@ant-design/icons';
 import { Col, Button, Modal, Form, Input, message, Table, Skeleton, Select } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import { get, post, remove, updatePatch } from "../utility/httpService";
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
+import { AuthContext } from '../contexts/AuthContext';
 
 const Admins = () => {
   const [form] = Form.useForm();
+  const { userData } = useContext(AuthContext);
   const [updateForm] = Form.useForm();
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [AddModal, setAddModal] = useState(false);
@@ -50,7 +52,8 @@ const Admins = () => {
   const fetchUsers = async (page = 1, limit = 10) => {
     try {
       const response = await get('/users?role=admin', {
-        page, limit 
+        page, limit,
+        sortBy: 'createdAt:desc', 
       });
       const usersWithKeys = response?.data?.results?.map(user => ({ ...user, key: user.id }));
       setGetAllUsers(usersWithKeys);
@@ -222,7 +225,7 @@ const Admins = () => {
   };
   
   
-  return (
+  return userData?.role === 'admin' ?(
     <div style={{ height: "100%" }}>
       <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: '2%' }}>
@@ -390,6 +393,10 @@ const Admins = () => {
         </Form>
       </Modal>
     </div>
+  ) :  (
+    <Col style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
+    <h1>You don't have access of this page.</h1>
+    </Col>
   );
 };
 

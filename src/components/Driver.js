@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import Header from "./Header";
 import "../style.css";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
@@ -17,10 +17,12 @@ import { v4 as uuidv4 } from "uuid";
 import { get, post, remove, updatePatch } from "../utility/httpService";
 import ThreeDotsDropdown from "../sharedComponents/DropDown";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
 const { Option } = Select;
 
 const Driver = () => {
+  const { userData } = useContext(AuthContext);
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [updateForm] = Form.useForm();
@@ -114,7 +116,8 @@ const Driver = () => {
       const response = await get("/users?role=driver", {
         page: currentPage,
         limit: pageSize,
-        company: selectedCompany, // Include the selected company
+        company: userData?.role === 'admin' ? selectedCompany : userData?.company?.id,
+        sortBy: 'createdAt:desc',
       });
       setUsers(
         response?.data?.results?.map((user) => ({
@@ -291,7 +294,7 @@ const Driver = () => {
     }
   };
 
-  return (
+  return userData?.role !== 'driver' ? (
     <div style={{ height: "100%" }}>
       <Header />
       <Col
@@ -315,7 +318,7 @@ const Driver = () => {
         </h2>
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           <Col>
-            <Select
+           {userData?.role === 'admin' && <Select
               placeholder="Select Company"
               style={{ width: 250 }}
               onChange={(value) => {
@@ -329,7 +332,7 @@ const Driver = () => {
                   {company.name}
                 </Option>
               ))}
-            </Select>
+            </Select>}
           </Col>
           <Button
             type="primary"
@@ -490,6 +493,10 @@ const Driver = () => {
         </Form>
       </Modal>
     </div>
+  ) : (
+    <Col style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
+    <h1>You don't have access of this page.</h1>
+    </Col>
   );
 };
 

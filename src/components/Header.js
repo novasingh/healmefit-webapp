@@ -92,7 +92,7 @@ const Header = () => {
       className='search_bar'
     >
       <div style={{ width: "30%" }}>
-        <Input size="large" placeholder="Search" prefix={<SearchOutlined />} />
+        {/* <Input size="large" placeholder="Search" prefix={<SearchOutlined />} /> */}
       </div>
       <Dropdown overlay={menu} trigger={['click']}>
         <a onClick={(e) => e.preventDefault()}>

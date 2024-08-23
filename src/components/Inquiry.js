@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import Header from "./Header";
 import "../style.css";
 import {
@@ -7,14 +7,14 @@ import {
   Table,
   Skeleton,
   Tooltip,
-  Button, // Import Button component
 } from "antd";
 import { get } from "../utility/httpService";
+import { AuthContext } from "../contexts/AuthContext";
 
 const Inquiry = () => {
+  const { userData } = useContext(AuthContext);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [contactData, setContactData] = useState([])
   const [totalResults, setTotalResults] = useState(0);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
@@ -57,7 +57,8 @@ const Inquiry = () => {
     try {
       const response = await get("/contact", {
         page: currentPage,
-        limit: pageSize
+        limit: pageSize,
+        sortBy: 'createdAt:desc', 
       });
       setUsers(
         response?.data?.results?.map((user) => ({
@@ -85,12 +86,7 @@ const Inquiry = () => {
     setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
   };
-
-  const handleRefresh = () => {
-    fetchUsers();
-  };
-
-  return (
+  return userData?.role === 'admin' ? (
     <div style={{ height: "100%" }}>
       <Header />
       <Col
@@ -113,9 +109,6 @@ const Inquiry = () => {
           >
             Inquiry
           </h2>
-          {/* <Button onClick={handleRefresh} type="primary" style={{ display: "flex",height: '35px', alignItems: "center", gap: "20px" }} >
-            Refresh
-          </Button> */}
         </div>
       </Col>
       {loading ? (
@@ -163,7 +156,11 @@ const Inquiry = () => {
         />
       )}
     </div>
-  );
+  )  :  (
+    <Col style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
+    <h1>You don't have access of this page.</h1>
+    </Col>
+  );;
 };
 
 export default Inquiry;

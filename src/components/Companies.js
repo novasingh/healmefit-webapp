@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from './Header';
 import { Col, Button, Modal, Form, Input, Upload, message, Table, Skeleton, Image, Select, Spin } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
@@ -74,7 +74,7 @@ const Companies = () => {
   
       await updatePatch(`/companies/${editCompany.id}`, updateData);
       message.success('Company updated successfully!');
-      fetchUsers(currentPage, pageSize);
+      fetchCompanies(currentPage, pageSize);
       setEditModal(false);
       form.resetFields();
       setUploadImg("")
@@ -103,7 +103,7 @@ const Companies = () => {
   
      await post('/companies', newCompanyData);
       message.success('Company added successfully!');
-      fetchUsers(currentPage, pageSize);
+      fetchCompanies(currentPage, pageSize);
       setAddModal(false);
       form.resetFields();
       setUploadImg("")
@@ -121,7 +121,7 @@ const Companies = () => {
     try {
       await remove(`/companies/${companyId}`);
       message.success('Company deleted successfully');
-      fetchUsers(currentPage, pageSize);
+      fetchCompanies(currentPage, pageSize);
     } catch (error) {
       console.error('Error deleting company:', error);
       message.error('An error occurred while deleting the company. Please try again.');
@@ -139,11 +139,12 @@ const Companies = () => {
     setEditModal(true);
   };
 
-  const fetchUsers = async (page = 1, limit = 10) => {
+  const fetchCompanies = useCallback(async (page = 1, limit = 10) => {
     try {
       const response = await get('/companies', {
         page: currentPage,
         limit: pageSize,
+        sortBy: 'createdAt:desc',
       });
       setCompaniesData(response?.data?.results?.map(user => ({
         ...user,
@@ -156,12 +157,12 @@ const Companies = () => {
       console.error('Error fetching companies:', error);
       message.error('An error occurred while fetching companies. Please try again.');
     }
-  };
+  }, [currentPage, pageSize])
 
   useEffect(() => {
     setLoading(true);
-    fetchUsers(currentPage, pageSize);
-  }, [currentPage, pageSize]);
+    fetchCompanies(currentPage, pageSize);
+  }, [currentPage, pageSize, fetchCompanies]);
 
 
   const customRequest = ({ file, onSuccess, onError }) => {

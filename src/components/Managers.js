@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Header from './Header';
 import { DeleteOutlined } from '@ant-design/icons';
 import { Col, Button, Modal, Form, Input, message, Table, Skeleton, Select } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import { get, post, remove, updatePatch } from "../utility/httpService";
 import ThreeDotsDropdown from '../sharedComponents/DropDown';
+import { AuthContext } from '../contexts/AuthContext';
 const { Option } = Select;
 
 const Managers = () => {
   const [form] = Form.useForm();
+  const { userData } = useContext(AuthContext);
   const [updateForm] = Form.useForm();
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -219,7 +221,7 @@ const Managers = () => {
   };
 
 
-  return (
+  return userData?.role === 'admin' ? (
     <div style={{ height: "100%" }}>
       <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "2%" }}>
@@ -330,7 +332,11 @@ const Managers = () => {
         </Form>
       </Modal>
     </div>
-  );
+  )  :  (
+    <Col style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
+    <h1>You don't have access of this page.</h1>
+    </Col>
+  );;
 };
 
 const EmptyState = ({ onClick }) => (
@@ -402,7 +408,7 @@ const AddManagerModal = ({ visible, form, formLayout, isAddMoreDisabled, isAddMa
       </Form>
     </div>
   </Modal>
-);
+)
 
 
 const ManagerDetailsModal = ({ visible, user, onCancel }) => (

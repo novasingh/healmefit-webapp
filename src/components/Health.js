@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { get, post, updatePatch } from "../utility/httpService";
 import { AuthContext } from "../contexts/AuthContext";
 import {
+  calculateAverages,
   calculateBMI,
   calculateHealthScore,
   calculateSleepPercentage,
@@ -139,11 +140,36 @@ const Health = () => {
     }
   };
 
+  // async function fetchDataForDateRange(token, timeRange) {
+  //   const { startDate, endDate } = timeRange;
+  //   const dateArray = [];
+  //   let currentDate = new Date(startDate);
+  
+  //   while (currentDate <= new Date(endDate)) {
+  //     dateArray.push(currentDate.toISOString().split('T')[0]); // Convert date to YYYY-MM-DD format
+  //     currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+  //   }
+  
+  //   const results = await Promise.all(
+  //     dateArray.map(async (date) => {
+  //       const [heart, sleep, steps] = await Promise.all([
+  //         fetchHeartDetail(token, { date }), // Pass the date to your API
+  //         fetchSleepData(token, { date }),   // Pass the date to your API
+  //         fetchStepData(token, { date }),    // Pass the date to your API
+  //       ]);
+  //       return { heart, sleep, steps };
+  //     })
+  //   );
+  
+  //   return results;
+  // }
+
   const fetchAllData = async () => {
     const token = localStorage.getItem("fitbitAccessToken");
     if (!token) return;
 
     try {
+
       // Fetch all data in parallel
       const [profile, device, heart, sleep, steps] = await Promise.all([
         fetchProfileData(token),

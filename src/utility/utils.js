@@ -184,7 +184,6 @@ export function getSleepAnalysis(ageInYears, sleepMinutes) {
         recommendedHours = { min: 7, max: 8 };
     }
 
-    console.log(sleepHours)
 
     if (sleepHours < 5) {
         return {
