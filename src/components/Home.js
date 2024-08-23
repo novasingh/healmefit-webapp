@@ -8,46 +8,27 @@ import PhoneInput from 'react-phone-input-2';
 
 const Home = () => {
   const [form] = Form.useForm();
-  const userData = JSON.parse(sessionStorage.getItem('user')) || {}
   const [loading, setLoading] = useState(false);
-  const [profileData, setProfileData] = useState(userData);
+  const [profileData, setProfileData] = useState(JSON.parse(sessionStorage.getItem('user')) || {});
 
   const { Panel } = Collapse;
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      setLoading(true);
-      try {
-        const response = await get(`/users/${userData.id}`);
-        const userDob = response.data.dob ? moment(response.data.dob) : moment();
-        response.data.dob = userDob;
-        setProfileData(response.data);
-        sessionStorage.setItem('user', JSON.stringify(response.data));
-        form.setFieldsValue({
-          ...response.data,
-          dob: userDob.format("YYYY-MM-DD"),
-        });
-      } catch (error) {
-        console.error("Failed to fetch user data", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (userData?.id) {
-      fetchUserData();
+    const data = JSON.parse(sessionStorage.getItem('user')) || {}
+    if(data){
+      data.dob = moment(data.dob).format('YYYY-MM-DD')
+      setProfileData(data)
     }
-  }, [userData.id, form]);
+  },[])
 
   const handleSaveChanges = async () => {
     try {
       setLoading(true);
       const values = await form.validateFields();
-      const formattedDob = moment(values.dob).format("YYYY-MM-DD");
       const data = {
         firstName: values.firstName,
         lastName: values.lastName,
-        dob: formattedDob ? formattedDob : null,
+        dob: values.dob,
         address: values.address ? values.address : 'N/A',
         truckN: values.truckN ? values.truckN : 'N/A',
         driverN: values.driverN ? values.driverN : 'N/A',
@@ -56,11 +37,10 @@ const Home = () => {
         phone: values.phone
       };
 
-      const response = await updatePatch(`/users/${userData.id}`, data);
-
+      const response = await updatePatch(`/users/${profileData.id}`, data);
       setProfileData(response.data);
+      sessionStorage.removeItem('user')
       sessionStorage.setItem('user', JSON.stringify(response.data));
-      form.resetFields();
       notification.success({ message: "Profile updated successfully!" });
     } catch (error) {
       console.error("Failed to update profile", error.response?.data || error.message);
@@ -103,7 +83,7 @@ const Home = () => {
   return (
     <div>
       <Header />
-      <WelcomeMessage userData={userData} /> {/* Display the WelcomeMessage */}
+      <WelcomeMessage userData={profileData} /> {/* Display the WelcomeMessage */}
       <div
         style={{
           marginTop: "30px",
@@ -151,14 +131,14 @@ const Home = () => {
         <div>
           <Collapse defaultActiveKey={['1', '2']} expandIconPosition="end">
             <Panel header={<h4 style={{ color: "#0B5676" }}>Personal Info</h4>} key="1">
-              <Form
+              {profileData.id && <Form
                 form={form}
                 initialValues={profileData}
                 layout="vertical"
                 style={{ justifyContent: "space-between", display: "flex", flexWrap: "wrap", gap: "20px" }}
               >
                 <Form.Item label={<div style={{ color: "#BBBBBB" }}>First Name</div>} name="firstName" rules={[{ required: true, message: "Please enter your first name" }]}>
-                  <Input style={{ width: "300px", color: "#000" }} placeholder="Enter First Name" defaultValue={profileData?.firstName} />
+                  <Input style={{ width: "300px", color: "#000" }} placeholder="Enter First Name" />
                 </Form.Item>
                 <Form.Item label={<div style={{ color: "#BBBBBB" }}>Last Name</div>} name="lastName" rules={[{ required: true, message: "Please enter your last name" }]}>
                   <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Last Name" />
@@ -179,8 +159,8 @@ const Home = () => {
                 </Form.Item>
                 <Form.Item label={<div style={{ color: "#BBBBBB" }}>Phone</div>} name="phone">
                   <PhoneInput
-                    country={'in'} // Set default country to India
-                    enableSearch={true} // Enable search option in the dropdown
+                    country={'in'} 
+                    enableSearch={true} 
                     containerStyle={{ width: "300px" }}
                     inputStyle={{ width: "100%", color: "#000" }}
                     placeholder="Enter Phone Number"
@@ -189,7 +169,7 @@ const Home = () => {
                 <Form.Item label={<div style={{ color: "#BBBBBB" }}>Address</div>} name="address">
                   <Input style={{ width: "300px", color: "#000" }} placeholder="Enter Address" />
                 </Form.Item>
-              </Form>
+              </Form>}
             </Panel>
 
               {profileData?.role === "driver" && (

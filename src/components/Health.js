@@ -10,6 +10,9 @@ import {
   calculateHealthScore,
   calculateSleepPercentage,
   convertDecimalHours,
+  getHeartRateType,
+  getSleepAnalysis,
+  getWeightStatus,
   isTokenExpired,
 } from "../utility/utils";
 import Chart from "react-apexcharts";
@@ -241,7 +244,6 @@ const Health = () => {
 
   const avgSteps = (profileData?.user?.averageDailySteps / 10000) * 100;
 
-  console.log(calculateSleepPercentage(healthData?.sleep))
   const chartOptions = {
     series: [
       heartRatePercentage,
@@ -560,7 +562,7 @@ const Health = () => {
                       subtext="Daily average"
                       status="Excellent"
                       statusColor="#10B981"
-                      recommendation="(40-75bpm)"
+                      recommendation={getHeartRateType(healthData?.age, healthData?.heartRate)}
                     />
                   </Col>
                   <Col span={10}>
@@ -577,9 +579,9 @@ const Health = () => {
                           : "N/A"
                       }
                       subtext="Last night"
-                      status="Fair"
-                      statusColor="#F59E0B"
-                      recommendation="(Recommended 7-9h)"
+                      status={getSleepAnalysis(healthData?.age, healthData.sleep).status || ''}
+                      statusColor={getSleepAnalysis(healthData?.age, healthData.sleep).color || ''}
+                     recommendation="(Recommended 7-9h)"
                     />
                   </Col>
                   <Col span={10}>
@@ -626,9 +628,9 @@ const Health = () => {
                           : "N/A"
                       }
                       subtext="Last 7 Days"
-                      status="Good"
-                      statusColor="#10B981"
-                      recommendation="(18.5 - 24.9)"
+                      status={getWeightStatus(healthData?.bmi).status || ''}
+                      statusColor={getWeightStatus(healthData?.bmi).color || ''}
+                      recommendation={getWeightStatus(healthData?.bmi)?.range || ''}
                     />
                   </Col>
                 </Row>

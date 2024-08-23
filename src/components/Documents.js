@@ -83,6 +83,23 @@ function Documents() {
       setTableData(dataTable);
       setDocuments(updatedDocuments);
       setLoading(false);
+    }else {
+      const updatedDocuments = initialDocuments.map((doc) => {
+        const matchedDoc = response?.data?.find(
+          (apiDoc) => apiDoc.type === doc.type
+        );
+        if (matchedDoc) {
+          return {
+            ...doc,
+            file: matchedDoc.fileUrl,
+            uid: matchedDoc._id,
+            status: "uploaded",
+          };
+        }
+        return doc;
+      });
+      setTableData([]);
+      setDocuments(updatedDocuments);
     }
     setLoading(false);
   }, [userData?.id]);
@@ -128,7 +145,7 @@ function Documents() {
   };
 
   const handleDelete = (document) => {
-    if (document) {
+    if (document._id) {
 
       remove(`/document/${userData?.id}/documents/${document._id}`).then((res) => {
         if(res){

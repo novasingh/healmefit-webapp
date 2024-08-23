@@ -94,7 +94,7 @@ const DriverDetail = () => {
       heartRatePercentage,
       calculateSleepPercentage(profileData?.healthData?.sleep),
       Math.round((profileData?.healthData?.bmi /25) * 100).toFixed(2),
-      avgSteps,
+      avgSteps > 100 ? 100 : Math.round(avgSteps),
     ],
     options: {
       chart: {
