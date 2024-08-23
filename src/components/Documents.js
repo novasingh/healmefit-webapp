@@ -32,7 +32,7 @@ const initialDocuments = [
   },
   {
     id: 4,
-    name: "Vaccination proof",
+    name: "Vaccination Proof",
     type: "Vaccination Proof",
     status: "not_uploaded",
     description: "Need to have the booster",
@@ -130,6 +130,7 @@ function Documents() {
   const handleDelete = (document) => {
     if (document) {
 
+      console.log(document)
       remove(`/document/${userData?.id}/documents/${document._id}`).then((res) => {
         if(res){
           const updatedDocuments = documents.map((doc) =>
