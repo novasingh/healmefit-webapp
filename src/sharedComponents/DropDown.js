@@ -54,9 +54,9 @@ const ThreeDotsDropdown = ({ onEdit, onDelete, emailId, driverName, role }) => {
       <Menu.Item key="delete" onClick={showDeleteConfirm}>
         Delete
       </Menu.Item>
-      <Menu.Item key="send-invite" onClick={handleSendInvite}>
+      {emailId && <Menu.Item key="send-invite" onClick={handleSendInvite}>
         Send Invitation Link
-      </Menu.Item>
+      </Menu.Item>}
     </Menu>
   );
 

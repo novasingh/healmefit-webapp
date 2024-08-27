@@ -228,7 +228,7 @@ const Driver = () => {
             truckN: values[`truckN${item.id}`],
             driverN: values[`driverN${item.id}`],
             name: values[`name_${item.id}`],
-            company: values[`company_${item.id}`], // Use companyId to link the company
+            company: userData?.role === 'admin' ? values[`company_${item.id}`] : userData?.company?.id,
             role: "driver",
           })
         )
@@ -274,7 +274,7 @@ const Driver = () => {
         driverN: values.driverN,
         firstName: values.name.split(' ').length > 0 ? values.name.split(' ')[0] : 'User',
         lastName: values.name.split(' ') ? values.name.split(' ')[1] : 'user',
-        company: values.company,
+        company: userData?.role === 'admin' ? values.company : userData?.company?.id,
       });
       if (response.status === 200) {
         message.success("Driver updated successfully!");
@@ -389,7 +389,7 @@ const Driver = () => {
               <Form.Item name={`driverN${item.id}`} rules={[{ required: true, message: 'Please input the driver number!' }]} style={{ flex: 1 }}>
                 <Input placeholder='Driver Number' />
               </Form.Item>
-              <Form.Item name={`company_${item.id}`} rules={[{ required: true, message: 'Please select a company!' }]} style={{ flex: 1 }}>
+              {userData?.role === 'admin' &&<Form.Item name={`company_${item.id}`} rules={[{ required: true, message: 'Please select a company!' }]} style={{ flex: 1 }}>
                 <Select placeholder='Select Company'>
                   {companies?.map(company => (
                     <Select.Option key={company.id} value={company.id}>
@@ -397,7 +397,7 @@ const Driver = () => {
                     </Select.Option>
                   ))}
                 </Select>
-              </Form.Item>
+              </Form.Item>}
               <div style={{ fontSize: '24px', cursor: 'pointer', marginBottom: '20px' }}>
                 <DeleteOutlined onClick={() => handleDeleteFormLayout(item.id)} />
               </div>
@@ -475,7 +475,7 @@ const Driver = () => {
           >
             <Input placeholder="Enter truck number" />
           </Form.Item>
-          <Form.Item
+          {userData?.role === 'admin' && <Form.Item
             label="Company"
             name="company"
             rules={[
@@ -489,7 +489,7 @@ const Driver = () => {
                 </Option>
               ))}
             </Select>
-          </Form.Item>
+          </Form.Item>}
         </Form>
       </Modal>
     </div>

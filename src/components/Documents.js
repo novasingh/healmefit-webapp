@@ -268,6 +268,7 @@ function Documents() {
         <div key={obj.id} style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#E7F8D6', padding: '10px', borderRadius: '5px', marginTop: '10px' }}>
          <p style={{ color: "#88C43E", margin: "auto", textAlign: "left", flex: 1 }}>
           {obj.message}
+          <small>{obj.description}</small>
          </p>
          <button onClick={() => handleClose(obj.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '26px', color: 'black', marginLeft: '10px' }}>
            &times;
