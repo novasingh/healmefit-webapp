@@ -113,14 +113,7 @@ const DriverDetail = () => {
               show: true,
               label: 'Health Score',
               formatter: () => {
-                return Math.round(
-                  calculateHealthScore(
-                    profileData?.healthData?.age,
-                    profileData?.healthData?.bmi,
-                    profileData?.healthData?.heartRate,
-                    profileData?.healthData?.steps,
-                    profileData?.healthData?.sleep / 60
-                  ) * 100
+                return Math.round(profileData?.healthData?.healthScore?.healthScore * 100
                 );
               },
             },

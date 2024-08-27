@@ -21,6 +21,8 @@ const Home = () => {
     }
   },[])
 
+  console.log(profileData)
+
   const handleSaveChanges = async () => {
     try {
       setLoading(true);
@@ -131,7 +133,7 @@ const Home = () => {
         <div>
           <Collapse defaultActiveKey={['1', '2']} expandIconPosition="end">
             <Panel header={<h4 style={{ color: "#0B5676" }}>Personal Info</h4>} key="1">
-              {profileData.id && <Form
+              {profileData?.id && <Form
                 form={form}
                 initialValues={profileData}
                 layout="vertical"

@@ -13,6 +13,7 @@ import {
   convertDecimalHours,
   getHeartRateType,
   getSleepAnalysis,
+  getStepActivityLevel,
   getWeightStatus,
   isTokenExpired,
 } from "../utility/utils";
@@ -183,8 +184,8 @@ const Health = () => {
       setProfileData(profile);
       setDeviceData(device);
 
-      const healthScore = Math.round(
-        calculateHealthScore(
+      const healthScore = 
+        await calculateHealthScore(
           profile?.user?.age,
           calculateBMI(
             profile?.user?.weight || 65,
@@ -193,8 +194,7 @@ const Health = () => {
           heart["activities-heart"][0]?.value?.restingHeartRate,
           profile?.user?.averageDailySteps,
           sleep?.summary?.totalTimeInBed / 60
-        ) * 100
-      );
+        );
 
       const bmiData = calculateBMI(
         profile?.user?.weight || 65,
@@ -321,7 +321,7 @@ const Health = () => {
               color: "black",
               fontSize: "18px",
               formatter: function (w) {
-                return  healthData?.healthScore
+                return  Math.round(healthData?.healthScore?.healthScore * 100)
               },
             },
           },
@@ -586,9 +586,9 @@ const Health = () => {
                           : "N/A"
                       }
                       subtext="Daily average"
-                      status="Excellent"
-                      statusColor="#10B981"
-                      recommendation={getHeartRateType(healthData?.age, healthData?.heartRate)}
+                      status={getHeartRateType(healthData?.age, healthData?.heartRate)?.type}
+                      statusColor={getHeartRateType(healthData?.age, healthData?.heartRate)?.color}
+                      recommendation={getHeartRateType(healthData?.age, healthData?.heartRate)?.recommended}
                     />
                   </Col>
                   <Col span={10}>
@@ -607,7 +607,7 @@ const Health = () => {
                       subtext="Last night"
                       status={getSleepAnalysis(healthData?.age, healthData.sleep).status || ''}
                       statusColor={getSleepAnalysis(healthData?.age, healthData.sleep).color || ''}
-                     recommendation="(Recommended 7-9h)"
+                      recommendation="(Recommended 7-9h)"
                     />
                   </Col>
                   <Col span={10}>
@@ -627,9 +627,9 @@ const Health = () => {
                       title="Steps"
                       value={ healthData?.steps || "N/A"}
                       subtext="Daily average"
-                      status="Poor"
-                      statusColor="#EF4444"
-                      recommendation="(Recommended 10,000)"
+                      status={getStepActivityLevel(healthData?.steps)?.type}
+                      statusColor={getStepActivityLevel(healthData?.steps)?.color}
+                      recommendation={getStepActivityLevel(healthData?.steps)?.recommended}
                     />
                   </Col>
 
