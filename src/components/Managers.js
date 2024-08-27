@@ -25,6 +25,7 @@ const Managers = () => {
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [isAddMoreDisabled, setIsAddMoreDisabled] = useState(true);
   const [isAddManagerDisabled, setIsAddManagerDisabled] = useState(true);
+  const [selectedCompany, setSelectedCompany] = useState(null);
   
   const [companies, setCompanies] = useState([]); // Changed Companies to companies
 
@@ -69,9 +70,9 @@ const Managers = () => {
     },
   ];
 
-  const fetchUsers = async (page = 1, limit = 10) => {
+  const fetchUsers = async (page = 1, limit = 10, company) => {
     try {
-      const response = await get('/users?role=manager', { page, limit });
+      const response = await get('/users?role=manager', { page, limit, company });
       const usersWithKeys = response.data.results.map(user => ({ ...user, key: user.id }));
       setManagers(usersWithKeys);
       setTotalResults(response.data.totalResults);
@@ -160,8 +161,8 @@ const Managers = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetchUsers(currentPage, pageSize);
-  }, [currentPage, pageSize]);
+    fetchUsers(currentPage, pageSize, selectedCompany);
+  }, [currentPage, pageSize, selectedCompany]);
 
   useEffect(() => {
     if (addModalVisible && formLayout.length === 0) {
@@ -226,9 +227,27 @@ const Managers = () => {
       <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "2%" }}>
         <h2 style={{ fontSize: "25px", color: "#0B5676", fontWeight: "600", marginBottom: '10px' }}>Managers</h2>
-        {managers.length > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        {userData?.role === 'admin' && <Select
+              placeholder="Select Company"
+              style={{ width: 250 }}
+              onChange={(value) => {
+                setSelectedCompany(value === "none" ? null : value);
+                setCurrentPage(1);
+              }}
+            >
+              <Option value="none">None</Option>
+              {companies.map((company) => (
+                <Option key={company.id} value={company.id}>
+                  {company.name}
+                </Option>
+              ))}
+            </Select>}
+        
           <Button onClick={() => setAddModalVisible(true)} style={{ background: "#1FA6E0", color: "#fff" }}>+ Add Managers</Button>
-        )}
+        
+          </div>
+       
       </Col>
       {!loading ? (
         managers.length > 0 ? (
