@@ -82,7 +82,7 @@ const Driver = () => {
       title: "Health Score",
       dataIndex: "healthScore",
       render: (_, record) => {
-        return record?.healthData?.healthScore ? Math.round(record?.healthData?.healthScore) : "-";
+        return record?.healthData?.healthScore?.healthScore ?  `${Math.round(+record?.healthData?.healthScore?.healthScore * 100)} - ${record?.healthData?.healthScore?.category}`  : "-";
       },
     },
     {

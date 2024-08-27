@@ -113,8 +113,7 @@ const DriverDetail = () => {
               show: true,
               label: 'Health Score',
               formatter: () => {
-                return Math.round(profileData?.healthData?.healthScore?.healthScore * 100
-                );
+                return profileData?.healthData?.healthScore?.healthScore ?  Math.round(profileData?.healthData?.healthScore?.healthScore * 100) : '-';
               },
             },
           },
