@@ -22,8 +22,6 @@ const Home = () => {
     }
   },[userData])
 
-  console.log(profileData)
-
   const handleSaveChanges = async () => {
     try {
       setLoading(true);
