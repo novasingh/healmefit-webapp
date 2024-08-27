@@ -297,7 +297,9 @@ const Health = () => {
               color: "black",
               fontSize: "18px",
               formatter: function (w) {
-                return  Math.round(healthData?.healthScore?.healthScore * 100)
+                const healthScore = Math.round(healthData?.healthScore?.healthScore * 100);
+                const category = healthData?.healthScore?.category;
+                return `${healthScore}\n${category}`;
               },
             },
           },
@@ -308,6 +310,7 @@ const Health = () => {
         },
       },
       labels: ["Heart Rate", "Sleep", "BMI", "Steps"],
+      color: ["#96ACFA", "#0B5676", "#1FA6E0", "#CAE427"],
     },
   };
 
@@ -583,7 +586,7 @@ const Health = () => {
                       subtext="Last night"
                       status={getSleepAnalysis(healthData?.age, healthData.sleep).status || ''}
                       statusColor={getSleepAnalysis(healthData?.age, healthData.sleep).color || ''}
-                      recommendation="(Recommended 7-9h)"
+                      recommendation="Recommended (7-9h)"
                     />
                   </Col>
                   <Col span={10}>
@@ -605,7 +608,7 @@ const Health = () => {
                       subtext="Daily average"
                       status={getStepActivityLevel(healthData?.steps)?.type}
                       statusColor={getStepActivityLevel(healthData?.steps)?.color}
-                      recommendation={getStepActivityLevel(healthData?.steps)?.recommended}
+                      recommendation={'Recommended '+getStepActivityLevel(healthData?.steps)?.recommended}
                     />
                   </Col>
 
