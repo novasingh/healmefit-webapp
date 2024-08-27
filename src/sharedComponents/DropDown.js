@@ -86,11 +86,11 @@ const ThreeDotsDropdown = ({ onEdit, onDelete, emailId, driverName, role }) => {
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         }}
       >
-        <p>Please follow the steps below to activate the account:</p>
+        <p>The invitation Will Send to the Id: {emailId}</p>
         <ol style={{ paddingLeft: '30px' }}>
-          <li>Review the email below or enter the correct one.</li>
+          {/* <li>Review the email below or enter the correct one.</li>
           <li>Add any additional instructions in the description (optional).</li>
-          <li>Click "Send" to send the invitation link to the user.</li>
+          <li>Click "Send" to send the invitation link to the user.</li> */}
         </ol>
         <Input.TextArea
           value={description}
