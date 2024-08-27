@@ -24,7 +24,7 @@ const Callback = () => {
             'Content-Type': 'application/x-www-form-urlencoded',
           }
         })
-        const { access_token, refresh_token, expires_in, token_type} = response.data;
+        const { access_token, refresh_token, expires_in, token_type, user_id } = response.data;
         localStorage.setItem('fitbitAccessToken', access_token);
         localStorage.setItem('fitbitRefreshToken', refresh_token);
         post(`/fitbit/${userData.id}`,{
@@ -33,7 +33,7 @@ const Callback = () => {
             "user": userData.id,
             "type": token_type,
             "expires": expires_in,
-            "code" : code
+            "fitbitUserId" : user_id
         })
         // Call the function to store the tokens in MongoDB
         // await storeTokens(access_token, refresh_token);

@@ -94,6 +94,7 @@ const Health = () => {
 
   const fetchAllData = async () => {
     const token = localStorage.getItem("fitbitAccessToken");
+    const userId = localStorage.getItem("fitbitUserId");
     if (!token) return;
 
     try {
@@ -160,6 +161,10 @@ const Health = () => {
             "fitbitRefreshToken",
             response.data.refreshToken
           );
+          localStorage.setItem(
+            "fitbitUserId",
+            response.data.fitbitUserId
+          );
           await fetchAllData();
           setHaveTokens(true);
           setIsDevicePaired(true);
@@ -209,7 +214,7 @@ const Health = () => {
         user: userData.id,
         type: data.token_type,
         expires: data.expires_in,
-        code: "N/A",
+        fitbitUserId: data?.user_id,
       });
 
       getUserFitbitTokens();
