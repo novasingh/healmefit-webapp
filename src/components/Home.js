@@ -15,7 +15,7 @@ const Home = () => {
 
   useEffect(() => {
     const data = JSON.parse(sessionStorage.getItem('user')) || {}
-    if(data){
+    if(data?.id){
       data.dob = moment(data.dob).format('YYYY-MM-DD')
       setProfileData(data)
     }
