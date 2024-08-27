@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { get, post, updatePatch } from "../utility/httpService";
 import { AuthContext } from "../contexts/AuthContext";
 import {
-  calculateAverages,
   calculateBMI,
   calculateHealthScore,
   calculateSleepPercentage,
@@ -45,11 +44,8 @@ const Health = () => {
 
   const [healthData, setHealthData] = useState({});
   const { userData } = useContext(AuthContext);
-  const [heartData, setHeartData] = useState();
   const [deviceData, setDeviceData] = useState();
-  const [stepData, setStepData] = useState();
   const [profileData, setProfileData] = useState();
-  const [sleepData, setSleepData] = useState();
   const [haveTokens, setHaveTokens] = useState(false);
   const [loading, setLoading] = useState(false);
   const [timeRange, setTimeRange] = useState("1d"); // Default to one day
@@ -95,75 +91,6 @@ const Health = () => {
   const handleBackClick = () => {
     navigate("/driver");
   };
-
-  const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem("fitbitRefreshToken");
-
-    const body = new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: refreshToken,
-      client_id: process.env.REACT_APP_FITBIT_CLIENT_ID,
-      client_secret: process.env.REACT_APP_FITBIT_CLIENT_SECRET,
-    });
-
-    try {
-      const response = await fetch("https://api.fitbit.com/oauth2/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Basic ${btoa(
-            `${process.env.REACT_APP_FITBIT_CLIENT_ID}:${process.env.REACT_APP_FITBIT_CLIENT_SECRET}`
-          )}`,
-        },
-        body: body.toString(),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to refresh token");
-      }
-
-      const data = await response.json();
-      localStorage.setItem("fitbitAccessToken", data.access_token);
-      localStorage.setItem("fitbitRefreshToken", data.refresh_token);
-
-      await post(`/fitbit/${userData.id}`, {
-        accessToken: data.access_token,
-        refreshToken: data.refresh_token,
-        user: userData.id,
-        type: data.token_type,
-        expires: data.expires_in,
-        code: "N/A",
-      });
-
-      getUserFitbitTokens();
-    } catch (error) {
-      console.error("Error refreshing access token:", error);
-    }
-  };
-
-  // async function fetchDataForDateRange(token, timeRange) {
-  //   const { startDate, endDate } = timeRange;
-  //   const dateArray = [];
-  //   let currentDate = new Date(startDate);
-  
-  //   while (currentDate <= new Date(endDate)) {
-  //     dateArray.push(currentDate.toISOString().split('T')[0]); // Convert date to YYYY-MM-DD format
-  //     currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
-  //   }
-  
-  //   const results = await Promise.all(
-  //     dateArray.map(async (date) => {
-  //       const [heart, sleep, steps] = await Promise.all([
-  //         fetchHeartDetail(token, { date }), // Pass the date to your API
-  //         fetchSleepData(token, { date }),   // Pass the date to your API
-  //         fetchStepData(token, { date }),    // Pass the date to your API
-  //       ]);
-  //       return { heart, sleep, steps };
-  //     })
-  //   );
-  
-  //   return results;
-  // }
 
   const fetchAllData = async () => {
     const token = localStorage.getItem("fitbitAccessToken");
@@ -244,6 +171,50 @@ const Health = () => {
       }
     } finally {
       setLoading(false);
+    }
+  }
+
+  const refreshAccessToken = async () => {
+    const refreshToken = localStorage.getItem("fitbitRefreshToken");
+
+    const body = new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: process.env.REACT_APP_FITBIT_CLIENT_ID,
+    });
+
+    try {
+      const response = await fetch("https://api.fitbit.com/oauth2/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${btoa(
+            `${process.env.REACT_APP_FITBIT_CLIENT_ID}:${process.env.REACT_APP_FITBIT_CLIENT_SECRET}`
+          )}`,
+        },
+        body: body.toString(),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to refresh token");
+      }
+
+      const data = await response.json();
+      localStorage.setItem("fitbitAccessToken", data.access_token);
+      localStorage.setItem("fitbitRefreshToken", data.refresh_token);
+
+      await post(`/fitbit/${userData.id}`, {
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        user: userData.id,
+        type: data.token_type,
+        expires: data.expires_in,
+        code: "N/A",
+      });
+
+      getUserFitbitTokens();
+    } catch (error) {
+      console.error("Error refreshing access token:", error);
     }
   };
 
