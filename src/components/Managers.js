@@ -136,7 +136,7 @@ const Managers = () => {
           email: values[`email_${id}`],
           phone: values[`phone_${id}`],
           name: values[`name_${id}`],
-          companyId: values[`company_${id}`],
+          company: values[`company_${id}`],
           role: 'manager',
         });
       });
