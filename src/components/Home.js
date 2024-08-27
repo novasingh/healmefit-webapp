@@ -1,25 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Input, Button, Form, notification, Tooltip, Collapse } from "antd";
 import Header from "./Header";
 import { get, updatePatch } from "../utility/httpService";
 import moment from "moment";
 import 'react-phone-input-2/lib/style.css';
 import PhoneInput from 'react-phone-input-2';
+import { AuthContext } from "../contexts/AuthContext";
 
 const Home = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [profileData, setProfileData] = useState(JSON.parse(sessionStorage.getItem('user')) || {});
+  const { userData } = useContext(AuthContext);
+  const [profileData, setProfileData] = useState(userData);
 
   const { Panel } = Collapse;
 
   useEffect(() => {
-    const data = JSON.parse(sessionStorage.getItem('user')) || {}
-    if(data?.id){
-      data.dob = moment(data.dob).format('YYYY-MM-DD')
-      setProfileData(data)
+    if(userData?.id){
+      userData.dob = moment(userData.dob).format('YYYY-MM-DD')
+      setProfileData(userData)
     }
-  },[])
+  },[userData])
 
   console.log(profileData)
 
