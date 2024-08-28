@@ -32,7 +32,7 @@ const Callback = () => {
             "refreshToken": refresh_token,
             "user": userData.id,
             "type": token_type,
-            "expires": expires_in,
+            "expires": new Date(Date.now() + expires_in * 1000),
             "fitbitUserId" : user_id
         })
         // Call the function to store the tokens in MongoDB
