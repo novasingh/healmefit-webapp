@@ -1,9 +1,11 @@
 // FeedbackModal.js
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Modal, Rate, Input, message } from 'antd';
-import emailjs from 'emailjs-com';
+import { AuthContext } from '../../contexts/AuthContext';
+import { post } from '../../utility/httpService';
 
 const FeedbackModal = ({ isModalOpen, handleOk, handleCancel }) => {
+  const { userData, setUserData } = useContext(AuthContext);
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
 
@@ -15,32 +17,30 @@ const FeedbackModal = ({ isModalOpen, handleOk, handleCancel }) => {
     setFeedback(e.target.value);
   };
 
-  const submitFeedback = () => {
+  const submitFeedback = async () => {
     if (rating === 0) {
       message.error('Please provide a rating before submitting.');
       return;
     }
 
-    const templateParams = {
+    const data = {
+      userId: userData.id,
       rating: rating,
-      feedback: feedback,
+      feedback: feedback ? feedback : 'N/A',
     };
 
-    emailjs.send(
-      'your_service_id',    // Replace with your EmailJS service ID
-      'your_template_id',   // Replace with your EmailJS template ID
-      templateParams,
-      'your_user_id'        // Replace with your EmailJS user ID
-    )
-    .then(response => {
-      message.success('Thank you for your feedback!');
-      handleOk();
-      setRating(0);
-      setFeedback('');
-    })
-    .catch(error => {
-      message.error('Failed to send feedback. Please try again later.');
-    });
+    await post(`/rating`, data)
+      .then((response) => {
+        if(response?.status === 201){
+          userData.ratingBefore = true;
+          setUserData(userData)
+          sessionStorage?.setItem('user', JSON.stringify(userData))
+          message.success('Thank you for your feedback!');
+          handleOk();
+        }else {
+          message.error('You already gave feedback.');
+        }
+      }) 
   };
 
   return (
@@ -52,7 +52,7 @@ const FeedbackModal = ({ isModalOpen, handleOk, handleCancel }) => {
     >
       <Rate allowHalf defaultValue={0} onChange={handleRateChange} />
       <Input.TextArea
-        placeholder="Optional: Leave your feedback here..."
+        placeholder="Leave your feedback here..."
         value={feedback}
         onChange={handleFeedbackChange}
         rows={4}
