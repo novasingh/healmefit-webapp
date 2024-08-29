@@ -20,6 +20,7 @@ import BlankLayout from './components/layouts/BlankLayout';
 import MasterLayout from './components/layouts/MasterLayout';
 import PageNotFound from './components/PageNotFound';
 import DriverDetail from './components/DriverDetail';
+import FeedbackModal from './components/layouts/FeedbackModal';
 
 const App = () => {
   return (
@@ -52,6 +53,7 @@ const Content = () => {
           <Route path="/companies" element={<MasterLayout children={<Companies />} />} />
           <Route path="/driver/:id" element={<MasterLayout children={<DriverDetail />} />} />
           <Route path="/inquiry" element={<MasterLayout children={<Inquiry />} />} />
+          <Route path="/feedbackmodal" element={<MasterLayout children={<FeedbackModal />} />} />
           <Route path="/*" element={<PageNotFound />} />
         </Routes>
       </div>
