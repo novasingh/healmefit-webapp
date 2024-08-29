@@ -27,6 +27,7 @@ import {
 import { HeartFilled, MoonFilled } from "@ant-design/icons";
 import icon1 from "../assets/sleep-hmf.webp";
 import icon2 from "../assets/BMI-hmf.webp";
+import moment from "moment/moment";
 
 const { Option } = Select;
 
@@ -48,7 +49,8 @@ const Health = () => {
   const [profileData, setProfileData] = useState();
   const [haveTokens, setHaveTokens] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [timeRange, setTimeRange] = useState("1d"); // Default to one day
+ const [startDate, setStartDate] = useState(moment().format('YYYY-MM-DD'))
+ const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'))
   const HealthMetric = ({
     icon,
     title,
@@ -92,7 +94,7 @@ const Health = () => {
     navigate("/driver");
   };
 
-  const fetchAllData = async () => {
+  const fetchAllData = async (s, e) => {
     const token = localStorage.getItem("fitbitAccessToken");
     const userId = localStorage.getItem("fitbitUserId");
     if (!token) return;
@@ -101,11 +103,11 @@ const Health = () => {
 
       // Fetch all data in parallel
       const [profile, device, heart, sleep, steps] = await Promise.all([
-        fetchProfileData(token),
-        fetchDeviceData(token),
-        fetchHeartDetail(token, timeRange),
-        fetchSleepData(token, timeRange),
-        fetchStepData(token, timeRange),
+        fetchProfileData(token, userId),
+        fetchDeviceData(token, userId),
+        fetchHeartDetail(token, userId, s, e),
+        fetchSleepData(token, userId, s, e),
+        fetchStepData(token, userId, s, e),
       ]);
 
       // Update state with fetched data
@@ -154,6 +156,10 @@ const Health = () => {
       const response = await get(`/fitbit/${userData.id}`);
       if (response.data) {
         if (isTokenExpired(response.data.accessToken)) {
+           localStorage.setItem(
+            "fitbitRefreshToken",
+            response.data.refreshToken
+          );
           await refreshAccessToken();
         } else {
           localStorage.setItem("fitbitAccessToken", response.data.accessToken);
@@ -165,7 +171,7 @@ const Health = () => {
             "fitbitUserId",
             response.data.fitbitUserId
           );
-          await fetchAllData();
+          await fetchAllData(startDate, endDate);
           setHaveTokens(true);
           setIsDevicePaired(true);
         }
@@ -213,7 +219,7 @@ const Health = () => {
         refreshToken: data.refresh_token,
         user: userData.id,
         type: data.token_type,
-        expires: data.expires_in,
+        expires: new Date(Date.now() + data.expires_in * 1000),
         fitbitUserId: data?.user_id,
       });
 
@@ -227,8 +233,19 @@ const Health = () => {
     getUserFitbitTokens();
   }, []);
 
-  const handleTimeRangeChange = (value) => {
-    setTimeRange(value);
+  const handleTimeRangeChange = async (value) => {
+    let s, e;
+    if(value === '1d'){
+      s = moment().format('YYYY-MM-DD')
+      e = moment().format('YYYY-MM-DD')
+    }else if(value === '1w'){
+      s = moment().subtract(7, 'days').format('YYYY-MM-DD')
+      e = moment().format('YYYY-MM-DD')
+    }else if(value === '1m'){
+      s = moment().subtract(30, 'days').format('YYYY-MM-DD')
+      e = moment().format('YYYY-MM-DD')
+    }
+    await fetchAllData(s, e)
   };
 
   const handleSyncClick = async () => {
