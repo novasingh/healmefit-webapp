@@ -19,6 +19,6 @@ const getFitbitData = async (endpoint, token) => {
 
 export const fetchProfileData = async (token, userId) => getFitbitData(`${userId}/profile.json`, token);
 export const fetchDeviceData = async (token, userId) => getFitbitData(`${userId}/devices.json`, token);
-export const fetchHeartDetail = async (token, userId) => getFitbitData(`${userId}/activities/heart/date/2024-08-22/1d.json`, token); // check 
-export const fetchSleepData = async (token, userId) => getFitbitData(`${userId}/sleep/date/2024-08-09.json`, token); // date 
-export const fetchStepData = async (token, userId) => getFitbitData(`${userId}/activities/date/2024-08-22.json`, token); // daily - weekly
+export const fetchHeartDetail = async (token, userId, start) => getFitbitData(`${userId}/activities/heart/date/${start}/1d.json`, token); // check 
+export const fetchSleepData = async (token, userId, start) => getFitbitData(`${userId}/sleep/date/${start}.json`, token); // date 
+export const fetchStepData = async (token, userId, start) => getFitbitData(`${userId}/activities/date/${start}.json`, token); // daily - weekly

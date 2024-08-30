@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/HealMeFit-Logo.webp'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faUser, faBuilding, faStethoscope, faFile, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faUser, faBuilding, faStethoscope, faFile, faUsers, faCommentDots } from '@fortawesome/free-solid-svg-icons';
 import { AuthContext } from '../../contexts/AuthContext';
 import FeedbackModal from './FeedbackModal';  // Adjusted path
 
@@ -23,7 +23,7 @@ const Sidebar = (props) => {
     manager: [
       { name: 'Home', link: '/home', icon: faHome, show: true },
       { name: 'Driver', link: '/driver', icon: faUser , show : true },
-      { name: 'Feedback', action: () => setIsFeedbackModalOpen(true), icon: faFile, show: checkShowFeedback() },
+      { name: 'Feedback', action: () => setIsFeedbackModalOpen(true), icon: faCommentDots, show: checkShowFeedback() },
     ],
     driver: [
       { name: 'Home', link: '/home', icon: faHome, show : true },

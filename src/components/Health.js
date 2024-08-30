@@ -49,8 +49,7 @@ const Health = () => {
   const [profileData, setProfileData] = useState();
   const [haveTokens, setHaveTokens] = useState(false);
   const [loading, setLoading] = useState(false);
- const [startDate, setStartDate] = useState(moment().format('YYYY-MM-DD'))
- const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'))
+  const [filterDate , setFilterDate] = useState('1d')
   const HealthMetric = ({
     icon,
     title,
@@ -95,6 +94,8 @@ const Health = () => {
   };
 
   const fetchAllData = async (s, e) => {
+    setLoading(true)
+    setHealthData({})
     const token = localStorage.getItem("fitbitAccessToken");
     const userId = localStorage.getItem("fitbitUserId");
     if (!token) return;
@@ -145,7 +146,9 @@ const Health = () => {
       updatePatch(`/users/${userData.id}`, {
         healthData: data,
       });
+      setLoading(false)
     } catch (error) {
+      setLoading(false)
       console.error("Error fetching data:", error);
     }
   };
@@ -171,7 +174,7 @@ const Health = () => {
             "fitbitUserId",
             response.data.fitbitUserId
           );
-          await fetchAllData(startDate, endDate);
+          await handleTimeRangeChange('1d');
           setHaveTokens(true);
           setIsDevicePaired(true);
         }
@@ -238,13 +241,19 @@ const Health = () => {
     if(value === '1d'){
       s = moment().format('YYYY-MM-DD')
       e = moment().format('YYYY-MM-DD')
-    }else if(value === '1w'){
-      s = moment().subtract(7, 'days').format('YYYY-MM-DD')
-      e = moment().format('YYYY-MM-DD')
-    }else if(value === '1m'){
-      s = moment().subtract(30, 'days').format('YYYY-MM-DD')
+    }else if( value === '2d'){
+      s = moment().subtract(1, 'days').format('YYYY-MM-DD')
       e = moment().format('YYYY-MM-DD')
     }
+    
+    // else if(value === '1w'){
+    //   s = moment().subtract(7, 'days').format('YYYY-MM-DD')
+    //   e = moment().format('YYYY-MM-DD')
+    // }else if(value === '1m'){
+    //   s = moment().subtract(30, 'days').format('YYYY-MM-DD')
+    //   e = moment().format('YYYY-MM-DD')
+    // }
+    setFilterDate(value)
     await fetchAllData(s, e)
   };
 
@@ -316,7 +325,7 @@ const Health = () => {
               formatter: function (w) {
                 const healthScore = Math.round(healthData?.healthScore?.healthScore * 100);
                 const category = healthData?.healthScore?.category;
-                return `${healthScore}\n${category}`;
+                return isNaN(healthScore) ? '' : `${healthScore}\n${category}`;
               },
             },
           },
@@ -384,11 +393,13 @@ const Health = () => {
           <Select
             defaultValue="1d"
             onChange={handleTimeRangeChange}
+            value={filterDate}
             style={{ width: "150px", height: "40px" }} // Consistent width and height
           >
             <Option value="1d">Today</Option>
-            <Option value="1w">Last 7 Days</Option>
-            <Option value="1m">Last 30 Days</Option>
+            <Option value="2d">Yesterday</Option>
+            {/* <Option value="1w">Last 7 Days</Option>
+            <Option value="1m">Last 30 Days</Option> */}
           </Select>
           <Button
             onClick={handleSyncClick}
