@@ -53,7 +53,7 @@ const Health = () => {
   const [profileData, setProfileData] = useState();
   const [haveTokens, setHaveTokens] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [filterDate , setFilterDate] = useState('1d')
+  const [filterDate, setFilterDate] = useState("1d");
   const HealthMetric = ({
     icon,
     title,
@@ -66,8 +66,9 @@ const Health = () => {
     <div
       style={{
         padding: "20px",
-        backgroundColor: "#f9fafb",
-        borderRadius: "8px",
+        border: "1px solid rgb(242, 242, 242)",
+        borderRadius: "12px",
+        lineHeight: '28px'
       }}
     >
       <div
@@ -75,14 +76,14 @@ const Health = () => {
           display: "flex",
           alignItems: "center",
           gap: "10px",
-          marginBottom: "10px",
+          marginBottom: "40px",
         }}
       >
         {icon}
-        <span style={{ fontSize: "16px", fontWeight: 600 }}>{title}</span>
+        <span style={{ fontSize: "18px", fontWeight: 600 }}>{title}</span>
       </div>
-      <div style={{ fontSize: "32px", fontWeight: 700 }}>{value}</div>
-      <div style={{ color: "#6B7280", fontSize: "14px" }}>{subtext}</div>
+      <div style={{ fontSize: "32px", fontWeight: 700, marginBottom: '5px' }}>{value}</div>
+      <div style={{ color: "#BBBBBB", fontSize: "14px", fontWeight: 700 }}>{subtext}</div>
       <div style={{ color: statusColor, fontSize: "14px", marginTop: "5px" }}>
         {status} <span style={{ color: "#6B7280" }}>{recommendation}</span>
       </div>
@@ -98,37 +99,39 @@ const Health = () => {
   };
 
   const fetchAllData = async (s, e, t) => {
-    setLoading(true)
-    setHealthData({})
+    setLoading(true);
+    setHealthData({});
     const token = localStorage.getItem("fitbitAccessToken");
     const userId = localStorage.getItem("fitbitUserId");
     if (!token) return;
 
     try {
-
       // Fetch all data in parallel
       const [profile, device, heart, sleep, steps] = await Promise.all([
         fetchProfileData(token, userId),
         fetchDeviceData(token, userId),
         fetchHeartDetail(token, userId, s, e, t),
         fetchSleepData(token, userId, s, e, t),
-        fetchStepData(token, userId, s, e, t)
+        fetchStepData(token, userId, s, e, t),
       ]);
 
       // Update state with fetched data
       setProfileData(profile);
       setDeviceData(device);
-      let data = {}
+      let data = {};
 
       const bmiData = calculateBMI(
         convertWeightToKg(profile?.user?.weight, profile?.user?.weightUnit),
         profile?.user?.height
-      )
+      );
 
-      if (t === '7d' || t === '30d'){
-        const averageData = await calculateAverages(sleep?.sleep, steps['activities-steps'], heart['activities-heart'])
-        const healthScore = 
-        await calculateHealthScore(
+      if (t === "7d" || t === "30d") {
+        const averageData = await calculateAverages(
+          sleep?.sleep,
+          steps["activities-steps"],
+          heart["activities-heart"]
+        );
+        const healthScore = await calculateHealthScore(
           profile?.user?.age,
           calculateBMI(
             convertWeightToKg(profile?.user?.weight, profile?.user?.weightUnit),
@@ -139,17 +142,16 @@ const Health = () => {
           averageData?.avgTimeInBed / 60
         );
 
-       data = {
-        age: profile?.user?.age,
-        sleep: averageData?.avgTimeInBed,
-        steps: averageData?.avgSteps,
-        heartRate: averageData?.avgRestingHeartRate || 62,
-        bmi: +bmiData,
-        healthScore: healthScore
-      }
-      }else{
-        const healthScore = 
-        await calculateHealthScore(
+        data = {
+          age: profile?.user?.age,
+          sleep: averageData?.avgTimeInBed,
+          steps: averageData?.avgSteps,
+          heartRate: averageData?.avgRestingHeartRate || 62,
+          bmi: +bmiData,
+          healthScore: healthScore,
+        };
+      } else {
+        const healthScore = await calculateHealthScore(
           profile?.user?.age,
           calculateBMI(
             convertWeightToKg(profile?.user?.weight, profile?.user?.weightUnit),
@@ -160,28 +162,29 @@ const Health = () => {
           sleep?.summary?.totalTimeInBed / 60
         );
 
-       data = {
-        age: profile?.user?.age,
-        sleep: sleep?.summary?.totalTimeInBed,
-        steps: profile?.user?.averageDailySteps,
-        heartRate: heart["activities-heart"][0]?.value?.restingHeartRate || 62,
-        bmi: +bmiData,
-        healthScore: healthScore
-      }
+        data = {
+          age: profile?.user?.age,
+          sleep: sleep?.summary?.totalTimeInBed,
+          steps: profile?.user?.averageDailySteps,
+          heartRate:
+            heart["activities-heart"][0]?.value?.restingHeartRate || 62,
+          bmi: +bmiData,
+          healthScore: healthScore,
+        };
       }
 
       setHealthData(data);
       // Post health data
 
-      if(t === '1d'){
+      if (t === "1d") {
         updatePatch(`/users/${userData.id}`, {
           healthData: data,
         });
       }
-      
-      setLoading(false)
+
+      setLoading(false);
     } catch (error) {
-      setLoading(false)
+      setLoading(false);
       console.error("Error fetching data:", error);
     }
   };
@@ -192,7 +195,7 @@ const Health = () => {
       const response = await get(`/fitbit/${userData.id}`);
       if (response.data) {
         if (isTokenExpired(response.data.accessToken)) {
-           localStorage.setItem(
+          localStorage.setItem(
             "fitbitRefreshToken",
             response.data.refreshToken
           );
@@ -203,11 +206,8 @@ const Health = () => {
             "fitbitRefreshToken",
             response.data.refreshToken
           );
-          localStorage.setItem(
-            "fitbitUserId",
-            response.data.fitbitUserId
-          );
-          await handleTimeRangeChange('1d');
+          localStorage.setItem("fitbitUserId", response.data.fitbitUserId);
+          await handleTimeRangeChange("1d");
           setHaveTokens(true);
           setIsDevicePaired(true);
         }
@@ -219,7 +219,7 @@ const Health = () => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const refreshAccessToken = async () => {
     const refreshToken = localStorage.getItem("fitbitRefreshToken");
@@ -271,23 +271,23 @@ const Health = () => {
 
   const handleTimeRangeChange = async (value) => {
     let s, e;
-    e = moment().format('YYYY-MM-DD')
-    if(value === '1d'){
-      s = moment().format('YYYY-MM-DD')
-    }else if( value === '2d'){
-      s = moment().subtract(1, 'days').format('YYYY-MM-DD')
-    }else if (value === '7d'){
-      s = moment().subtract(7, 'days').format('YYYY-MM-DD')
-    }else if (value === '30d'){
-      s = moment().subtract(30, 'days').format('YYYY-MM-DD')
+    e = moment().format("YYYY-MM-DD");
+    if (value === "1d") {
+      s = moment().format("YYYY-MM-DD");
+    } else if (value === "2d") {
+      s = moment().subtract(1, "days").format("YYYY-MM-DD");
+    } else if (value === "7d") {
+      s = moment().subtract(7, "days").format("YYYY-MM-DD");
+    } else if (value === "30d") {
+      s = moment().subtract(30, "days").format("YYYY-MM-DD");
     }
 
-    setFilterDate(value)
-    await fetchAllData(s, e, value)
+    setFilterDate(value);
+    await fetchAllData(s, e, value);
   };
 
   const handleSyncClick = async () => {
-    await fetchAllData('', '', filterDate);
+    await fetchAllData("", "", filterDate);
   };
   const handleUnpairDevice = () => {
     // Logic to unpair the device, e.g., removing tokens
@@ -303,29 +303,26 @@ const Health = () => {
 
   const chartOptions = {
     series: [
-      heartRatePercentage,
-      calculateSleepPercentage(healthData?.sleep),
-      Math.round(
-        (healthData?.bmi /
-          25) *
-          100
-      ).toFixed(2),
       avgSteps > 100 ? 100 : Math.round(avgSteps),
+      Math.round((healthData?.bmi / 25) * 100).toFixed(2),
+      calculateSleepPercentage(healthData?.sleep),
+      heartRatePercentage,
     ],
     options: {
       chart: {
-        height: "500px",
-        width: "500px",
+      height: '100%',  // Set the height to be responsive
+      width: '100%',
         type: "radialBar",
       },
       plotOptions: {
         radialBar: {
           hollow: {
-            size: "50%",
+            size: "30%",
           },
           track: {
             show: true,
-            strokeWidth: "20%", // Adjust the thickness of the track
+            strokeWidth: "100%",
+            margin: '20px'
           },
           dataLabels: {
             name: {
@@ -349,9 +346,11 @@ const Health = () => {
               color: "black",
               fontSize: "18px",
               formatter: function (w) {
-                const healthScore = Math.round(healthData?.healthScore?.healthScore * 100);
+                const healthScore = Math.round(
+                  healthData?.healthScore?.healthScore * 100
+                );
                 const category = healthData?.healthScore?.category;
-                return isNaN(healthScore) ? '' : `${healthScore}\n${category}`;
+                return isNaN(healthScore) ? "" : `${healthScore}\n${category}`;
               },
             },
           },
@@ -359,14 +358,14 @@ const Health = () => {
             lineCap: "round", // Make the ends of the strokes round
             width: 50, // Increase the stroke width
           },
+          rounded: true,
         },
       },
+      colors: ["#96ACFA", "#0B5676", "#1FA6E0", "#CAE427"],
       labels: ["Heart Rate", "Sleep", "BMI", "Steps"],
-      color: ["#96ACFA", "#0B5676", "#1FA6E0", "#CAE427"],
     },
   };
 
-  
   return loading ? (
     <Col
       style={{
@@ -511,99 +510,79 @@ const Health = () => {
         <>
           {profileData?.user?.age ? (
             <Row gutter={[16, 16]}>
-              {/* Top row with Age, Height, Weight */}
-              <Col span={5}>
-                <div
-                  style={{
-                    padding: "20px",
-                    backgroundColor: "#f9fafb",
-                    borderRadius: "8px",
-                    textAlign: 'center'
-                  }}
-                >
-                  <div
-                    style={{
-                      color: "#6B7280",
-                      fontSize: "14px"
-                    }}
-                  >
-                    Age
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: 700
-                    }}
-                  >
-                    {profileData?.user?.age || "N/A"}
-                  </div>
-                </div>
-              </Col>
-              <Col span={5}>
-                <div
-                  style={{
-                    padding: "20px",
-                    backgroundColor: "#f9fafb",
-                    borderRadius: "8px",
-                    textAlign: 'center'
-                  }}
-                >
-                  <div
-                    style={{
-                      color: "#6B7280",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Height
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {profileData?.user.height ? cmToFeetInches(profileData?.user.height) : "N/A"}
-                  </div>
-                </div>
-              </Col>
-              <Col span={5}>
-                <div
-                  style={{
-                    padding: "20px",
-                    backgroundColor: "#f9fafb",
-                    borderRadius: "8px",
-                    textAlign: 'center'
-                  }}
-                >
-                  <div
-                    style={{
-                      color: "#6B7280",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Weight
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {profileData?.user?.weight
-                      ? profileData?.user?.weight + "lb"
-                      : "0"}
-                  </div>
-                </div>
-              </Col>
-
-              {/* Left column with health metrics */}
-              <Col span={12}>
-                <Row gutter={[16, 16]}>
-                  <Col span={10}>
+              <Col span={12} lg={12} md={24}>
+                <Row style={{border: '1px solid #F2F2F2', borderRadius: "12px", padding: '24px', textAlign: 'center', lineHeight: '25px'}}>
+                  <Col span={8}>
+                      <div
+                        style={{
+                          color: '#BBBBBB',
+                          fontSize: '16px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        Age
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "24px",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {profileData?.user?.age || "N/A"}
+                      </div>
+                  </Col>
+                  <Col span={8}>
+                      <div
+                         style={{
+                          color: '#BBBBBB',
+                          fontSize: '16px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        Height
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "24px",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {profileData?.user.height
+                          ? cmToFeetInches(profileData?.user.height)
+                          : "N/A"}
+                      </div>
+                  </Col>
+                  <Col span={8}>
+                      <div
+                         style={{
+                          color: '#BBBBBB',
+                          fontSize: '16px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        Weight
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "24px",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {profileData?.user?.weight
+                          ? profileData?.user?.weight + "lb"
+                          : "0"}
+                      </div>
+                  </Col>
+                </Row>
+                <Row style={{marginTop: '25px'}} gutter={[16, 16]}>
+                  <Col span={12} >
                     <HealthMetric
                       icon={
                         <HeartFilled
-                          style={{ color: "#8B5CF6", fontSize: "20px" }}
+                          style={{ color: "#8B5CF6", fontSize: '18px',
+                            background: '#F2F2F2',
+                            borderRadius: '8px',
+                            padding: '6px' }}
                         />
                       }
                       title="Resting Heart Rate"
@@ -613,16 +592,28 @@ const Health = () => {
                           : "N/A"
                       }
                       subtext="Daily average"
-                      status={getHeartRateType(healthData?.age, healthData?.heartRate)?.type}
-                      statusColor={getHeartRateType(healthData?.age, healthData?.heartRate)?.color}
-                      recommendation={getHeartRateType(healthData?.age, healthData?.heartRate)?.recommended}
+                      status={
+                        getHeartRateType(healthData?.age, healthData?.heartRate)
+                          ?.type
+                      }
+                      statusColor={
+                        getHeartRateType(healthData?.age, healthData?.heartRate)
+                          ?.color
+                      }
+                      recommendation={
+                        getHeartRateType(healthData?.age, healthData?.heartRate)
+                          ?.recommended
+                      }
                     />
                   </Col>
-                  <Col span={10}>
+                  <Col span={12}>
                     <HealthMetric
                       icon={
                         <MoonFilled
-                          style={{ color: "#3B82F6", fontSize: "20px" }}
+                          style={{ color: "#3B82F6", fontSize: '18px',
+                            background: '#F2F2F2',
+                            borderRadius: '8px',
+                            padding: '6px' }}
                         />
                       }
                       title="Sleep"
@@ -632,12 +623,18 @@ const Health = () => {
                           : "N/A"
                       }
                       subtext="Last night"
-                      status={getSleepAnalysis(healthData?.age, healthData.sleep).status || ''}
-                      statusColor={getSleepAnalysis(healthData?.age, healthData.sleep).color || ''}
+                      status={
+                        getSleepAnalysis(healthData?.age, healthData.sleep)
+                          .status || ""
+                      }
+                      statusColor={
+                        getSleepAnalysis(healthData?.age, healthData.sleep)
+                          .color || ""
+                      }
                       recommendation="Recommended (7-9h)"
                     />
                   </Col>
-                  <Col span={10}>
+                  <Col span={12}>
                     <HealthMetric
                       icon={
                         <img
@@ -645,22 +642,28 @@ const Health = () => {
                           alt="icon"
                           style={{
                             color: "#10B981",
-                            fontSize: "20px",
-                            width: "20px",
-                            height: "20px",
+                            fontSize: '18px',
+                            background: '#F2F2F2',
+                            borderRadius: '8px',
+                            padding: '4px 8p'
                           }}
                         />
                       }
                       title="Steps"
-                      value={ healthData?.steps || "N/A"}
+                      value={healthData?.steps || "N/A"}
                       subtext="Daily average"
                       status={getStepActivityLevel(healthData?.steps)?.type}
-                      statusColor={getStepActivityLevel(healthData?.steps)?.color}
-                      recommendation={'Recommended '+getStepActivityLevel(healthData?.steps)?.recommended}
+                      statusColor={
+                        getStepActivityLevel(healthData?.steps)?.color
+                      }
+                      recommendation={
+                        "Recommended " +
+                        getStepActivityLevel(healthData?.steps)?.recommended
+                      }
                     />
                   </Col>
 
-                  <Col span={10}>
+                  <Col span={12}>
                     <HealthMetric
                       icon={
                         <img
@@ -668,50 +671,54 @@ const Health = () => {
                           alt="icon"
                           style={{
                             color: "#10B981",
-                            fontSize: "20px",
-                            width: "20px",
-                            height: "20px",
+                            fontSize: '18px',
+                            background: '#F2F2F2',
+                            borderRadius: '8px',
+                            padding: '4px 8px',
                           }}
                         />
                       }
                       title="BMI"
-                      value={
-                        healthData?.bmi
-                          ?  healthData?.bmi
-                          : "N/A"
-                      }
+                      value={healthData?.bmi ? healthData?.bmi : "N/A"}
                       subtext="Last 7 Days"
-                      status={getWeightStatus(healthData?.bmi).status || ''}
-                      statusColor={getWeightStatus(healthData?.bmi).color || ''}
-                      recommendation={getWeightStatus(healthData?.bmi)?.range || ''}
+                      status={getWeightStatus(healthData?.bmi).status || ""}
+                      statusColor={getWeightStatus(healthData?.bmi).color || ""}
+                      recommendation={
+                        getWeightStatus(healthData?.bmi)?.range || ""
+                      }
                     />
                   </Col>
                 </Row>
               </Col>
-
-              {/* Right column with chart */}
-              <Col span={12}>
+              <Col span={12} md={12} sm={24}>
                 <div
                   style={{
                     height: "100%",
                     display: "flex",
                     justifyContent: "center",
-                    alignItems: "auto",
+                    alignItems: "center",
                   }}
                 >
                   <Chart
                     options={chartOptions.options}
                     series={chartOptions.series}
                     type="radialBar"
-                    height={550}
-                    width={500}
+                    width={600}
+                    height={600}
                   />
                 </div>
               </Col>
             </Row>
           ) : (
-            <Col style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80%'}}>
-              <p style={{fontSize: '20px'}}>
+            <Col
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "80%",
+              }}
+            >
+              <p style={{ fontSize: "20px" }}>
                 Sorry we don't have data access now please refresh the page or
                 Try again later.
               </p>

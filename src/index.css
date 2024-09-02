@@ -16,3 +16,6 @@ code {
   text-align:left;
   margin-top: 2px;
 }
+path{
+  stroke-linecap: round;
+}

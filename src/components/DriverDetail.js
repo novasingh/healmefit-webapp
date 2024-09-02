@@ -120,6 +120,7 @@ const DriverDetail = () => {
         },
       },
       labels: ['Heart Rate', 'Sleep', 'BMI', 'Steps'],
+      colors: ["#96ACFA", "#0B5676", "#1FA6E0", "#CAE427"],
     },
   };
 
