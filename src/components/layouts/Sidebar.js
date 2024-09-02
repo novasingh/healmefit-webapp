@@ -9,8 +9,6 @@ import FeedbackModal from './FeedbackModal';  // Adjusted path
 const Sidebar = (props) => {
   const { role , userData } = useContext(AuthContext);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
-  
-  console.log(userData)
  
   const checkShowFeedback = () => {
     if(userData?.role !== 'admin' && !userData?.ratingBefore){

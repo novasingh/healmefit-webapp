@@ -24,6 +24,7 @@ import {
   fetchProfileData,
   fetchSleepData,
   fetchStepData,
+  fetchWeightData,
 } from "../utility/fitbitServices";
 import { HeartFilled, MoonFilled } from "@ant-design/icons";
 import icon1 from "../assets/sleep-hmf.webp";
@@ -104,13 +105,16 @@ const Health = () => {
     try {
 
       // Fetch all data in parallel
-      const [profile, device, heart, sleep, steps] = await Promise.all([
+      const [profile, device, heart, sleep, steps, weight] = await Promise.all([
         fetchProfileData(token, userId),
         fetchDeviceData(token, userId),
         fetchHeartDetail(token, userId, s, e, t),
         fetchSleepData(token, userId, s, e, t),
         fetchStepData(token, userId, s, e, t),
+        fetchWeightData(token, userId, s, e, t)
       ]);
+
+      console.log('weight:', weight)
 
       // Update state with fetched data
       setProfileData(profile);
