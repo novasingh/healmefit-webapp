@@ -209,10 +209,6 @@ export function getSleepAnalysis(ageInYears, sleepMinutes) {
 }
 
 export async function calculateAverages(sleepData, stepsData, heartRateData) {
-
-    console.log('Sleep Data:', sleepData)
-    console.log('Steps Data:', stepsData)
-    console.log('Heart Rate Data:', heartRateData)
     
     const getDefault = (value) => (isNaN(value) || value == null ? 0 : value);
   
@@ -241,3 +237,21 @@ export async function calculateAverages(sleepData, stepsData, heartRateData) {
       avgRestingHeartRate
     };
   }
+
+ export  function cmToFeetInches(cm) {
+    const totalInches = cm / 2.54;
+
+    const feet = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return `${feet}ft ${inches}in`;
+  }
+
+  export function convertWeightToKg(weight, weightUnit) {
+    if (weightUnit === "en_US") {
+        // 1 pound (lbs) = 0.453592 kg
+        const weightInKg = weight * 0.453592;
+        return weightInKg.toFixed(2); // Round to 2 decimal places
+    } else {
+        return weight;
+    }
+}

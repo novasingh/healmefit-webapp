@@ -10,7 +10,9 @@ import {
   calculateBMI,
   calculateHealthScore,
   calculateSleepPercentage,
+  cmToFeetInches,
   convertDecimalHours,
+  convertWeightToKg,
   getHeartRateType,
   getSleepAnalysis,
   getStepActivityLevel,
@@ -105,16 +107,13 @@ const Health = () => {
     try {
 
       // Fetch all data in parallel
-      const [profile, device, heart, sleep, steps, weight] = await Promise.all([
+      const [profile, device, heart, sleep, steps] = await Promise.all([
         fetchProfileData(token, userId),
         fetchDeviceData(token, userId),
         fetchHeartDetail(token, userId, s, e, t),
         fetchSleepData(token, userId, s, e, t),
-        fetchStepData(token, userId, s, e, t),
-        fetchWeightData(token, userId, s, e, t)
+        fetchStepData(token, userId, s, e, t)
       ]);
-
-      console.log('weight:', weight)
 
       // Update state with fetched data
       setProfileData(profile);
@@ -122,18 +121,17 @@ const Health = () => {
       let data = {}
 
       const bmiData = calculateBMI(
-        profile?.user?.weight,
+        convertWeightToKg(profile?.user?.weight, profile?.user?.weightUnit),
         profile?.user?.height
       )
 
       if (t === '7d' || t === '30d'){
         const averageData = await calculateAverages(sleep?.sleep, steps['activities-steps'], heart['activities-heart'])
-        console.log(averageData)
         const healthScore = 
         await calculateHealthScore(
           profile?.user?.age,
           calculateBMI(
-            profile?.user?.weight,
+            convertWeightToKg(profile?.user?.weight, profile?.user?.weightUnit),
             profile?.user?.height
           ),
           averageData?.avgRestingHeartRate || 62,
@@ -154,7 +152,7 @@ const Health = () => {
         await calculateHealthScore(
           profile?.user?.age,
           calculateBMI(
-            profile?.user?.weight,
+            convertWeightToKg(profile?.user?.weight, profile?.user?.weightUnit),
             profile?.user?.height
           ),
           heart["activities-heart"][0]?.value?.restingHeartRate || 62,
@@ -308,10 +306,7 @@ const Health = () => {
       heartRatePercentage,
       calculateSleepPercentage(healthData?.sleep),
       Math.round(
-        (calculateBMI(
-          profileData?.user?.weight,
-          profileData?.user?.height
-        ) /
+        (healthData?.bmi /
           25) *
           100
       ).toFixed(2),
@@ -567,7 +562,7 @@ const Health = () => {
                       fontWeight: 700,
                     }}
                   >
-                    {Math.trunc(profileData?.user.height) || "N/A"}
+                    {profileData?.user.height ? cmToFeetInches(profileData?.user.height) : "N/A"}
                   </div>
                 </div>
               </Col>
