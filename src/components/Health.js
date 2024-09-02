@@ -303,10 +303,10 @@ const Health = () => {
 
   const chartOptions = {
     series: [
-      avgSteps > 100 ? 100 : Math.round(avgSteps),
-      Math.round((healthData?.bmi / 25) * 100).toFixed(2),
-      calculateSleepPercentage(healthData?.sleep),
       heartRatePercentage,
+      calculateSleepPercentage(healthData?.sleep),
+      Math.round((healthData?.bmi / 25) * 100).toFixed(2),
+      avgSteps > 100 ? 100 : Math.round(avgSteps),
     ],
     options: {
       chart: {
@@ -328,7 +328,6 @@ const Health = () => {
             name: {
               show: true,
               fontSize: "20px", // Increase font size for name
-              color: undefined,
               offsetY: -10,
             },
             value: {
@@ -353,10 +352,6 @@ const Health = () => {
                 return isNaN(healthScore) ? "" : `${healthScore}\n${category}`;
               },
             },
-          },
-          stroke: {
-            lineCap: "round", // Make the ends of the strokes round
-            width: 50, // Increase the stroke width
           },
           rounded: true,
         },
@@ -569,7 +564,7 @@ const Health = () => {
                         }}
                       >
                         {profileData?.user?.weight
-                          ? profileData?.user?.weight + "lb"
+                          ? profileData?.user?.weight + `${profileData?.user?.weight === 'en_US' ? ' lb' : ' kg'}` 
                           : "0"}
                       </div>
                   </Col>
