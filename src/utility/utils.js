@@ -22,7 +22,7 @@ export async function calculateHealthScore(age, bmi, heartRate, steps, sleep) {
     const sleepNorm = normalize(sleep, 4, 10);
   
     // Calculate the average score
-    const healthScore = (ageNorm + bmiNorm + heartRateNorm + stepsNorm + sleepNorm) / 5;
+    let healthScore = (ageNorm + bmiNorm + heartRateNorm + stepsNorm + sleepNorm) / 5;
   
     // Determine the health category
     let category;
@@ -34,6 +34,10 @@ export async function calculateHealthScore(age, bmi, heartRate, steps, sleep) {
       category = "Fair";
     } else {
       category = "Bad";
+    }
+
+    if(isNaN(healthScore)){
+        healthScore = 0
     }
   
     return { healthScore: healthScore.toFixed(2), category };
@@ -203,3 +207,37 @@ export function getSleepAnalysis(ageInYears, sleepMinutes) {
         };
     }
 }
+
+export async function calculateAverages(sleepData, stepsData, heartRateData) {
+
+    console.log('Sleep Data:', sleepData)
+    console.log('Steps Data:', stepsData)
+    console.log('Heart Rate Data:', heartRateData)
+    
+    const getDefault = (value) => (isNaN(value) || value == null ? 0 : value);
+  
+    const totalSleep = sleepData.length;
+    const totalTimeInBed = sleepData.reduce((sum, entry) => sum + getDefault(entry.timeInBed), 0);
+    const totalMinutesAsleep = sleepData.reduce((sum, entry) => sum + getDefault(entry.minutesAsleep), 0);
+    const totalMinutesAwake = sleepData.reduce((sum, entry) => sum + getDefault(entry.minutesAwake), 0);
+  
+    const avgTimeInBed = Math.round(totalSleep ? totalTimeInBed / totalSleep : 0);
+    const avgMinutesAsleep = Math.round(totalSleep ? totalMinutesAsleep / totalSleep : 0);
+    const avgMinutesAwake = Math.round(totalSleep ? totalMinutesAwake / totalSleep : 0);
+  
+    const totalSteps = stepsData.length;
+    const totalStepsValue = stepsData.reduce((sum, entry) => sum + getDefault(parseInt(entry.value, 10)), 0);
+    const avgSteps = Math.round(totalSteps ? totalStepsValue / totalSteps : 0);
+  
+    const totalHeartRates = heartRateData.length;
+    const totalRestingHeartRate = heartRateData.reduce((sum, entry) => sum + getDefault(entry.value.restingHeartRate), 0);
+    const avgRestingHeartRate = Math.round(totalHeartRates ? totalRestingHeartRate / totalHeartRates : 0);
+  
+    return {
+      avgTimeInBed,
+      avgMinutesAsleep,
+      avgMinutesAwake,
+      avgSteps,
+      avgRestingHeartRate
+    };
+  }

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { get, post, updatePatch } from "../utility/httpService";
 import { AuthContext } from "../contexts/AuthContext";
 import {
+  calculateAverages,
   calculateBMI,
   calculateHealthScore,
   calculateSleepPercentage,
@@ -93,7 +94,7 @@ const Health = () => {
     navigate("/driver");
   };
 
-  const fetchAllData = async (s, e) => {
+  const fetchAllData = async (s, e, t) => {
     setLoading(true)
     setHealthData({})
     const token = localStorage.getItem("fitbitAccessToken");
@@ -106,46 +107,76 @@ const Health = () => {
       const [profile, device, heart, sleep, steps] = await Promise.all([
         fetchProfileData(token, userId),
         fetchDeviceData(token, userId),
-        fetchHeartDetail(token, userId, s, e),
-        fetchSleepData(token, userId, s, e),
-        fetchStepData(token, userId, s, e),
+        fetchHeartDetail(token, userId, s, e, t),
+        fetchSleepData(token, userId, s, e, t),
+        fetchStepData(token, userId, s, e, t),
       ]);
 
       // Update state with fetched data
       setProfileData(profile);
       setDeviceData(device);
+      let data = {}
 
-      const healthScore = 
+      const bmiData = calculateBMI(
+        profile?.user?.weight,
+        profile?.user?.height
+      )
+
+      if (t === '7d' || t === '30d'){
+        const averageData = await calculateAverages(sleep?.sleep, steps['activities-steps'], heart['activities-heart'])
+        console.log(averageData)
+        const healthScore = 
         await calculateHealthScore(
           profile?.user?.age,
           calculateBMI(
-            profile?.user?.weight || 65,
+            profile?.user?.weight,
             profile?.user?.height
           ),
-          heart["activities-heart"][0]?.value?.restingHeartRate,
+          averageData?.avgRestingHeartRate || 62,
+          averageData?.avgSteps || 0,
+          averageData?.avgTimeInBed / 60
+        );
+
+       data = {
+        age: profile?.user?.age,
+        sleep: averageData?.avgTimeInBed,
+        steps: averageData?.avgSteps,
+        heartRate: averageData?.avgRestingHeartRate || 62,
+        bmi: +bmiData,
+        healthScore: healthScore
+      }
+      }else{
+        const healthScore = 
+        await calculateHealthScore(
+          profile?.user?.age,
+          calculateBMI(
+            profile?.user?.weight,
+            profile?.user?.height
+          ),
+          heart["activities-heart"][0]?.value?.restingHeartRate || 62,
           profile?.user?.averageDailySteps,
           sleep?.summary?.totalTimeInBed / 60
         );
 
-      const bmiData = calculateBMI(
-        profile?.user?.weight || 65,
-        profile?.user?.height
-      )
-
-      const data = {
+       data = {
         age: profile?.user?.age,
         sleep: sleep?.summary?.totalTimeInBed,
         steps: profile?.user?.averageDailySteps,
-        heartRate: heart["activities-heart"][0]?.value?.restingHeartRate,
+        heartRate: heart["activities-heart"][0]?.value?.restingHeartRate || 62,
         bmi: +bmiData,
         healthScore: healthScore
-      };
+      }
+      }
 
       setHealthData(data);
       // Post health data
-      updatePatch(`/users/${userData.id}`, {
-        healthData: data,
-      });
+
+      if(t === '1d'){
+        updatePatch(`/users/${userData.id}`, {
+          healthData: data,
+        });
+      }
+      
       setLoading(false)
     } catch (error) {
       setLoading(false)
@@ -238,27 +269,23 @@ const Health = () => {
 
   const handleTimeRangeChange = async (value) => {
     let s, e;
+    e = moment().format('YYYY-MM-DD')
     if(value === '1d'){
       s = moment().format('YYYY-MM-DD')
-      e = moment().format('YYYY-MM-DD')
     }else if( value === '2d'){
       s = moment().subtract(1, 'days').format('YYYY-MM-DD')
-      e = moment().format('YYYY-MM-DD')
+    }else if (value === '7d'){
+      s = moment().subtract(7, 'days').format('YYYY-MM-DD')
+    }else if (value === '30d'){
+      s = moment().subtract(30, 'days').format('YYYY-MM-DD')
     }
-    
-    // else if(value === '1w'){
-    //   s = moment().subtract(7, 'days').format('YYYY-MM-DD')
-    //   e = moment().format('YYYY-MM-DD')
-    // }else if(value === '1m'){
-    //   s = moment().subtract(30, 'days').format('YYYY-MM-DD')
-    //   e = moment().format('YYYY-MM-DD')
-    // }
+
     setFilterDate(value)
-    await fetchAllData(s, e)
+    await fetchAllData(s, e, value)
   };
 
   const handleSyncClick = async () => {
-    await fetchAllData();
+    await fetchAllData('', '', filterDate);
   };
   const handleUnpairDevice = () => {
     // Logic to unpair the device, e.g., removing tokens
@@ -267,7 +294,7 @@ const Health = () => {
     setIsDevicePaired(false);
     setHaveTokens(false);
   };
-  const heartRate = healthData?.heartRate || 72;
+  const heartRate = healthData?.heartRate || 62;
   const heartRatePercentage = Math.round((heartRate / 78) * 100);
 
   const avgSteps = (profileData?.user?.averageDailySteps / 10000) * 100;
@@ -278,7 +305,7 @@ const Health = () => {
       calculateSleepPercentage(healthData?.sleep),
       Math.round(
         (calculateBMI(
-          profileData?.user?.weight || 65,
+          profileData?.user?.weight,
           profileData?.user?.height
         ) /
           25) *
@@ -398,8 +425,8 @@ const Health = () => {
           >
             <Option value="1d">Today</Option>
             <Option value="2d">Yesterday</Option>
-            {/* <Option value="1w">Last 7 Days</Option>
-            <Option value="1m">Last 30 Days</Option> */}
+            <Option value="7d">Last 7 Days</Option>
+            <Option value="30d">Last 30 Days</Option>
           </Select>
           <Button
             onClick={handleSyncClick}
@@ -492,14 +519,13 @@ const Health = () => {
                     padding: "20px",
                     backgroundColor: "#f9fafb",
                     borderRadius: "8px",
+                    textAlign: 'center'
                   }}
                 >
                   <div
                     style={{
                       color: "#6B7280",
-                      fontSize: "14px",
-                      marginBottom: "4px",
-                      marginLeft: 80,
+                      fontSize: "14px"
                     }}
                   >
                     Age
@@ -507,8 +533,7 @@ const Health = () => {
                   <div
                     style={{
                       fontSize: "24px",
-                      fontWeight: 700,
-                      marginLeft: 80,
+                      fontWeight: 700
                     }}
                   >
                     {profileData?.user?.age || "N/A"}
@@ -521,14 +546,13 @@ const Health = () => {
                     padding: "20px",
                     backgroundColor: "#f9fafb",
                     borderRadius: "8px",
+                    textAlign: 'center'
                   }}
                 >
                   <div
                     style={{
                       color: "#6B7280",
                       fontSize: "14px",
-                      marginBottom: "4px",
-                      marginLeft: 80,
                     }}
                   >
                     Height
@@ -537,7 +561,6 @@ const Health = () => {
                     style={{
                       fontSize: "24px",
                       fontWeight: 700,
-                      marginLeft: 70,
                     }}
                   >
                     {Math.trunc(profileData?.user.height) || "N/A"}
@@ -550,14 +573,13 @@ const Health = () => {
                     padding: "20px",
                     backgroundColor: "#f9fafb",
                     borderRadius: "8px",
+                    textAlign: 'center'
                   }}
                 >
                   <div
                     style={{
                       color: "#6B7280",
                       fontSize: "14px",
-                      marginBottom: "4px",
-                      marginLeft: 80,
                     }}
                   >
                     Weight
@@ -566,7 +588,6 @@ const Health = () => {
                     style={{
                       fontSize: "24px",
                       fontWeight: 700,
-                      marginLeft: 70,
                     }}
                   >
                     {profileData?.user?.weight
