@@ -147,8 +147,6 @@ export function calculateHealthScore(age, bmi, heartRate, steps, sleepHours) {
                         (stepsScore * weights.steps) +
                         (sleepScore * weights.sleep);
 
-  
-     console.log(healthScore)                   
     // Determine the health category
     let category;
     if (healthScore >= 0.8) {
@@ -238,13 +236,13 @@ export const convertDecimalHours = (totalSleep) => {
   export function getHeartRateType(age, heartRate) {
     let result = { type: "Unknown", recommended : 'N/A',  color: "gray" }; // Default return object
 
-    if (heartRate >= 50 && heartRate <= 60) {
-        result = { type: "Excellent", recommended: '(50 - 60 bpm)', color: "green" };
-    } else if (heartRate >= 61 && heartRate <= 70) {
-        result = { type: "Good", recommended: '(61 - 70 bpm)' , color: "#5eb75e" };
-    } else if (heartRate >= 71 && heartRate <= 80) {
-        result = { type: "Fair", recommended: '(71 - 80 bpm)' , color: "yellow" };
-    } else if (heartRate >= 81 && heartRate <= 100) {
+    if (heartRate >= 56 && heartRate <= 62) {
+        result = { type: "Excellent", recommended: '(56 - 62 bpm)', color: "green" };
+    } else if (heartRate >= 63 && heartRate <= 70) {
+        result = { type: "Good", recommended: '(63 - 70 bpm)' , color: "#5eb75e" };
+    } else if (heartRate >= 71 && heartRate <= 82) {
+        result = { type: "Fair", recommended: '(71 - 83 bpm)' , color: "yellow" };
+    } else if (heartRate >= 83 && heartRate <= 100) {
         result = { type: "Bad", recommended: '(81 - 100 bpm)' ,color: "red" };
     }
 
@@ -318,7 +316,7 @@ export function getSleepAnalysis(ageInYears, sleepMinutes) {
             color: 'green',
             advice: '- (Maintain current sleep routine)'
         };
-    } else if (sleepHours >= 7 && sleepHours <= 8) {
+    } else if (sleepHours >= 7 && sleepHours <= 9) {
         return {
             status: 'Excellent',
             color: 'green',

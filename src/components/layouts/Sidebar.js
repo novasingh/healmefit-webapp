@@ -27,7 +27,7 @@ const Sidebar = (props) => {
       { name: 'Home', link: '/home', icon: faHome, show : true },
       { name: 'Health', link: '/health', icon: faStethoscope, show : true },
       { name: 'Documents', link: '/documents', icon: faFile, show : true },
-      { name: 'Feedback', action: () => setIsFeedbackModalOpen(true), icon: faFile, show: checkShowFeedback() },
+      { name: 'Feedback', action: () => setIsFeedbackModalOpen(true), icon: faCommentDots, show: checkShowFeedback() },
     ],
     admin: [
       { name: 'Home', link: '/home', icon: faHome, show : true },
