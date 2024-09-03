@@ -1,11 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Input, Button, Form, notification, Tooltip, Collapse } from "antd";
-import Header from "./Header";
-import { get, updatePatch } from "../utility/httpService";
+import { updatePatch } from "../../../utility/httpService";
 import moment from "moment";
 import 'react-phone-input-2/lib/style.css';
 import PhoneInput from 'react-phone-input-2';
-import { AuthContext } from "../contexts/AuthContext";
+import { AuthContext } from "../../../contexts/AuthContext";
 
 const Home = () => {
   const [form] = Form.useForm();
@@ -83,7 +82,6 @@ const Home = () => {
 
   return (
     <div>
-      <Header />
       <WelcomeMessage userData={profileData} /> {/* Display the WelcomeMessage */}
       <div
         style={{

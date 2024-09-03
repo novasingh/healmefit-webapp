@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { post } from '../utility/httpService';
-import { AuthContext } from '../contexts/AuthContext';
+import { post } from '../../../utility/httpService';
+import { AuthContext } from '../../../contexts/AuthContext';
 import { Col, Spin } from 'antd';
 
 const Callback = () => {

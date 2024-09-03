@@ -1,14 +1,13 @@
 import React, { useState, useContext } from 'react';
-import { Button, message, Spin } from 'antd';
-import { AuthContext } from '../contexts/AuthContext';
+import { Button, Input, message } from 'antd';
+import { AuthContext } from '../../../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
-import facebookicon from '../assets/facebook-hmf.webp';
-import emailicon from '../assets/email-hmf.webp';
-import healmefitlogo from '../assets/HealMeFit-Logo.webp';
-import checkmarkicon from '../assets/login-hmf.webp';
-import { post } from '../utility/httpService';
-import { LoadingOutlined } from '@ant-design/icons';
+import facebookicon from '../../../assets/facebook-hmf.webp';
+import emailicon from '../../../assets/email-hmf.webp';
+import healmefitlogo from '../../../assets/HealMeFit-Logo.webp';
+import checkmarkicon from '../../../assets/login-hmf.webp';
+import { post } from '../../../utility/httpService';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -146,7 +145,7 @@ const Login = () => {
           {/* <div id="googleSignInDiv"></div>
           <div className="divider">or</div> */}
           <div className="input-box">
-            <input
+            <Input
               type="email"
               required
               value={email}
@@ -155,7 +154,7 @@ const Login = () => {
             />
           </div>
           <div className="input-box">
-            <input
+            <Input.Password
               type="password"
               required
               value={password}
@@ -165,7 +164,7 @@ const Login = () => {
           </div>
           {errorMessage && <p className="error-message">{errorMessage}</p>}
           <div className="input-box">
-            <input disabled={loading} type="submit" value={loading ? 'Loading...' : 'Log In'} />
+            <input className='submit-btn' disabled={loading} type="submit" value={loading ? 'Loading...' : 'Log In'} />
           </div>
         </form>
         <div className="login-footer">

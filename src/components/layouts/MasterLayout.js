@@ -1,5 +1,6 @@
 import React from "react";
 import Sidebar from "./Sidebar";
+import Header from "./Header";
 
 const MasterLayout = ({ children }) => {
   return (
@@ -7,7 +8,9 @@ const MasterLayout = ({ children }) => {
       <aside>
         <Sidebar />
       </aside>
-      <section style={{width: '100%', padding: '2rem', overflowY : 'auto'}}>{children}</section>
+      <section style={{width: '100%', padding: '2rem', overflowY : 'auto'}}>
+        <Header/>
+        {children}</section>
     </main>
   );
 };

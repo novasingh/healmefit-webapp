@@ -1,0 +1,168 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  /* overflow-x: scroll; */
+  
+}
+
+.login-container {
+  display: flex;
+  /* height: 100vh;
+  width: 100vw; */
+  color: white;
+  overflow: hidden;
+  
+}
+
+.login-info {
+  flex: 1;
+  background-color: #0a3a58;
+  height: 100vh;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.circle {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, #004b6b 0%, #0a3a58 70%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.checkmark {
+  width: 50px;
+  height: 50px;
+  background: no-repeat center center;
+  background-size: contain;
+}
+
+.login-info p {
+  font-size: 1.2rem;
+  text-align: center;
+  max-width: 300px;
+  
+}
+
+.login-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background-color: #ffffff;
+}
+
+.login-logo img {
+  max-width: 150px;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  
+  color: #0a3a58;
+}
+
+p {
+  color: #5d5d5d;
+}
+
+form {
+  width: 100%;
+  text-align: center;
+}
+
+.google-login {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: #656565;
+  color: white;
+  border: 1px;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.divider {
+  margin: 1rem 0;
+  color: #7a7a7a;
+}
+
+.input-box {
+  margin-bottom: 1rem;
+}
+
+.input-box input {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.input-box input::placeholder {
+  color: #aaa;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 1rem;
+}
+
+.login-footer {
+  margin-top: 1rem;
+}
+
+.login-footer a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: #7a7a7a;
+}
+
+.social-links img {
+  width: 24px;
+  height: 24px;
+  margin: 0 0.5rem;
+}
+
+h3 {
+  margin-top: 8rem;
+text-align: center;
+}
+
+.login-logo {
+  size: 50px;
+}
+
+h4 {
+  color: #5d5d5d;
+  margin-bottom: 2rem;
+}
+.submit-btn{
+  padding: 8px 24px;
+  background: #1FA6E0;
+  color: white;
+  border: none !important;
+}

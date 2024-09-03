@@ -8,22 +8,147 @@ export function isTokenExpired(token) {
     return decodedPayload.exp < currentTime;
 }
 
-function normalize(value, min, max) {
-    return (value - min) / (max - min);
-  }
+// function normalize(value, min, max) {
+//     return (value - min) / (max - min);
+//   }
   
-export async function calculateHealthScore(age, bmi, heartRate, steps, sleep) {
+// export async function calculateHealthScore(age, bmi, heartRate, steps, sleep) {
 
-    // Normalize each metric based on the given ranges
-    const ageNorm = normalize(age, 20, 80);
-    const bmiNorm = normalize(bmi, 15, 40);
-    const heartRateNorm = normalize(heartRate, 40, 100);
-    const stepsNorm = normalize(steps, 0, 10000);
-    const sleepNorm = normalize(sleep, 4, 10);
+//     // Normalize each metric based on the given ranges
+//     const ageNorm = normalize(age, 20, 80);
+//     const bmiNorm = normalize(bmi, 15, 40);
+//     const heartRateNorm = normalize(heartRate, 40, 100);
+//     const stepsNorm = normalize(steps, 0, 10000);
+//     const sleepNorm = normalize(sleep, 4, 10);
   
-    // Calculate the average score
-    let healthScore = (ageNorm + bmiNorm + heartRateNorm + stepsNorm + sleepNorm) / 5;
+//     // Calculate the average score
+//     let healthScore = (ageNorm + bmiNorm + heartRateNorm + stepsNorm + sleepNorm) / 5;
   
+//     // Determine the health category
+//     let category;
+//     if (healthScore >= 0.8) {
+//       category = "Excellent";
+//     } else if (healthScore >= 0.6) {
+//       category = "Good";
+//     } else if (healthScore >= 0.4) {
+//       category = "Fair";
+//     } else {
+//       category = "Bad";
+//     }
+
+//     if(isNaN(healthScore)){
+//         healthScore = 0
+//     }
+  
+//     return { healthScore: healthScore.toFixed(2), category };
+//   }
+  
+
+/**
+ * Calculates the age score based on the given age.
+ *
+ * @param {number} age - The age of the individual.
+ * @returns {number} The score for age.
+ */
+function getAgeScore(age) {
+    if (age >= 20 && age <= 30) return 1; // Excellent
+    if (age >= 31 && age <= 50) return 0.75; // Good
+    if (age >= 51 && age <= 65) return 0.5; // Fair
+    if (age >= 66 && age <= 80) return 0.25; // Bad
+    return 0; // Outside of considered age range
+}
+
+/**
+ * Calculates the BMI score based on the given BMI.
+ *
+ * @param {number} bmi - The Body Mass Index of the individual.
+ * @returns {number} The score for BMI.
+ */
+function getBMIScore(bmi) {
+    if (bmi >= 18.5 && bmi <= 24.9) return 1; // Excellent
+    if (bmi >= 25.0 && bmi <= 27.9) return 0.75; // Good
+    if (bmi >= 28.0 && bmi <= 29.9) return 0.5; // Fair
+    if (bmi >= 30.0 && bmi <= 40.0) return 0.25; // Bad
+    return 0; // Outside of considered BMI range
+}
+
+/**
+ * Calculates the heart rate score based on the given heart rate.
+ *
+ * @param {number} heartRate - The resting heart rate of the individual.
+ * @returns {number} The score for heart rate.
+ */
+function getHeartRateScore(heartRate) {
+    if (heartRate >= 56 && heartRate <= 62) return 1; // Excellent
+    if (heartRate >= 63 && heartRate <= 70) return 0.75; // Good
+    if (heartRate >= 71 && heartRate <= 82) return 0.5; // Fair
+    if (heartRate >= 83 && heartRate <= 100) return 0.25; // Bad
+    return 0; // Outside of considered heart rate range
+}
+
+/**
+ * Calculates the steps score based on the given number of steps.
+ *
+ * @param {number} steps - The number of steps taken by the individual.
+ * @returns {number} The score for steps.
+ */
+function getStepsScore(steps) {
+    if (steps >= 12000 && steps <= 20000) return 1; // Excellent
+    if (steps >= 8000 && steps < 12000) return 0.75; // Good
+    if (steps >= 5000 && steps < 8000) return 0.5; // Fair
+    if (steps < 5000) return 0.25; // Bad
+    return 0; // Outside of considered steps range
+}
+
+/**
+ * Calculates the sleep score based on the given number of sleep hours.
+ *
+ * @param {number} sleepHours - The number of hours the individual sleeps.
+ * @returns {number} The score for sleep.
+ */
+function getSleepScore(sleepHours) {
+    if (sleepHours >= 7 && sleepHours <= 9) return 1; // Excellent
+    if (sleepHours >= 5 && sleepHours < 7) return 0.75; // Good
+    if (sleepHours >= 4 && sleepHours < 5) return 0.5; // Fair
+    if (sleepHours < 4) return 0.25; // Bad
+    return 0; // Outside of considered sleep range
+}
+
+/**
+ * Calculates the health score based on the given metrics.
+ *
+ * @param {number} age - The age of the individual.
+ * @param {number} bmi - The Body Mass Index of the individual.
+ * @param {number} heartRate - The resting heart rate of the individual.
+ * @param {number} steps - The number of steps taken by the individual.
+ * @param {number} sleepHours - The number of hours the individual sleeps.
+ * @returns {number} The calculated health score.
+ */
+export function calculateHealthScore(age, bmi, heartRate, steps, sleepHours) {
+    const ageScore = getAgeScore(age);
+    const bmiScore = getBMIScore(bmi);
+    const heartRateScore = getHeartRateScore(heartRate);
+    const stepsScore = getStepsScore(steps);
+    const sleepScore = getSleepScore(sleepHours);
+
+    // Weights for each factor
+    const weights = {
+        age: 0.25,
+        bmi: 0.25,
+        heartRate: 0.25,
+        steps: 0.15,
+        sleep: 0.10
+    };
+
+    // Calculate the weighted health score
+    let healthScore = (ageScore * weights.age) +
+                        (bmiScore * weights.bmi) +
+                        (heartRateScore * weights.heartRate) +
+                        (stepsScore * weights.steps) +
+                        (sleepScore * weights.sleep);
+
+  
+     console.log(healthScore)                   
     // Determine the health category
     let category;
     if (healthScore >= 0.8) {
@@ -41,8 +166,8 @@ export async function calculateHealthScore(age, bmi, heartRate, steps, sleep) {
     }
   
     return { healthScore: healthScore.toFixed(2), category };
-  }
-  
+}
+
 
 export function calculateBMI(weightKg, heightCM) {
     const heightM = heightCM / 100;

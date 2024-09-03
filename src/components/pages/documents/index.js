@@ -2,10 +2,9 @@ import React, { useState, useEffect, useContext, useCallback } from "react";
 import DocumentCard from "./DocumentCard";
 import DocumentUploadModal from "./DocumentUploadModal";
 import "./Documents.css";
-import Header from "./Header";
 import { Button, Col, message, Spin, Table, Space } from "antd";
-import { get, post, remove } from "../utility/httpService";
-import { AuthContext } from "../contexts/AuthContext";
+import { get, post, remove } from "../../../utility/httpService";
+import { AuthContext } from "../../../contexts/AuthContext";
 import { DownloadOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const initialDocuments = [
@@ -263,7 +262,6 @@ function Documents() {
     </Col>
   ) : (
     <div>
-      <Header />
       {notificationsList.length > 0 && notificationsList.map((obj) => !obj.isRead && (
         <div key={obj.id} style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: '#E7F8D6', padding: '10px', borderRadius: '5px', marginTop: '10px' }}>
          <p style={{ color: "#88C43E", margin: "auto", textAlign: "left", flex: 1 }}>

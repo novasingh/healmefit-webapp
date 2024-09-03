@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
-import Header from "./Header";
-import "../style.css";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   Col,
@@ -14,16 +12,15 @@ import {
   Select,
 } from "antd";
 import { v4 as uuidv4 } from "uuid";
-import { get, post, remove, updatePatch } from "../utility/httpService";
-import ThreeDotsDropdown from "../sharedComponents/DropDown";
-import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../contexts/AuthContext";
+import { get, post, remove, updatePatch } from "../../../utility/httpService";
+import ThreeDotsDropdown from "../../../sharedComponents/DropDown";
+import { Link } from "react-router-dom";
+import { AuthContext } from "../../../contexts/AuthContext";
 
 const { Option } = Select;
 
 const Driver = () => {
   const { userData } = useContext(AuthContext);
-  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [updateForm] = Form.useForm();
   const [addModalVisible, setAddModalVisible] = useState(false);
@@ -296,7 +293,6 @@ const Driver = () => {
 
   return userData?.role !== 'driver' ? (
     <div style={{ height: "100%" }}>
-      <Header />
       <Col
         style={{
           paddingTop: "2%",

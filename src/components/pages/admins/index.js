@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Header from './Header';
 import { DeleteOutlined } from '@ant-design/icons';
-import { Col, Button, Modal, Form, Input, message, Table, Skeleton, Select } from 'antd';
+import { Col, Button, Modal, Form, Input, message, Table, Skeleton} from 'antd';
 import { v4 as uuidv4 } from 'uuid';
-import { get, post, remove, updatePatch } from "../utility/httpService";
-import ThreeDotsDropdown from '../sharedComponents/DropDown';
-import { AuthContext } from '../contexts/AuthContext';
+import { get, post, remove, updatePatch } from "../../../utility/httpService";
+import ThreeDotsDropdown from '../../../sharedComponents/DropDown';
+import { AuthContext } from '../../../contexts/AuthContext';
 
 const Admins = () => {
   const [form] = Form.useForm();
@@ -227,7 +226,6 @@ const Admins = () => {
   
   return userData?.role === 'admin' ?(
     <div style={{ height: "100%" }}>
-      <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: '2%' }}>
         <h2 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600",  marginBottom: '10px' }}>Admins</h2>
         <div style={{ display: "flex", gap: "6px" }}>

@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import Header from './Header';
 import { Col, Button, Modal, Form, Input, Upload, message, Table, Skeleton, Image, Select, Spin } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-import { get, post, remove, updatePatch } from "../utility/httpService"; // Make sure to implement these methods
-import ThreeDotsDropdown from '../sharedComponents/DropDown';
+import { get, post, remove, updatePatch } from "../../../utility/httpService"; // Make sure to implement these methods
+import ThreeDotsDropdown from '../../../sharedComponents/DropDown';
 import axios from 'axios';
 
 const Companies = () => {
@@ -205,7 +204,6 @@ const Companies = () => {
 
   return (
     <div style={{ height: "100%" }}>
-      <Header />
       <Col lg={24} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: '2%' }}>
         <h2 style={{ fontSize: "25px", color: "#0B5676", letterSpacing: "1px", fontWeight: "600", marginBottom: '10px' }}>Companies</h2>
         <div style={{ display: "flex", gap: "6px" }}>

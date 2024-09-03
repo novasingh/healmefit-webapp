@@ -1,9 +1,7 @@
-import React, { useEffect } from 'react';
-import { useContext } from 'react';
-import { SearchOutlined } from '@ant-design/icons';
-import { Input, Dropdown, Space, Menu, message } from 'antd';
+import React, { useEffect, useContext } from 'react';
+import { Dropdown, Space, Menu, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const Header = () => {
   const navigate = useNavigate();

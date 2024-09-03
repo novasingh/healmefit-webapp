@@ -3,23 +3,23 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import Home from './components/Home';
-import Driver from './components/Driver';
-import Login from './components/Login';
+import Home from './components/pages/home/Home';
+import Driver from './components/pages/driver';
+import Login from './components/pages/auth/Login';
 import './style.css';
-import Managers from './components/Managers';
-import Admins from './components/Admins';
-import Companies from './components/Companies';
-import Health from './components/Health';
-import Callback from './components/Callback';
-import Documents from './components/Documents'; 
-import ResetPassword from './components/ResetPassword'; 
-import ForgotPassword from './components/ForgotPassword';
-import Inquiry from './components/Inquiry';
+import Managers from './components/pages/manager';
+import Admins from './components/pages/admins';
+import Companies from './components/pages/companies';
+import Health from './components/pages/health';
+import Callback from './components/pages/health/Callback';
+import Documents from './components/pages/documents'; 
+import ResetPassword from './components/pages/auth/ResetPassword'; 
+import ForgotPassword from './components/pages/auth/ForgotPassword';
+import Inquiry from './components/pages/inquiry';
 import BlankLayout from './components/layouts/BlankLayout';
 import MasterLayout from './components/layouts/MasterLayout';
 import PageNotFound from './components/PageNotFound';
-import DriverDetail from './components/DriverDetail';
+import DriverDetail from './components/pages/driver/DriverDetail';
 import FeedbackModal from './components/layouts/FeedbackModal';
 
 const App = () => {

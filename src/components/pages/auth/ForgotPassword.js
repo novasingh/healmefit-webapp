@@ -1,13 +1,13 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState } from 'react';
-import { message } from 'antd';
+import { Input, message } from 'antd';
 import { Link } from 'react-router-dom';
 import './Login.css'; // Assuming you have styles for login page
-import facebookicon from '../assets/facebook-hmf.webp';
-import emailicon from '../assets/email-hmf.webp';
-import healmefitlogo from '../assets/HealMeFit-Logo.webp';
-import checkmarkicon from '../assets/ResetLogin.webp'; // Assuming you have the checkmark icon
-import { post } from '../utility/httpService';
+import facebookicon from '../../../assets/facebook-hmf.webp';
+import emailicon from '../../../assets/email-hmf.webp';
+import healmefitlogo from '../../../assets/HealMeFit-Logo.webp';
+import checkmarkicon from '../../../assets/ResetLogin.webp'; // Assuming you have the checkmark icon
+import { post } from '../../../utility/httpService';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -51,7 +51,7 @@ const ForgotPassword = () => {
         <h4>Forgot Password</h4>
         <form onSubmit={handleSubmit}>
           <div className="input-box">
-          <input
+          <Input
               type="email"
               required
               value={email}
@@ -62,7 +62,7 @@ const ForgotPassword = () => {
           </div>
           {errorMessage && <p className="error-message">{errorMessage}</p>}
           <div className="input-box">
-            <input type="submit" value="Continue"  />
+            <input className='submit-btn' type="submit" value="Continue"  />
           </div>
         </form>
        </>}

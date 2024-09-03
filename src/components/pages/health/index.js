@@ -1,10 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Button, Col, Row, Spin, Select, Modal } from "antd";
-import Header from "./Header";
-import back from "../assets/backicon.png";
+import back from "../../../assets/backicon.png";
 import { useNavigate } from "react-router-dom";
-import { get, post, updatePatch } from "../utility/httpService";
-import { AuthContext } from "../contexts/AuthContext";
+import { get, post, updatePatch } from "../../../utility/httpService";
+import { AuthContext } from "../../../contexts/AuthContext";
 import {
   calculateAverages,
   calculateBMI,
@@ -18,7 +17,7 @@ import {
   getStepActivityLevel,
   getWeightStatus,
   isTokenExpired,
-} from "../utility/utils";
+} from "../../../utility/utils";
 import Chart from "react-apexcharts";
 import {
   fetchDeviceData,
@@ -26,11 +25,10 @@ import {
   fetchProfileData,
   fetchSleepData,
   fetchStepData,
-  fetchWeightData,
-} from "../utility/fitbitServices";
+} from "../../../utility/fitbitServices";
 import { HeartFilled, MoonFilled } from "@ant-design/icons";
-import icon1 from "../assets/sleep-hmf.webp";
-import icon2 from "../assets/BMI-hmf.webp";
+import icon1 from "../../../assets/sleep-hmf.webp";
+import icon2 from "../../../assets/BMI-hmf.webp";
 import moment from "moment/moment";
 
 const { Option } = Select;
@@ -374,7 +372,6 @@ const Health = () => {
     </Col>
   ) : (
     <div style={{ height: "100%" }}>
-      <Header />
       <Col
         lg={24}
         style={{
@@ -564,7 +561,7 @@ const Health = () => {
                         }}
                       >
                         {profileData?.user?.weight
-                          ? profileData?.user?.weight + `${profileData?.user?.weight === 'en_US' ? ' lb' : ' kg'}` 
+                          ? profileData?.user?.weight + `${profileData?.user?.weightUnit === 'en_US' ? ' lb' : ' kg'}` 
                           : "0"}
                       </div>
                   </Col>

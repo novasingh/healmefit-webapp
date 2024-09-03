@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { Input, message } from "antd";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "./Login.css";
-import facebookicon from "../assets/facebook-hmf.webp";
-import emailicon from "../assets/email-hmf.webp";
-import healmefitlogo from "../assets/HealMeFit-Logo.webp";
-import checkmarkicon from "../assets/ResetLogin.webp";
-import { post } from "../utility/httpService";
+import facebookicon from "../../../assets/facebook-hmf.webp";
+import emailicon from "../../../assets/email-hmf.webp";
+import healmefitlogo from "../../../assets/HealMeFit-Logo.webp";
+import checkmarkicon from "../../../assets/ResetLogin.webp";
+import { post } from "../../../utility/httpService";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -93,7 +93,7 @@ const ResetPassword = () => {
               <p className="error-message">Passwords do not match</p>
             )}
             <div className="input-box">
-              <input type="submit" value="Reset Password" />
+              <input className='submit-btn' type="submit" value="Reset Password" />
             </div>
           </form>
           <div className="login-footer">
