@@ -418,7 +418,7 @@ const Health = () => {
             <Option value="7d">Last 7 Days</Option>
             <Option value="30d">Last 30 Days</Option>
           </Select>
-          <Button
+          {/* <Button
             onClick={handleSyncClick}
             style={{
               width: "150px",
@@ -429,7 +429,7 @@ const Health = () => {
             }}
           >
             Sync
-          </Button>
+          </Button> */}
           {!isDevicePaired ? (
             <Button
               onClick={handleFitbitAuth}
