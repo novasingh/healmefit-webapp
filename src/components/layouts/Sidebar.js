@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../../assets/HealMeFit-Logo.webp'; 
+import logo from '../../assets/healmefit-logo-mini.webp'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faUser, faBuilding, faStethoscope, faFile, faUsers, faCommentDots } from '@fortawesome/free-solid-svg-icons';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -50,23 +50,7 @@ const Sidebar = (props) => {
   return (
     <div className="sidebar">
       <ul>
-        <li
-          style={{
-            color: "#BBBBBB33", 
-            fontWeight: "600",
-            letterSpacing: "1px",
-            fontSize: "20px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: "0.4px solid #d9d9d9",
-            width: "100%",
-            height: "70px",
-            background: "#ffffff",
-            borderRadius: "8px",
-            padding: "10px",
-          }}
-        >
+        <li style={{width: '100%', height: '80px'}}>
           <img src={logo} alt="Logo" style={{ height: "100%", width: "auto", objectFit: "contain" }} />
         </li>
 

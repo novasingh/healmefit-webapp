@@ -1,11 +1,11 @@
 import React, { useState, useContext } from 'react';
-import { Button, Input, message } from 'antd';
+import { Input, message } from 'antd';
 import { AuthContext } from '../../../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 import facebookicon from '../../../assets/facebook-hmf.webp';
 import emailicon from '../../../assets/email-hmf.webp';
-import healmefitlogo from '../../../assets/HealMeFit-Logo.webp';
+import healmefitlogo from '../../../assets/healmefit-logo-mini.webp';
 import checkmarkicon from '../../../assets/login-hmf.webp';
 import { post } from '../../../utility/httpService';
 

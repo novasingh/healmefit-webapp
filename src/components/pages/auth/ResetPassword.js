@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import "./Login.css";
 import facebookicon from "../../../assets/facebook-hmf.webp";
 import emailicon from "../../../assets/email-hmf.webp";
-import healmefitlogo from "../../../assets/HealMeFit-Logo.webp";
+import healmefitlogo from '../../../assets/healmefit-logo-mini.webp';
 import checkmarkicon from "../../../assets/ResetLogin.webp";
 import { post } from "../../../utility/httpService";
 
