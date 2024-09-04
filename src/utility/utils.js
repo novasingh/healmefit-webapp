@@ -79,6 +79,7 @@ function getBMIScore(bmi) {
  * @returns {number} The score for heart rate.
  */
 function getHeartRateScore(heartRate) {
+    if (heartRate >= 48 && heartRate <= 55) return 1.25; // Excellent
     if (heartRate >= 56 && heartRate <= 62) return 1; // Excellent
     if (heartRate >= 63 && heartRate <= 70) return 0.75; // Good
     if (heartRate >= 71 && heartRate <= 82) return 0.5; // Fair
