@@ -174,8 +174,8 @@ const Login = () => {
           <p>&copy; 2024 Heal Me Fit</p>
           <p>3104 E. Camelback Rd, Ste 2634, Phoenix, AZ 85016</p><br />
           <div className="social-links">
+          <a href="mailto:sales@healmefit.com"><img src={emailicon} alt="Email" /></a>
           <a href="https://www.facebook.com/HealMeFit"><img src={facebookicon} alt="Facebook" /></a>
-          <a href="mailto:support@healmefit.com"><img src={emailicon} alt="Email" /></a>
           </div>
         </footer>
         </div>
