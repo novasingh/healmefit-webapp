@@ -236,8 +236,9 @@ export const convertDecimalHours = (totalSleep) => {
 
   export function getHeartRateType(age, heartRate) {
     let result = { type: "Unknown", recommended : 'N/A',  color: "gray" }; // Default return object
-
-    if (heartRate >= 56 && heartRate <= 62) {
+    if (heartRate >= 48 && heartRate <= 55) {
+        result = { type: "Athletic", recommended: '(48 - 55 bpm)', color: "green" };
+    }else if (heartRate >= 56 && heartRate <= 62) {
         result = { type: "Excellent", recommended: '(56 - 62 bpm)', color: "green" };
     } else if (heartRate >= 63 && heartRate <= 70) {
         result = { type: "Good", recommended: '(63 - 70 bpm)' , color: "#5eb75e" };
