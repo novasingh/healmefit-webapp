@@ -266,11 +266,11 @@ const Driver = () => {
     try {
       const values = await updateForm.validateFields();
       const response = await updatePatch(`/users/${selectedUser.id}`, {
-        email: values.email,
-        truckN: values.truckN,
-        driverN: values.driverN,
-        firstName: values.name.split(' ').length > 0 ? values.name.split(' ')[0] : 'User',
-        lastName: values.name.split(' ') ? values.name.split(' ')[1] : 'user',
+        email: values?.email,
+        truckN: values?.truckN,
+        driverN: values?.driverN,
+        firstName: values?.name?.split(' ').length > 0 ? values.name.split(' ')[0] : 'User',
+        lastName: values?.name?.split(' ') ? values.name.split(' ')[1] : 'user',
         company: userData?.role === 'admin' ? values.company : userData?.company?.id,
       });
       if (response.status === 200) {
@@ -379,10 +379,10 @@ const Driver = () => {
               <Form.Item name={`email_${item.id}`} rules={[{ required: true, type: 'email', message: 'Please input a valid email!' }]} style={{ flex: 1 }}>
                 <Input placeholder='Email' />
               </Form.Item>
-              <Form.Item name={`truckN${item.id}`} rules={[{ required: true, message: 'Please input the truck number!' }]} style={{ flex: 1 }}>
+              <Form.Item name={`truckN${item.id}`} style={{ flex: 1 }}>
                 <Input placeholder='Truck Number' />
               </Form.Item>
-              <Form.Item name={`driverN${item.id}`} rules={[{ required: true, message: 'Please input the driver number!' }]} style={{ flex: 1 }}>
+              <Form.Item name={`driverN${item.id}`}  style={{ flex: 1 }}>
                 <Input placeholder='Driver Number' />
               </Form.Item>
               {userData?.role === 'admin' &&<Form.Item name={`company_${item.id}`} rules={[{ required: true, message: 'Please select a company!' }]} style={{ flex: 1 }}>
@@ -450,24 +450,12 @@ const Driver = () => {
           <Form.Item
             label="Driver Number"
             name="driverN"
-            rules={[
-              {
-                required: true,
-                message: "Please input the driver number!",
-              },
-            ]}
           >
             <Input placeholder="Enter driver number" />
           </Form.Item>
           <Form.Item
             label="Truck Number"
             name="truckN"
-            rules={[
-              {
-                required: true,
-                message: "Please input the truck number!",
-              },
-            ]}
           >
             <Input placeholder="Enter truck number" />
           </Form.Item>
