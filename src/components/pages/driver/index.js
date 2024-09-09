@@ -267,8 +267,8 @@ const Driver = () => {
       const values = await updateForm.validateFields();
       const response = await updatePatch(`/users/${selectedUser.id}`, {
         email: values?.email,
-        truckN: values?.truckN,
-        driverN: values?.driverN,
+        truckN: values?.truckN ? values?.truckN :  'N/A',
+        driverN: values?.driverN ? values?.driverN  :  'N/A',
         firstName: values?.name?.split(' ').length > 0 ? values.name.split(' ')[0] : 'User',
         lastName: values?.name?.split(' ') ? values.name.split(' ')[1] : 'user',
         company: userData?.role === 'admin' ? values.company : userData?.company?.id,
