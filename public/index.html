@@ -16,5 +16,33 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    
+    <!-- Dialogflow Chatbot Code -->
+    <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+    <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+    <df-messenger
+      project-id="heal-me-fit-bot"
+      agent-id="6cb5486a-0a21-411b-a101-1f757ced1152"
+      language-code="en"
+      max-query-length="-1">
+      <df-messenger-chat-bubble
+        chat-title="Ask Me">
+      </df-messenger-chat-bubble>
+    </df-messenger>
+
+    <!-- Chatbot Styles -->
+    <style>
+      df-messenger {
+        z-index: 999;
+        position: fixed;
+        --df-messenger-font-color: #000;
+        --df-messenger-font-family: Google Sans;
+        --df-messenger-chat-background: #f3f6fc;
+        --df-messenger-message-user-background: #d3e3fd;
+        --df-messenger-message-bot-background: #fff;
+        bottom: 16px; /* Position at the bottom */
+        right: 16px;   /* Move it to the bottom left */
+      }
+    </style>
   </body>
 </html>
